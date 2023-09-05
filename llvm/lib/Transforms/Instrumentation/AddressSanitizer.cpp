@@ -2183,6 +2183,7 @@ void ModuleAddressSanitizer::InstrumentGlobalsWithMetadataArray(
   auto AllGlobals = new GlobalVariable(
       M, ArrayOfGlobalStructTy, false, GlobalVariable::InternalLinkage,
       ConstantArray::get(ArrayOfGlobalStructTy, MetadataInitializers), "");
+  AllGlobals->setSection("asmjs");
   if (Mapping.Scale > 3)
     AllGlobals->setAlignment(Align(1ULL << Mapping.Scale));
 
@@ -2205,6 +2206,7 @@ void ModuleAddressSanitizer::InstrumentGlobalsWithMetadataArray(
 // redzones and inserts this function into llvm.global_ctors.
 // Sets *CtorComdat to true if the global registration code emitted into the
 // asan constructor is comdat-compatible.
+// bookmark
 bool ModuleAddressSanitizer::InstrumentGlobals(IRBuilder<> &IRB, Module &M,
                                                bool *CtorComdat) {
   *CtorComdat = false;
