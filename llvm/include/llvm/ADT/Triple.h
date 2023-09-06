@@ -662,6 +662,10 @@ public:
     return getOS() == Triple::Emscripten;
   }
 
+  bool isCheerpWasm() const {
+    return getArch() == Triple::cheerp && getObjectFormat() == Triple::Wasm;
+  }
+
   /// Tests whether the OS uses glibc.
   bool isOSGlibc() const {
     return (getOS() == Triple::Linux || getOS() == Triple::KFreeBSD ||

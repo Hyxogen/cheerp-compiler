@@ -118,6 +118,7 @@ static const uint64_t kNetBSDKasan_ShadowOffset64 = 0xdfff900000000000;
 static const uint64_t kPS_ShadowOffset64 = 1ULL << 40;
 static const uint64_t kWindowsShadowOffset32 = 3ULL << 28;
 static const uint64_t kEmscriptenShadowOffset = 0;
+static const uint64_t kCheerpWasmShadowOffset = 0;
 
 // The shadow memory space is dynamically allocated.
 static const uint64_t kWindowsShadowOffset64 = kDynamicShadowSentinel;
@@ -491,6 +492,7 @@ static ShadowMapping getShadowMapping(const Triple &TargetTriple, int LongSize,
   bool IsFuchsia = TargetTriple.isOSFuchsia();
   bool IsEmscripten = TargetTriple.isOSEmscripten();
   bool IsAMDGPU = TargetTriple.isAMDGPU();
+  bool IsCheerpWasm = TargetTriple.isCheerpWasm();
 
   ShadowMapping Mapping;
 
@@ -516,6 +518,8 @@ static ShadowMapping getShadowMapping(const Triple &TargetTriple, int LongSize,
       Mapping.Offset = kWindowsShadowOffset32;
     else if (IsEmscripten)
       Mapping.Offset = kEmscriptenShadowOffset;
+    else if (IsCheerpWasm)
+      Mapping.Offset = kCheerpWasmShadowOffset;
     else
       Mapping.Offset = kDefaultShadowOffset32;
   } else {  // LongSize == 64
@@ -624,6 +628,7 @@ static uint64_t getRedzoneSizeForScale(int MappingScale) {
   return std::max(32U, 1U << MappingScale);
 }
 
+//bookmark
 static uint64_t GetCtorAndDtorPriority(Triple &TargetTriple) {
   if (TargetTriple.isOSEmscripten()) {
     return kAsanEmscriptenCtorAndDtorPriority;

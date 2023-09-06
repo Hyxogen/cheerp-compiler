@@ -6,7 +6,7 @@ int __asan_option_detect_stack_use_after_return;
 
 void __asan_init(void) {
         __asan_option_detect_stack_use_after_return = 0;
-        *(volatile uint8_t*) 0 = 0xff;
+        *(uint8_t*) 0 = 0xff;
         fprintf(stderr, "initialized asan\n");
 }
 
