@@ -54,7 +54,11 @@ void InitializeFlags() {
     CommonFlags cf;
     cf.CopyFrom(*common_flags());
     cf.detect_leaks = cf.detect_leaks && CAN_SANITIZE_LEAKS;
+#if !SANITIZER_CHEERPWASM
+    // getenv on emscripten uses malloc, which we can't when using LSan.
+    // You can't run external symbolizer executables anyway.
     cf.external_symbolizer_path = GetEnv("ASAN_SYMBOLIZER_PATH");
+#endif
     cf.malloc_context_size = kDefaultMallocContextSize;
     cf.intercept_tls_get_addr = true;
     cf.exitcode = 1;

@@ -41,6 +41,9 @@ void AsanOnDeadlySignal(int signo, void *siginfo, void *context) {
 }
 
 bool PlatformUnpoisonStacks() {
+#if SANITIZER_CHEERPWASM
+  return false;
+#endif
   stack_t signal_stack;
   CHECK_EQ(0, sigaltstack(nullptr, &signal_stack));
   uptr sigalt_bottom = (uptr)signal_stack.ss_sp;
