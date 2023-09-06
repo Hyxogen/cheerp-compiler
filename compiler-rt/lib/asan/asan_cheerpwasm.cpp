@@ -10,7 +10,11 @@
 #include <cassert>
 #include <cstddef>
 #include <pthread.h>
+#include <cstdint>
+#include <cheerpintrin.h>
 #define __ATTRP_C11_THREAD ((void*)(uptr)-1)
+
+#define WASM_PAGE_SIZE 65536
 
 namespace __asan {
 

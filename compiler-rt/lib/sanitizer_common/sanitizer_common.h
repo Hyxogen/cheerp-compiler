@@ -967,7 +967,8 @@ static inline void SanitizerBreakOptimization(void *arg) {
 #if defined(_MSC_VER) && !defined(__clang__)
   _ReadWriteBarrier();
 #else
-  __asm__ __volatile__("" : : "r" (arg) : "memory");
+  //TODO probably implement some kind of barrier
+  //__asm__ __volatile__("" : : "r" (arg) : "memory");
 #endif
 }
 

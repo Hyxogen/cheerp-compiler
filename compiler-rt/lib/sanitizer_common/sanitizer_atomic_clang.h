@@ -20,6 +20,8 @@
 # include "sanitizer_atomic_clang_other.h"
 #endif
 
+#include <cassert>
+
 namespace __sanitizer {
 
 // We would like to just use compiler builtin atomic operations
@@ -35,32 +37,42 @@ namespace __sanitizer {
 // for mappings of the memory model to different processors.
 
 inline void atomic_signal_fence(memory_order) {
-  __asm__ __volatile__("" ::: "memory");
+        assert(0 && "atomics are not supported");
+  //__asm__ __volatile__("" ::: "memory");
 }
 
 inline void atomic_thread_fence(memory_order) {
-  __sync_synchronize();
+        assert(0 && "atomics are not supported");
+  //__sync_synchronize();
 }
 
 template<typename T>
 inline typename T::Type atomic_fetch_add(volatile T *a,
     typename T::Type v, memory_order mo) {
+        assert(0 && "atomics are not supported");
+        /*
   (void)mo;
   DCHECK(!((uptr)a % sizeof(*a)));
   return __sync_fetch_and_add(&a->val_dont_use, v);
+  */
 }
 
 template<typename T>
 inline typename T::Type atomic_fetch_sub(volatile T *a,
     typename T::Type v, memory_order mo) {
+        assert(0 && "atomics are not supported");
+        /*
   (void)mo;
   DCHECK(!((uptr)a % sizeof(*a)));
   return __sync_fetch_and_add(&a->val_dont_use, -v);
+  */
 }
 
 template<typename T>
 inline typename T::Type atomic_exchange(volatile T *a,
     typename T::Type v, memory_order mo) {
+        assert(0 && "atomics are not supported");
+        /*
   DCHECK(!((uptr)a % sizeof(*a)));
   if (mo & (memory_order_release | memory_order_acq_rel | memory_order_seq_cst))
     __sync_synchronize();
@@ -68,6 +80,7 @@ inline typename T::Type atomic_exchange(volatile T *a,
   if (mo == memory_order_seq_cst)
     __sync_synchronize();
   return v;
+  */
 }
 
 template <typename T>
@@ -78,8 +91,10 @@ inline bool atomic_compare_exchange_strong(volatile T *a, typename T::Type *cmp,
   // SPARC V8 that cannot inline atomic cmpxchg.  __atomic_compare_exchange
   // can then be resolved from libatomic.  __ATOMIC_SEQ_CST is used to best
   // match the __sync builtin memory order.
-  return __atomic_compare_exchange(&a->val_dont_use, cmp, &xchg, false,
-                                   __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+        assert(0 && "atomics are not supported");
+        /*
+  return __atomic_compare_exchange(&a->val_dont_use, cmp, &xchg, false, 
+                                   __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);*/
 }
 
 template<typename T>
@@ -87,7 +102,10 @@ inline bool atomic_compare_exchange_weak(volatile T *a,
                                          typename T::Type *cmp,
                                          typename T::Type xchg,
                                          memory_order mo) {
+        assert(0 && "atomics are not supported");
+        /*
   return atomic_compare_exchange_strong(a, cmp, xchg, mo);
+  */
 }
 
 }  // namespace __sanitizer

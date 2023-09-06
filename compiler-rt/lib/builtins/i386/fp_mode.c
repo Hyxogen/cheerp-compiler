@@ -6,6 +6,11 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if defined(__ASMJS__) && defined(__i386__)
+# error "nope"
+#endif
+
+#if !defined(__ASMJS__)
 #include "../fp_mode.h"
 
 #define X87_TONEAREST  0x0000
@@ -37,3 +42,4 @@ int __fe_raise_inexact(void) {
   __asm__ __volatile__ ("fdivs %1" : "+t" (f) : "m" (g));
   return 0;
 }
+#endif
