@@ -20,6 +20,8 @@
 #include "sanitizer_libc.h"
 #include "sanitizer_placement_new.h"
 
+#include <cstring>
+
 namespace __sanitizer {
 
 const char *SanitizerToolName = "SanitizerTool";
@@ -255,6 +257,10 @@ const char *GetProcessName() {
 }
 
 static uptr ReadProcessName(/*out*/ char *buf, uptr buf_len) {
+#ifdef SANITIZER_CHEERPWASM
+        strncpy(buf, "todoproc", buf_len);
+        return buf_len;
+#else
   ReadLongProcessName(buf, buf_len);
   char *s = const_cast<char *>(StripModuleName(buf));
   uptr len = internal_strlen(s);
@@ -263,6 +269,7 @@ static uptr ReadProcessName(/*out*/ char *buf, uptr buf_len) {
     buf[len] = '\0';
   }
   return len;
+#endif
 }
 
 void UpdateProcessName() {

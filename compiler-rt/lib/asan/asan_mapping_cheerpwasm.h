@@ -14,13 +14,12 @@
 #ifndef ASAN_MAPPING_CHEERPWASM_H
 #define ASAN_MAPPING_CHEERPWASM_H
 
-extern char __global_base;
+#define kLowMemBeg     ((uptr) 0x20000000)
 
-#define kLowMemBeg     ((uptr) &__global_base)
 #define kLowMemEnd     ((kLowShadowBeg << ASAN_SHADOW_SCALE) - 1)
 
 #define kLowShadowBeg  0
-#define kLowShadowEnd  ((uptr) &__global_base - 1)
+#define kLowShadowEnd  (kLowMemBeg - 1)
 
 #define kHighMemBeg    0
 

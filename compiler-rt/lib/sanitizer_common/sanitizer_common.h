@@ -26,6 +26,10 @@ extern "C" void _ReadWriteBarrier();
 #pragma intrinsic(_ReadWriteBarrier)
 #endif
 
+#ifdef SANITIZER_CHEERPWASM
+#include <cstring>
+#endif
+
 namespace __sanitizer {
 
 struct AddressInfo;
@@ -66,6 +70,13 @@ inline uptr GetPageSize() {
 }
 inline uptr GetPageSizeCached() {
   return 4096;
+}
+#elif SANITIZER_CHEERPWASM
+inline uptr GetPageSize() {
+  return 65536;
+}
+inline uptr GetPageSizeCached() {
+  return 65536;
 }
 #else
 uptr GetPageSize();
@@ -266,7 +277,16 @@ const char *StripPathPrefix(const char *filepath,
 const char *StripModuleName(const char *module);
 
 // OS
+#if SANITIZER_CHEERPWASM
+
+inline uptr ReadBinaryName(/*out*/char *buf, uptr buf_len) {
+        strncpy(buf, "todo", buf_len);
+        return buf_len;
+}
+
+#else
 uptr ReadBinaryName(/*out*/char *buf, uptr buf_len);
+#endif
 uptr ReadBinaryNameCached(/*out*/char *buf, uptr buf_len);
 uptr ReadBinaryDir(/*out*/ char *buf, uptr buf_len);
 uptr ReadLongProcessName(/*out*/ char *buf, uptr buf_len);
