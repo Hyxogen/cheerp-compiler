@@ -130,6 +130,11 @@ const interpose_substitution substitution_##func_name[] \
     extern "C" ret_type func(__VA_ARGS__);
 # define DECLARE_WRAPPER_WINAPI(ret_type, func, ...) \
     extern "C" __declspec(dllimport) ret_type __stdcall func(__VA_ARGS__);
+#elif SANITIZER_CHEERPWASM
+# define WRAP(x) x
+# define WRAPPER_NAME(x) #x
+# define INTERCEPTOR_ATTRIBUTE
+# define DECLARE_WRAPPER(ret_type, func, ...)
 #elif SANITIZER_FREEBSD || SANITIZER_NETBSD
 # define WRAP(x) __interceptor_ ## x
 # define WRAPPER_NAME(x) "__interceptor_" #x
@@ -157,6 +162,14 @@ const interpose_substitution substitution_##func_name[] \
 # define INTERCEPTOR_ATTRIBUTE __attribute__((visibility("default")))
 # define REAL(x) __unsanitized_##x
 # define DECLARE_REAL(ret_type, func, ...)
+#elif SANITIZER_CHEERPWASM
+// Sanitizer runtimes on Emscripten just define functions directly to override
+// the libc functions. If the real version is really needed, they can be defined
+// with the emscripten_builtin_ prefix.
+// CHEERP: TODO
+# define REAL(x) x
+# define DECLARE_REAL(ret_type, func, ...) \
+    extern "C" ret_type REAL(func)(__VA_ARGS__);
 #elif !SANITIZER_APPLE
 # define PTR_TO_REAL(x) real_##x
 # define REAL(x) __interception::PTR_TO_REAL(x)
@@ -193,7 +206,7 @@ const interpose_substitution substitution_##func_name[] \
 // macros does its job. In exceptional cases you may need to call REAL(foo)
 // without defining INTERCEPTOR(..., foo, ...). For example, if you override
 // foo with an interceptor for other function.
-#if !SANITIZER_APPLE && !SANITIZER_FUCHSIA
+#if !SANITIZER_APPLE && !SANITIZER_FUCHSIA && !SANITIZER_CHEERPWASM
 #  define DEFINE_REAL(ret_type, func, ...)            \
     typedef ret_type (*FUNC_TYPE(func))(__VA_ARGS__); \
     namespace __interception {                        \

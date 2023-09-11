@@ -7,3 +7,4 @@ multi_arch
 /*.out
 /*.wasm
 /build
+*.d

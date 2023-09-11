@@ -2955,11 +2955,13 @@ Error BitcodeReader::parseConstants() {
   unsigned CurTyID = Int32TyID;
   Type *CurElemTy = nullptr;
   unsigned NextCstNo = ValueList.size();
+  unsigned entry = 0;
 
   while (true) {
     Expected<BitstreamEntry> MaybeEntry = Stream.advanceSkippingSubblocks();
     if (!MaybeEntry)
       return MaybeEntry.takeError();
+    (void)entry;
     BitstreamEntry Entry = MaybeEntry.get();
 
     switch (Entry.Kind) {
@@ -3211,6 +3213,7 @@ Error BitcodeReader::parseConstants() {
                                                      // operands]
       if (Record.size() < 2)
         return error("Constant GEP record must have at least two elements");
+      ++entry;
       unsigned OpNum = 0;
       Type *PointeeType = nullptr;
       if (BitCode == bitc::CST_CODE_CE_GEP_WITH_INRANGE_INDEX ||
@@ -4894,6 +4897,7 @@ Error BitcodeReader::parseFunctionBody(Function *F) {
         Ty = getTypeByID(TyID);
       } else if (!cast<PointerType>(BasePtr->getType()->getScalarType())
                       ->isOpaqueOrPointeeTypeMatches(Ty)) {
+        assert(0);
         return error(
             "Explicit gep type does not match pointee type of pointer operand");
       }

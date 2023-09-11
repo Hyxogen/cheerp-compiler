@@ -54,7 +54,9 @@ uptr StackTrace::GetNextInstructionPc(uptr pc) {
 }
 
 uptr StackTrace::GetCurrentPc() {
-  return GET_CALLER_PC();
+  // CHEERP: TODO
+  //return GET_CALLER_PC();
+  return 0;
 }
 
 void BufferedStackTrace::Init(const uptr *pcs, uptr cnt, uptr extra_top_pc) {

@@ -479,7 +479,8 @@ void ReportGenericError(uptr pc, uptr bp, uptr sp, uptr addr, bool is_write,
     return;
   }
   if (!fatal && SuppressErrorReport(pc)) return;
-  ENABLE_FRAME_POINTER;
+  // CHEERP: TODO enable frame pointer
+  //ENABLE_FRAME_POINTER;
 
   // Optimization experiments.
   // The experiments can be used to evaluate potential optimizations that remove
@@ -503,7 +504,8 @@ using namespace __asan;
 
 void __asan_report_error(uptr pc, uptr bp, uptr sp, uptr addr, int is_write,
                          uptr access_size, u32 exp) {
-  ENABLE_FRAME_POINTER;
+  // CHEERP: TODO enable frame pointer
+  //ENABLE_FRAME_POINTER;
   bool fatal = flags()->halt_on_error;
   ReportGenericError(pc, bp, sp, addr, is_write, access_size, exp, fatal);
 }

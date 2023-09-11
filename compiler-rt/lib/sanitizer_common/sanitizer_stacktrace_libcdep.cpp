@@ -103,10 +103,15 @@ void StackTrace::PrintTo(InternalScopedString *output) const {
   }
 
   for (uptr i = 0; i < size && trace[i]; i++) {
+#if !SANITIZER_CHEERPWASM
     // PCs in stack traces are actually the return addresses, that is,
     // addresses of the next instructions after the call.
     uptr pc = GetPreviousInstructionPc(trace[i]);
     CHECK(printer.ProcessAddressFrames(pc));
+#else
+
+    uptr pc = trace[i];
+#endif
   }
 
   // Always add a trailing empty line after stack trace.
