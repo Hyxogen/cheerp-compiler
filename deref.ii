@@ -1,0 +1,12 @@
+# 1 "deref.cc"
+# 1 "<built-in>" 1
+# 1 "<built-in>" 3
+# 379 "<built-in>" 3
+# 1 "<command line>" 1
+# 1 "<built-in>" 2
+# 1 "deref.cc" 2
+# 16 "deref.cc"
+int main(void) {
+        int *ptr = 0;
+        return *ptr;
+}
