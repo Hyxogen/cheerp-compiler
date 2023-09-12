@@ -118,7 +118,7 @@ static const uint64_t kNetBSDKasan_ShadowOffset64 = 0xdfff900000000000;
 static const uint64_t kPS_ShadowOffset64 = 1ULL << 40;
 static const uint64_t kWindowsShadowOffset32 = 3ULL << 28;
 static const uint64_t kEmscriptenShadowOffset = 0;
-static const uint64_t kCheerpWasmShadowOffset = 0;
+static const uint64_t kCheerpWasmShadowOffset = 1ULL << 29;
 
 // The shadow memory space is dynamically allocated.
 static const uint64_t kWindowsShadowOffset64 = kDynamicShadowSentinel;
@@ -519,7 +519,7 @@ static ShadowMapping getShadowMapping(const Triple &TargetTriple, int LongSize,
     else if (IsEmscripten)
       Mapping.Offset = kEmscriptenShadowOffset;
     else if (IsCheerpWasm)
-      Mapping.Offset = kCheerpWasmShadowOffset;
+      Mapping.InGlobal = true; //Mapping.Offset = kCheerpWasmShadowOffset;
     else
       Mapping.Offset = kDefaultShadowOffset32;
   } else {  // LongSize == 64
@@ -2552,6 +2552,9 @@ void AddressSanitizer::initializeCallbacks(Module &M) {
       M.getOrInsertFunction(kAsanPtrCmp, IRB.getVoidTy(), IntptrTy, IntptrTy);
   AsanPtrSubFunction =
       M.getOrInsertFunction(kAsanPtrSub, IRB.getVoidTy(), IntptrTy, IntptrTy);
+  // CHEERPASAN: TODO check if it even gets to here?
+  // CHEERPASAN: As far as I understand, I have to make sure `&__asan_shadow`
+  // overlaps with `_heapStart` in the 'linking process' of cheerpwasm
   if (Mapping.InGlobal)
     AsanShadowGlobal = M.getOrInsertGlobal("__asan_shadow",
                                            ArrayType::get(IRB.getInt8Ty(), 0));
