@@ -14,25 +14,32 @@
 #ifndef ASAN_MAPPING_CHEERPWASM_H
 #define ASAN_MAPPING_CHEERPWASM_H
 
+// || `[0x38000000, 0xffffffff]` || HighMem    ||
+// || `[0x27000000, 0x37ffffff]` || HighShadow ||
+// || `[0x24000000, 0x26ffffff]` || ShadowGap  ||
+// || `[0x20000000, 0x23ffffff]` || LowShadow  ||
+// || `[0x00000000, 0x1fffffff]` || LowMem     ||
+
 #define WASM_PAGE_SIZE 65536
 
-#define kLowMemBeg     ((uptr) 0x20000000)
+#define kLowMemBeg     ((uptr) 0x00000000)
 
-#define kLowMemEnd     ((kLowShadowBeg << ASAN_SHADOW_SCALE) - 1)
+#define kLowMemEnd     ((uptr) 0x1fffffff)
 
-#define kLowShadowBeg  0
-#define kLowShadowEnd  (kLowMemBeg - 1)
+#define kHighMemBeg    ((uptr) 0x38000000)
+#define kHighMemEnd    ((uptr) 0xffffffff)
 
-#define kHighMemBeg    0
+#define kLowShadowBeg  ((uptr) 0x20000000)
+#define kLowShadowEnd  ((uptr) 0x23ffffff)
 
-#define kHighShadowBeg 0
-#define kHighShadowEnd 0
+#define kHighShadowBeg ((uptr) 0x27000000)
+#define kHighShadowEnd ((uptr) 0x37000000)
 
 #define kMidShadowBeg  0
 #define kMidShadowEnd  0
 
-#define kShadowGapBeg  (kLowMemEnd + 1)
-#define kShadowGapEnd  0xFFFFFFFF
+#define kShadowGapBeg  ((uptr) (kLowShadowEnd + 1))
+#define kShadowGapEnd  ((uptr) (kHighShadowBeg - 1))
 
 #define kShadowGap2Beg 0
 #define kShadowGap2End 0
@@ -73,16 +80,17 @@ static inline bool AddrIsInMidShadow(uptr a) {
 static inline bool AddrIsInHighMem(uptr a) {
   //PROFILE_ASAN_MAPPING();
   return false;
+  return a >= kHighMemBeg && a <= kHighMemEnd;
 }
 
 static inline bool AddrIsInHighShadow(uptr a) {
   //PROFILE_ASAN_MAPPING();
-  return false;
+  return a >= kHighShadowBeg && a <= kHighShadowEnd;
 }
 
 static inline bool AddrIsInShadowGap(uptr a) {
   //PROFILE_ASAN_MAPPING();
-  return a >= kShadowGapBeg;
+  return a >= kShadowGapBeg && a <= kShadowGapEnd;
 }
 
 }  // namespace __asan

@@ -208,8 +208,13 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 					{
 						if(II == Intrinsic::cheerp_allocate)
 						{
+                                                        PointerType *voidPtr = Type::getInt8PtrTy(module.getContext());
+                                                        Type *sizeTy = Type::getInt32Ty(module.getContext());
+                                                        module.getOrInsertFunction("realloc", voidPtr, sizeTy);
 							Function* F = module.getFunction("malloc");
+							//Function* F = module.getFunction("malloc");
 							assert(F);
+
 							Type* oldType = ci->getType();
 							if(oldType != F->getReturnType())
 							{
@@ -232,8 +237,13 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 						}
 						else if(II == Intrinsic::cheerp_reallocate)
 						{
+                                                        PointerType *voidPtr = Type::getInt8PtrTy(module.getContext());
+                                                        Type *sizeTy = Type::getInt32Ty(module.getContext());
+                                                        module.getOrInsertFunction("realloc", voidPtr, voidPtr, sizeTy);
 							Function* F = module.getFunction("realloc");
+							//Function* F = module.getFunction("realloc");
 							assert(F);
+
 							Type* oldType = ci->getType();
 							if(oldType != F->getReturnType())
 							{
@@ -249,8 +259,12 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 						}
 						else if(II == Intrinsic::cheerp_deallocate)
 						{
+                                                        PointerType *voidPtr = Type::getInt8PtrTy(module.getContext());
+                                                        Type *voidTy = Type::getVoidTy(module.getContext());
+                                                        module.getOrInsertFunction("free", voidTy, voidPtr);
 							Function* F = module.getFunction("free");
 							assert(F);
+
 							ci->setCalledFunction(F);
 							Type* oldType = ci->getOperand(0)->getType();
 							Type* newType = F->arg_begin()->getType();

@@ -13,13 +13,21 @@
 #include "asan_internal.h"
 #include "asan_poisoning.h"
 #include "asan_report.h"
+#include "asan_interface_internal.h"
+
+#include <cstdio>
+#include <cstdint>
+
+extern uintptr_t _heapStart;
+extern uintptr_t _heapEnd;
 
 int __asan_option_detect_stack_use_after_return;  // Global interface symbol.
+uptr __asan_shadow_memory_dynamic_address;
 
 namespace __asan {
 
 int asan_inited = 0;
-
+uptr kHighMemEnd, kMidMemBeg, kMidMemEnd;
 // -------------------------- Run-time entry ------------------- {{{1
 // exported functions
 #define ASAN_REPORT_ERROR(type, is_write, size)                                \
@@ -53,7 +61,16 @@ ASAN_REPORT_ERROR(store, true, 16)
 static void AsanInitInternal() {
   if (LIKELY(asan_inited)) return;
   //SanitizerToolName = "AddressSanitizer";
+  //
+  kHighMemEnd = ~(uptr)0;
+  kMidMemBeg = kMidMemEnd = 0;
 
+  __asan_shadow_memory_dynamic_address = (uptr) _heapStart;
+  fprintf(stderr,
+          "__asan_shadow_memory_dynamic_address: %p, _heapStart: %p, _heapEnd: "
+          "%p\n",
+          (void*) __asan_shadow_memory_dynamic_address, (void *)_heapStart,
+          (void *)_heapEnd);
   __asan_option_detect_stack_use_after_return = 0;
   InitializeShadowMemory();
 
@@ -63,10 +80,10 @@ static void AsanInitInternal() {
 
 using namespace __asan;
 
-extern "C" void __asan_init() {
+void __asan_init() {
   //AsanActivate();
   AsanInitInternal();
 }
 
-extern "C" void __asan_version_mismatch_check_v8() {
+void __asan_version_mismatch_check_v8() {
 }

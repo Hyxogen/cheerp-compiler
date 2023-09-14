@@ -1245,9 +1245,15 @@ bool replaceCallOfBitCastWithBitCastOfCall(CallBase& callInst, bool mayFail, boo
 	auto addCast = [&performPtrIntConversions](Value* src, Type* oldType, Type* newType, Instruction* insertPoint) -> Value*
 	{
 		if(oldType->isIntegerTy() && newType->isPointerTy()) {
-			if (PtrToIntOperator* ptrToInt = dyn_cast<PtrToIntOperator>(src))
-				if (ptrToInt->getOperand(0)->getType() == newType)
+			if (PtrToIntOperator* ptrToInt = dyn_cast<PtrToIntOperator>(src)) {
+                                //std::cout << "a" << std::endl;
+				if (ptrToInt->getOperand(0)->getType() == newType) {
+                                        //std::cout << "b" << std::endl;
 					return ptrToInt->getOperand(0);
+                                }
+                                assert(performPtrIntConversions);
+                        }
+                        //std::cout << "c" << std::endl;
 			assert(performPtrIntConversions);
 			return new IntToPtrInst(src, newType, "", insertPoint);
 		} else if(oldType->isPointerTy() && newType->isIntegerTy()) {
@@ -1294,6 +1300,7 @@ bool replaceCallOfBitCastWithBitCastOfCall(CallBase& callInst, bool mayFail, boo
 		return false;
 	}
 	FunctionType* FTy = F->getFunctionType();
+        //std::cout << "function name: " << F->getName().str() << std::endl;
 
 	if (FTy->getNumParams() > callInst.arg_size() || (FTy->getNumParams() < callInst.arg_size() && !FTy->isVarArg()))
 	{

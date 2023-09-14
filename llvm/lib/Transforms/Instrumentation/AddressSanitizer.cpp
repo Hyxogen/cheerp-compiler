@@ -518,9 +518,10 @@ static ShadowMapping getShadowMapping(const Triple &TargetTriple, int LongSize,
       Mapping.Offset = kWindowsShadowOffset32;
     else if (IsEmscripten)
       Mapping.Offset = kEmscriptenShadowOffset;
-    else if (IsCheerpWasm)
+    else if (IsCheerpWasm) {
+      Mapping.Offset = kDynamicShadowSentinel;
       Mapping.InGlobal = true; //Mapping.Offset = kCheerpWasmShadowOffset;
-    else
+    } else
       Mapping.Offset = kDefaultShadowOffset32;
   } else {  // LongSize == 64
     // Fuchsia is always PIE, which means that the beginning of the address
@@ -2187,7 +2188,7 @@ void ModuleAddressSanitizer::InstrumentGlobalsWithMetadataArray(
       ArrayType::get(MetadataInitializers[0]->getType(), N);
   auto AllGlobals = new GlobalVariable(
       M, ArrayOfGlobalStructTy, false, GlobalVariable::InternalLinkage,
-      ConstantArray::get(ArrayOfGlobalStructTy, MetadataInitializers), "");
+      ConstantArray::get(ArrayOfGlobalStructTy, MetadataInitializers), "__asan_all_globals"); // CHEERP: TODO Only when using cheerp
   AllGlobals->setSection("asmjs");
   if (Mapping.Scale > 3)
     AllGlobals->setAlignment(Align(1ULL << Mapping.Scale));
@@ -2555,9 +2556,11 @@ void AddressSanitizer::initializeCallbacks(Module &M) {
   // CHEERPASAN: TODO check if it even gets to here?
   // CHEERPASAN: As far as I understand, I have to make sure `&__asan_shadow`
   // overlaps with `_heapStart` in the 'linking process' of cheerpwasm
-  if (Mapping.InGlobal)
+  if (Mapping.InGlobal) {
     AsanShadowGlobal = M.getOrInsertGlobal("__asan_shadow",
                                            ArrayType::get(IRB.getInt8Ty(), 0));
+    cast<GlobalVariable>(AsanShadowGlobal)->setSection("asmjs");
+  }
 
   AMDGPUAddressShared = M.getOrInsertFunction(
       kAMDGPUAddressSharedName, IRB.getInt1Ty(), IRB.getInt8PtrTy());

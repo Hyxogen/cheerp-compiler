@@ -646,18 +646,21 @@ void LinearMemoryHelper::checkMemorySize()
 }
 void LinearMemoryHelper::addHeapStartAndEnd()
 {
-	GlobalVariable* heapStartVar = module->getNamedGlobal("_heapStart");
-	GlobalVariable* heapEndVar = module->getNamedGlobal("_heapEnd");
+	//GlobalVariable* heapStartVar = module->getNamedGlobal("_heapStart");
+	//GlobalVariable* heapEndVar = module->getNamedGlobal("_heapEnd");
 
-	if (heapStartVar)
-	{
-		assert(heapEndVar && "No _heapEnd global variable found");
-		// Align to 8 bytes
-		heapStart = (heapStart + 7) & ~7;
+        if (GlobalVariable* heapStartVar = module->getNamedGlobal("_heapStart")) {
+                // Align to 8 bytes
+                heapStart = (heapStart + 7) & ~7;
+
 		ConstantInt* startAddr = ConstantInt::get(IntegerType::getInt32Ty(module->getContext()), heapStart, false);
 		Constant* startInit = ConstantExpr::getIntToPtr(startAddr, heapStartVar->getValueType(), false);
 		heapStartVar->setInitializer(startInit);
 		heapStartVar->setSection("asmjs");
+        }
+        if (GlobalVariable* heapEndVar = module->getNamedGlobal("_heapEnd")) {
+                // Align to 8 bytes
+                heapStart = (heapStart + 7) & ~7;
 
 		uint32_t heapEnd = growMem ? heapStart : memorySize;
 		// Align heapEnd to a wasm page size
@@ -666,7 +669,18 @@ void LinearMemoryHelper::addHeapStartAndEnd()
 		Constant* endInit = ConstantExpr::getIntToPtr(endAddr, heapEndVar->getValueType(), false);
 		heapEndVar->setInitializer(endInit);
 		heapEndVar->setSection("asmjs");
-	}
+        }
+
+        /*
+        Type* Ty = Type::getVoidTy(module->getContext())->getPointerTo();
+        GlobalVariable *AsanShadow =
+            cast<GlobalVariable>(module->getOrInsertGlobal(
+                "__asan_shadow_memory_dynamic_address", Ty));
+        AsanShadow->setSection("asmjs");
+        asmjsAddressableGlobals.push_back(AsanShadow);
+        globalAddresses.emplace(AsanShadow, heapStart);
+        inverseGlobalAddresses.emplace(heapStart, AsanShadow);
+        */
 }
 
 uint32_t LinearMemoryHelper::getGlobalVariableAddress(const GlobalVariable* G) const

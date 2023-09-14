@@ -13,6 +13,7 @@
 #ifndef ASAN_INTERNAL
 #define ASAN_INTERNAL
 
+#include "asan_interface_internal.h"
 #include "sanitizer_common_new/sanitizer_internal_defs.h"
 
 #if __has_feature(address_sanitizer) || defined(__SANITIZE_ADDRESS__)

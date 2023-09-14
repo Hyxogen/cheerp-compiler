@@ -11,8 +11,9 @@
 // Shadow memory poisoning by ASan RTL and by user application.
 //===----------------------------------------------------------------------===//
 
+#include "asan_internal.h"
+#include "asan_interface_internal.h"
 #include "asan_mapping.h"
-#include "asan_new/asan_internal.h"
 
 #include <cstring>
 

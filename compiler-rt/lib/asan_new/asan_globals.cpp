@@ -20,4 +20,4 @@ namespace __asan {
 void __asan_register_globals(void *globals, uptr n) {}
 void __asan_unregister_globals(void *globals, uptr n) {}
 
-}
+} // namespace __asan

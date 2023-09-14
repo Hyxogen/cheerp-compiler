@@ -160,12 +160,260 @@
 
 #define ASAN_SHADOW_SCALE 3
 
+#if SANITIZER_FUCHSIA
+#  define ASAN_SHADOW_OFFSET_CONST (0)
+#elif SANITIZER_WORDSIZE == 32
+#  if SANITIZER_ANDROID
+#    define ASAN_SHADOW_OFFSET_DYNAMIC
+#  elif defined(__mips__)
+#    define ASAN_SHADOW_OFFSET_CONST 0x0aaa0000
+#  elif SANITIZER_FREEBSD
+#    define ASAN_SHADOW_OFFSET_CONST 0x40000000
+#  elif SANITIZER_NETBSD
+#    define ASAN_SHADOW_OFFSET_CONST 0x40000000
+#  elif SANITIZER_WINDOWS
+#    define ASAN_SHADOW_OFFSET_CONST 0x30000000
+#  elif SANITIZER_IOS
+#    define ASAN_SHADOW_OFFSET_DYNAMIC
+#  elif SANITIZER_CHEERPWASM
+#    define ASAN_SHADOW_OFFSET_DYNAMIC
+#  else
+#    define ASAN_SHADOW_OFFSET_CONST 0x20000000
+#  endif
+#else
+#  if SANITIZER_IOS
+#    define ASAN_SHADOW_OFFSET_DYNAMIC
+#  elif SANITIZER_APPLE && defined(__aarch64__)
+#    define ASAN_SHADOW_OFFSET_DYNAMIC
+#  elif SANITIZER_FREEBSD && defined(__aarch64__)
+#    define ASAN_SHADOW_OFFSET_CONST 0x0000800000000000
+#  elif SANITIZER_RISCV64
+#    define ASAN_SHADOW_OFFSET_CONST 0x0000000d55550000
+#  elif defined(__aarch64__)
+#    define ASAN_SHADOW_OFFSET_CONST 0x0000001000000000
+#  elif defined(__powerpc64__)
+#    define ASAN_SHADOW_OFFSET_CONST 0x0000100000000000
+#  elif defined(__s390x__)
+#    define ASAN_SHADOW_OFFSET_CONST 0x0010000000000000
+#  elif SANITIZER_FREEBSD
+#    define ASAN_SHADOW_OFFSET_CONST 0x0000400000000000
+#  elif SANITIZER_NETBSD
+#    define ASAN_SHADOW_OFFSET_CONST 0x0000400000000000
+#  elif SANITIZER_APPLE
+#    define ASAN_SHADOW_OFFSET_CONST 0x0000100000000000
+#  elif defined(__mips64)
+#    define ASAN_SHADOW_OFFSET_CONST 0x0000002000000000
+#  elif defined(__sparc__)
+#    define ASAN_SHADOW_OFFSET_CONST 0x0000080000000000
+#  elif SANITIZER_LOONGARCH64
+#    define ASAN_SHADOW_OFFSET_CONST 0x0000400000000000
+#  elif SANITIZER_WINDOWS64
+#    define ASAN_SHADOW_OFFSET_DYNAMIC
+#  else
+#    if ASAN_SHADOW_SCALE != 3
+#      error "Value below is based on shadow scale = 3."
+#      error "Original formula was: 0x7FFFFFFF & (~0xFFFULL << SHADOW_SCALE)."
+#    endif
+#    define ASAN_SHADOW_OFFSET_CONST 0x000000007fff8000
+#  endif
+#endif
+
 #if defined(__cplusplus)
 #  include "asan_internal.h"
 
-#  define ASAN_SHADOW_GRANULARITY (1ULL << ASAN_SHADOW_SCALE)
-#endif
+static const u64 kDefaultShadowSentinel = ~(uptr)0;
 
-#include "asan_mapping_cheerpwasm.h"
+#  if defined(ASAN_SHADOW_OFFSET_CONST)
+static const u64 kConstShadowOffset = ASAN_SHADOW_OFFSET_CONST;
+#    define ASAN_SHADOW_OFFSET kConstShadowOffset
+#  elif defined(ASAN_SHADOW_OFFSET_DYNAMIC)
+#    define ASAN_SHADOW_OFFSET __asan_shadow_memory_dynamic_address
+#  else
+#    error "ASAN_SHADOW_OFFSET can't be determined."
+#  endif
+
+#  if SANITIZER_ANDROID && defined(__arm__)
+#    define ASAN_PREMAP_SHADOW 1
+#  else
+#    define ASAN_PREMAP_SHADOW 0
+#  endif
+
+#  define ASAN_SHADOW_GRANULARITY (1ULL << ASAN_SHADOW_SCALE)
+
+#  define DO_ASAN_MAPPING_PROFILE 0  // Set to 1 to profile the functions below.
+
+#  if DO_ASAN_MAPPING_PROFILE
+#    define PROFILE_ASAN_MAPPING() AsanMappingProfile[__LINE__]++;
+#  else
+#    define PROFILE_ASAN_MAPPING()
+#  endif
+
+// If 1, all shadow boundaries are constants.
+// Don't set to 1 other than for testing.
+#  define ASAN_FIXED_MAPPING 0
+
+namespace __asan {
+
+extern uptr AsanMappingProfile[];
+
+#  if ASAN_FIXED_MAPPING
+// Fixed mapping for 64-bit Linux. Mostly used for performance comparison
+// with non-fixed mapping. As of r175253 (Feb 2013) the performance
+// difference between fixed and non-fixed mapping is below the noise level.
+static uptr kHighMemEnd = 0x7fffffffffffULL;
+static uptr kMidMemBeg = 0x3000000000ULL;
+static uptr kMidMemEnd = 0x4fffffffffULL;
+#  else
+extern uptr kHighMemEnd, kMidMemBeg, kMidMemEnd;  // Initialized in __asan_init.
+#  endif
+
+}  // namespace __asan
+
+#  if defined(__sparc__) && SANITIZER_WORDSIZE == 64
+#    include "asan_mapping_sparc64.h"
+#  else
+#    define MEM_TO_SHADOW(mem) \
+      (((mem) >> ASAN_SHADOW_SCALE) + (ASAN_SHADOW_OFFSET))
+#    define SHADOW_TO_MEM(mem) \
+      (((mem) - (ASAN_SHADOW_OFFSET)) << (ASAN_SHADOW_SCALE))
+
+#    define kLowMemBeg 0
+#    define kLowMemEnd (ASAN_SHADOW_OFFSET ? ASAN_SHADOW_OFFSET - 1 : 0)
+
+#    define kLowShadowBeg ASAN_SHADOW_OFFSET
+#    define kLowShadowEnd MEM_TO_SHADOW(kLowMemEnd)
+
+#    define kHighMemBeg (MEM_TO_SHADOW(kHighMemEnd) + 1)
+
+#    define kHighShadowBeg MEM_TO_SHADOW(kHighMemBeg)
+#    define kHighShadowEnd MEM_TO_SHADOW(kHighMemEnd)
+
+#    define kMidShadowBeg MEM_TO_SHADOW(kMidMemBeg)
+#    define kMidShadowEnd MEM_TO_SHADOW(kMidMemEnd)
+
+// With the zero shadow base we can not actually map pages starting from 0.
+// This constant is somewhat arbitrary.
+#    define kZeroBaseShadowStart 0
+#    define kZeroBaseMaxShadowStart (1 << 18)
+
+#    define kShadowGapBeg \
+      (kLowShadowEnd ? kLowShadowEnd + 1 : kZeroBaseShadowStart)
+#    define kShadowGapEnd ((kMidMemBeg ? kMidShadowBeg : kHighShadowBeg) - 1)
+
+#    define kShadowGap2Beg (kMidMemBeg ? kMidShadowEnd + 1 : 0)
+#    define kShadowGap2End (kMidMemBeg ? kMidMemBeg - 1 : 0)
+
+#    define kShadowGap3Beg (kMidMemBeg ? kMidMemEnd + 1 : 0)
+#    define kShadowGap3End (kMidMemBeg ? kHighShadowBeg - 1 : 0)
+
+namespace __asan {
+
+static inline bool AddrIsInLowMem(uptr a) {
+  PROFILE_ASAN_MAPPING();
+  return a <= kLowMemEnd;
+}
+
+static inline bool AddrIsInLowShadow(uptr a) {
+  PROFILE_ASAN_MAPPING();
+  return a >= kLowShadowBeg && a <= kLowShadowEnd;
+}
+
+static inline bool AddrIsInMidMem(uptr a) {
+  PROFILE_ASAN_MAPPING();
+  return kMidMemBeg && a >= kMidMemBeg && a <= kMidMemEnd;
+}
+
+static inline bool AddrIsInMidShadow(uptr a) {
+  PROFILE_ASAN_MAPPING();
+  return kMidMemBeg && a >= kMidShadowBeg && a <= kMidShadowEnd;
+}
+
+static inline bool AddrIsInHighMem(uptr a) {
+  PROFILE_ASAN_MAPPING();
+  return kHighMemBeg && a >= kHighMemBeg && a <= kHighMemEnd;
+}
+
+static inline bool AddrIsInHighShadow(uptr a) {
+  PROFILE_ASAN_MAPPING();
+  return kHighMemBeg && a >= kHighShadowBeg && a <= kHighShadowEnd;
+}
+
+static inline bool AddrIsInShadowGap(uptr a) {
+  PROFILE_ASAN_MAPPING();
+  if (kMidMemBeg) {
+    if (a <= kShadowGapEnd)
+      return ASAN_SHADOW_OFFSET == 0 || a >= kShadowGapBeg;
+    return (a >= kShadowGap2Beg && a <= kShadowGap2End) ||
+           (a >= kShadowGap3Beg && a <= kShadowGap3End);
+  }
+  // In zero-based shadow mode we treat addresses near zero as addresses
+  // in shadow gap as well.
+  if (ASAN_SHADOW_OFFSET == 0)
+    return a <= kShadowGapEnd;
+  return a >= kShadowGapBeg && a <= kShadowGapEnd;
+}
+
+}  // namespace __asan
+
+#  endif
+
+namespace __asan {
+
+static inline uptr MemToShadowSize(uptr size) {
+  return size >> ASAN_SHADOW_SCALE;
+}
+
+static inline bool AddrIsInMem(uptr a) {
+  PROFILE_ASAN_MAPPING();
+#if SANITIZER_CHEERPWASM
+  return AddrIsInLowMem(a) || AddrIsInMidMem(a) || AddrIsInHighMem(a);
+#else 
+
+  return AddrIsInLowMem(a) || AddrIsInMidMem(a) || AddrIsInHighMem(a) ||
+         (flags()->protect_shadow_gap == 0 && AddrIsInShadowGap(a));
+#endif
+}
+
+static inline uptr MemToShadow(uptr p) {
+  PROFILE_ASAN_MAPPING();
+  CHECK(AddrIsInMem(p));
+  return MEM_TO_SHADOW(p);
+}
+
+static inline bool AddrIsInShadow(uptr a) {
+  PROFILE_ASAN_MAPPING();
+  return AddrIsInLowShadow(a) || AddrIsInMidShadow(a) || AddrIsInHighShadow(a);
+}
+
+static inline uptr ShadowToMem(uptr p) {
+  PROFILE_ASAN_MAPPING();
+  CHECK(AddrIsInShadow(p));
+  return SHADOW_TO_MEM(p);
+}
+
+static inline bool AddrIsAlignedByGranularity(uptr a) {
+  PROFILE_ASAN_MAPPING();
+  return (a & (ASAN_SHADOW_GRANULARITY - 1)) == 0;
+}
+
+static inline bool AddressIsPoisoned(uptr a) {
+  PROFILE_ASAN_MAPPING();
+  const uptr kAccessSize = 1;
+  u8 *shadow_address = (u8 *)MEM_TO_SHADOW(a);
+  s8 shadow_value = *shadow_address;
+  if (shadow_value) {
+    u8 last_accessed_byte =
+        (a & (ASAN_SHADOW_GRANULARITY - 1)) + kAccessSize - 1;
+    return (last_accessed_byte >= shadow_value);
+  }
+  return false;
+}
+
+// Must be after all calls to PROFILE_ASAN_MAPPING().
+static const uptr kAsanMappingProfileSize = __LINE__;
+
+}  // namespace __asan
+
+#endif  // __cplusplus
 
 #endif  // ASAN_MAPPING_H
