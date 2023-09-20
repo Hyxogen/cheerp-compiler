@@ -148,12 +148,16 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 	// Replace the aliases with the actual values
 	for (auto& a: make_early_inc_range(module.aliases()))
 	{
+
+                // Not really sure about putting this here, since this will not
+                // allow for optimizing a unit individually
+                a.replaceAllUsesWith( a.getAliasee() );
+
                 auto name = a.getName();
                 if (name == StringRef("malloc") ||
                     name == StringRef("realloc") || name == StringRef("free") ||
                     name == StringRef("calloc"))
                         continue;
-                a.replaceAllUsesWith( a.getAliasee() );
 		a.eraseFromParent();
 	}
 
