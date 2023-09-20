@@ -20,6 +20,20 @@ using namespace cheerp;
 using namespace llvm;
 typedef LinearMemoryHelperInitializer::FunctionAddressMode FunctionAddressMode;
 
+static Function* getFunctionYes(llvm::Module& module, StringRef name) {
+  GlobalAlias* alias = module.getNamedAlias(name);
+  if (alias)
+    return dyn_cast<Function>(alias->getAliaseeObject());
+  return module.getFunction(name);
+}
+
+static Function* getFunctionYes(const llvm::Module& module, StringRef name) {
+  GlobalAlias* alias = module.getNamedAlias(name);
+  if (alias)
+    return dyn_cast<Function>(alias->getAliaseeObject());
+  return module.getFunction(name);
+}
+
 void LinearMemoryHelper::compileConstantAsBytes(const Constant* c, bool asmjs, ByteListener* listener, int32_t offset) const
 {
 	const auto& targetData = module->getDataLayout();
@@ -694,7 +708,7 @@ uint32_t LinearMemoryHelper::getFunctionAddress(const llvm::Function* F) const
 {
 	if (F->getName() == StringRef("__genericjs__free"))
 	{
-		const Function* ffree = module->getFunction("free");
+		const Function* ffree = getFunctionYes(*module, "free");
 		assert(ffree);
 		F = ffree;
 	}
@@ -705,7 +719,7 @@ bool LinearMemoryHelper::functionHasAddress(const llvm::Function* F) const
 {
 	if (F->getName() == StringRef("__genericjs__free"))
 	{
-		const Function* ffree = module->getFunction("free");
+		const Function* ffree = getFunctionYes(*module, "free");
 		assert(ffree);
 		F = ffree;
 	}
