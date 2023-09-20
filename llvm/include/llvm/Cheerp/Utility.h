@@ -252,7 +252,8 @@ bool hasNonLoadStoreUses(const llvm::Value* v);
 
 llvm::Type* getGEPContainerType(const llvm::User* gep);
 
-inline bool isFreeFunctionName(llvm::StringRef name)
+// CHEERP: TODO remove this
+[[deprecated("free might be a alias")]] inline bool isFreeFunctionName(llvm::StringRef name)
 {
 	return name=="free" || name=="_ZdlPv" || name=="_ZdaPv";
 }

@@ -1081,7 +1081,7 @@ CheerpWriter::COMPILE_INSTRUCTION_FEEDBACK CheerpWriter::handleBuiltinCall(const
 		compileOperand(*it);
 		return COMPILE_OK;
 	}
-	else if(cheerp::isFreeFunctionName(ident) || intrinsicId==Intrinsic::cheerp_deallocate)
+	else if(func == getFunctionYes(module, "free") || cheerp::isFreeFunctionName(ident) || intrinsicId==Intrinsic::cheerp_deallocate)
 	{
 		if (asmjs || TypeSupport::isAsmJSPointer((*it)->getType()))
 		{
