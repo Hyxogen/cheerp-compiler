@@ -684,7 +684,7 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 		{
 			if(!hasAsmJSMalloc)
 			{
-                                // std::cout << "!hasAsmJSMalloc" << std::endl;
+                                //std::cout << "!hasAsmJSMalloc" << std::endl;
                                 //  The symbol is still used around, so keep it
                                 //  but make it empty
 
@@ -1218,8 +1218,13 @@ void GlobalDepsAnalyzer::visitGlobal( const GlobalValue * C, VisitedSet & visite
 			}
 			else
 			{
-				if (C->getName() == StringRef("malloc"))
+                                if (F == getFunctionYes(*F->getParent(), "malloc")) {
 					hasAsmJSMalloc = true;
+                                }
+                                /*
+                          //Check if function is malloc function through weak alias
+				if (C->getName() == StringRef("malloc"))
+					hasAsmJSMalloc = true;*/
 
 				if (C->getSection() == StringRef("asmjs"))
 				{
@@ -1419,7 +1424,7 @@ void GlobalDepsAnalyzer::visitFunction(const Function* F, VisitedSet& visited)
 						Function* fmalloc = ::getFunctionYes(*module, "malloc");
 						if (fmalloc)
 						{
-							SubExprVec vec;
+                                                        SubExprVec vec;
 							visitGlobal(fmalloc, visited, vec );
 							if(!isAsmJS)
 								asmJSExportedFuncions.insert(fmalloc);
@@ -1644,15 +1649,15 @@ int GlobalDepsAnalyzer::filterModule( const DenseSet<const Function*>& droppedMa
 {
 	std::vector< llvm::GlobalValue * > eraseQueue;
 	
-        std::cout << "malloc reachable?: " << isReachable(module.getNamedValue("malloc")) << std::endl;
-        std::cout << "realloc reachable?: " << isReachable(module.getNamedValue("realloc")) << std::endl;
-        std::cout << "free reachable?: " << isReachable(module.getNamedValue("free")) << std::endl;
-        std::cout << "calloc reachable?: " << isReachable(module.getNamedValue("calloc")) << std::endl;
+        //std::cout << "malloc reachable?: " << isReachable(module.getNamedValue("malloc")) << std::endl;
+        //std::cout << "realloc reachable?: " << isReachable(module.getNamedValue("realloc")) << std::endl;
+        //std::cout << "free reachable?: " << isReachable(module.getNamedValue("free")) << std::endl;
+        //std::cout << "calloc reachable?: " << isReachable(module.getNamedValue("calloc")) << std::endl;
 
-        std::cout << "dlmalloc reachable?: " << isReachable(module.getNamedValue("dlmalloc")) << std::endl;
-        std::cout << "dlrealloc reachable?: " << isReachable(module.getNamedValue("dlrealloc")) << std::endl;
-        std::cout << "dlfree reachable?: " << isReachable(module.getNamedValue("dlfree")) << std::endl;
-        std::cout << "dlcalloc reachable?: " << isReachable(module.getNamedValue("dlcalloc")) << std::endl;
+        //std::cout << "dlmalloc reachable?: " << isReachable(module.getNamedValue("dlmalloc")) << std::endl;
+        //std::cout << "dlrealloc reachable?: " << isReachable(module.getNamedValue("dlrealloc")) << std::endl;
+        //std::cout << "dlfree reachable?: " << isReachable(module.getNamedValue("dlfree")) << std::endl;
+        //std::cout << "dlcalloc reachable?: " << isReachable(module.getNamedValue("dlcalloc")) << std::endl;
 
 	for (auto& a: make_early_inc_range(module.aliases()))
 	{
@@ -1736,9 +1741,6 @@ int GlobalDepsAnalyzer::filterModule( const DenseSet<const Function*>& droppedMa
 	// Remove dead constant users
 	for ( GlobalValue * var : eraseQueue )
 		var->removeDeadConstantUsers();
-
-	for ( GlobalValue * var : eraseQueue )
-          std::cout << "will delete: " << var->getName().str() << std::endl;
 
 	// Now we can safely invoke operator delete
 	for ( GlobalValue * var : eraseQueue )
