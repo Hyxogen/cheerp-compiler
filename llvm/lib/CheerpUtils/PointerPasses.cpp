@@ -677,7 +677,7 @@ bool FreeAndDeleteRemoval::runOnModule(Module& M)
 				else if (Constant* c = dyn_cast<Constant>(Usr))
 				{
                                         if (isa<Function>(U.get()) &&
-                                            (c == getFunctionYes(M, "free") ||
+                                            (cast<Function>(U.get()) == getFunctionYes(M, "free") ||
                                              cheerp::isFreeFunctionName(
                                                  cast<Function>(U.get())
                                                      ->getName()))) {
@@ -740,10 +740,10 @@ bool FreeAndDeleteRemoval::runOnModule(Module& M)
 
 	if (!usesToBeReplaced.empty())
 	{
-		cheerp::replaceSomeUsesWith(usesToBeReplaced, getOrCreateGenericJSFree(M, isAllGenericJS));
+                cheerp::replaceSomeUsesWith(usesToBeReplaced, getOrCreateGenericJSFree(M, isAllGenericJS));
 	}
 
-	return Changed;
+        return Changed;
 }
 
 PreservedAnalyses FreeAndDeleteRemovalPass::run(Module& M, ModuleAnalysisManager& MAM)
