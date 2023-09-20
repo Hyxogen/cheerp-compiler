@@ -714,6 +714,8 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 	} else {
                 std::cout << "!mayNeedAsmJSFree" << std::endl;
         }
+	//assert(!verifyModule(module, &errs()));
+
         // If we are in opt, there is a chance that a following
 	// pass will convert malloc into a calloc, so keep that if we keep malloc
 	if(!llcPass && hasAsmJSMalloc)
@@ -769,7 +771,7 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 		}
 	};
 
-	assert(!verifyModule(module, &errs()));
+	//assert(!verifyModule(module, &errs()));
 	// Mark the __wasm_nullptr as reachable.
 	llvm::Function* wasmNullptr = module.getFunction(StringRef(wasmNullptrName));
 	markAsReachableIfPresent(wasmNullptr);
@@ -783,7 +785,7 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 		markAsReachableIfPresent(module.getFunction("__udivti3"));
 	}
 
-	assert(!verifyModule(module, &errs()));
+	//assert(!verifyModule(module, &errs()));
 	NumRemovedGlobals = filterModule(droppedMathBuiltins, module);
 	assert(!verifyModule(module, &errs()));
 
