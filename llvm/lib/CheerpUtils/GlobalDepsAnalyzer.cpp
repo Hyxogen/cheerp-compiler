@@ -33,6 +33,20 @@ using namespace llvm;
 
 STATISTIC(NumRemovedGlobals, "Number of unused globals which have been removed");
 
+static Function* getFunctionYes(llvm::Module& module, StringRef name) {
+  GlobalAlias* alias = module.getNamedAlias(name);
+  if (alias)
+    return dyn_cast<Function>(alias->getAliaseeObject());
+  return module.getFunction(name);
+}
+
+static Function* getFunctionYes(const llvm::Module& module, StringRef name) {
+  GlobalAlias* alias = module.getNamedAlias(name);
+  if (alias)
+    return dyn_cast<Function>(alias->getAliaseeObject());
+  return module.getFunction(name);
+}
+
 namespace cheerp {
 
 using namespace std;
@@ -132,6 +146,9 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 	// Replace the aliases with the actual values
 	for (auto& a: make_early_inc_range(module.aliases()))
 	{
+                auto name = a.getName();
+                if (name == StringRef("malloc") || name == StringRef("realloc") || name == StringRef("free"))
+                  continue;
 		a.replaceAllUsesWith( a.getAliasee() );
 		a.eraseFromParent();
 	}
@@ -208,7 +225,7 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 					{
 						if(II == Intrinsic::cheerp_allocate)
 						{
-							Function* F = module.getFunction("malloc");
+							Function* F = getFunctionYes(module, "malloc");
 							assert(F);
 							Type* oldType = ci->getType();
 							if(oldType != F->getReturnType())
@@ -232,7 +249,7 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 						}
 						else if(II == Intrinsic::cheerp_reallocate)
 						{
-							Function* F = module.getFunction("realloc");
+							Function* F = getFunctionYes(module, "realloc");
 							assert(F);
 							Type* oldType = ci->getType();
 							if(oldType != F->getReturnType())
@@ -249,7 +266,7 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 						}
 						else if(II == Intrinsic::cheerp_deallocate)
 						{
-							Function* F = module.getFunction("free");
+							Function* F = getFunctionYes(module, "free");
 							assert(F);
 							ci->setCalledFunction(F);
 							Type* oldType = ci->getOperand(0)->getType();
@@ -656,7 +673,7 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 
 	if(mayNeedAsmJSFree)
 	{
-		Function* ffree = module.getFunction("free");
+		Function* ffree = getFunctionYes(module, "free");
 		if (ffree)
 		{
 			if(!hasAsmJSMalloc)
@@ -1369,7 +1386,7 @@ void GlobalDepsAnalyzer::visitFunction(const Function* F, VisitedSet& visited)
 				{
 					if (isAsmJS || TypeSupport::isAsmJSPointed(ci.getParamElementType(0)))
 					{
-						Function* fmalloc = module->getFunction("malloc");
+						Function* fmalloc = ::getFunctionYes(*module, "malloc");
 						if (fmalloc)
 						{
 							SubExprVec vec;
@@ -1385,7 +1402,7 @@ void GlobalDepsAnalyzer::visitFunction(const Function* F, VisitedSet& visited)
 				{
 					if (isAsmJS || TypeSupport::isAsmJSPointed(ci.getParamElementType(0)))
 					{
-						Function* frealloc = module->getFunction("realloc");
+						Function* frealloc = getFunctionYes(*module, "realloc");
 						if (frealloc)
 						{
 							SubExprVec vec;
@@ -1597,6 +1614,13 @@ int GlobalDepsAnalyzer::filterModule( const DenseSet<const Function*>& droppedMa
 {
 	std::vector< llvm::GlobalValue * > eraseQueue;
 	
+        std::cout << "malloc reachable?: " << isReachable(module.getNamedValue("malloc")) << std::endl;
+        std::cout << "realloc reachable?: " << isReachable(module.getNamedValue("realloc")) << std::endl;
+        std::cout << "free reachable?: " << isReachable(module.getNamedValue("free")) << std::endl;
+
+        std::cout << "dlmalloc reachable?: " << isReachable(module.getNamedValue("dlmalloc")) << std::endl;
+        std::cout << "dlrealloc reachable?: " << isReachable(module.getNamedValue("dlrealloc")) << std::endl;
+        std::cout << "dlfree reachable?: " << isReachable(module.getNamedValue("dlfree")) << std::endl;
 	// Detach all the global variables, and put the unused ones in the eraseQueue
 	for ( Module::global_iterator it = module.global_begin(); it != module.global_end(); )
 	{
