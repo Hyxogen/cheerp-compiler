@@ -692,28 +692,15 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
                                 //  The symbol is still used around, so keep it
                                 //  but make it empty
 
-                                //  We can't delete the body,
-                                //  because llvm doesn't like a weak alias to
-                                //  something without a definition
+                                ffree->deleteBody();
 
-                                if (!llcPass) {
-                                        // llvm requires than an alias must
-                                        // point to a definition, so just
-                                        // removing the body will not work
-                                        /*reachableGlobals.erase(
-                                            module.getNamedAlias("free"));*/
-                                        ffree->deleteBody();
-
-                                        BasicBlock* Entry = BasicBlock::Create(module.getContext(), "entry", ffree);
-                                        IRBuilder<> Builder(Entry);
-                                        Builder.CreateRetVoid();
-                                        /*
-                                        Function *FNop =
-                                            module.getFunction("do_nothing");
-                                        reachableGlobals.insert(FNop);
-                                        ffree->replaceAllUsesWith(FNop);
-                                        */
-                                }
+                                // We can't just only remove the body, since
+                                // free might be an alias, and LLVM doesn't like
+                                // it when an alias doesn't have a definition
+                                BasicBlock *FreeEntry = BasicBlock::Create(
+                                    module.getContext(), "entry", ffree);
+                                IRBuilder<> FreeBuilder(FreeEntry);
+                                FreeBuilder.CreateRetVoid();
 
                                 asmJSExportedFuncions.erase(ffree);
 				Function* jsfree = module.getFunction("__genericjs__free");
