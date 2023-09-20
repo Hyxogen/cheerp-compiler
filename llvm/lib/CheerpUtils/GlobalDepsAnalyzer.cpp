@@ -149,9 +149,11 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 	for (auto& a: make_early_inc_range(module.aliases()))
 	{
                 auto name = a.getName();
-                if (name == StringRef("malloc") || name == StringRef("realloc") || name == StringRef("free"))
-                  continue;
-		a.replaceAllUsesWith( a.getAliasee() );
+                if (name == StringRef("malloc") ||
+                    name == StringRef("realloc") || name == StringRef("free") ||
+                    name == StringRef("calloc"))
+                        continue;
+                a.replaceAllUsesWith( a.getAliasee() );
 		a.eraseFromParent();
 	}
 
@@ -682,10 +684,15 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 		{
 			if(!hasAsmJSMalloc)
 			{
-                                std::cout << "!hasAsmJSMalloc" << std::endl;
-				// The symbol is still used around, so keep it but make it empty
-				ffree->deleteBody();
-				asmJSExportedFuncions.erase(ffree);
+                                // std::cout << "!hasAsmJSMalloc" << std::endl;
+                                //  The symbol is still used around, so keep it
+                                //  but make it empty
+
+                                //  We can't delete the body,
+                                //  because llvm doesn't like a weak alias to
+                                //  something without a definition
+                                // ffree->deleteBody();
+                                asmJSExportedFuncions.erase(ffree);
 				Function* jsfree = module.getFunction("__genericjs__free");
 				// For jsfree, keep an empty body (could still be called if we don't run lto)
 				if (jsfree)
@@ -698,7 +705,7 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 			}
 			else
 			{
-                                std::cout << "hasAsmJSMalloc" << std::endl;
+                                //std::cout << "hasAsmJSMalloc" << std::endl;
                                 hasAsmJSCode = true;
 				asmJSExportedFuncions.insert(ffree);
 				externals.push_back(ffree);
@@ -709,10 +716,10 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 				reachableGlobals.insert(module.getNamedValue("free"));
 			}
 		} else {
-                        std::cout << "!free" << std::endl;
+                        //std::cout << "!free" << std::endl;
                 }
 	} else {
-                std::cout << "!mayNeedAsmJSFree" << std::endl;
+                //std::cout << "!mayNeedAsmJSFree" << std::endl;
         }
 	//assert(!verifyModule(module, &errs()));
 
@@ -720,7 +727,7 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 	// pass will convert malloc into a calloc, so keep that if we keep malloc
 	if(!llcPass && hasAsmJSMalloc)
 	{
-		Function* fcalloc = module.getFunction("calloc");
+		Function* fcalloc = getFunctionYes(module, "calloc");
 		if (fcalloc)
 		{
 			asmJSExportedFuncions.insert(fcalloc);
@@ -1640,10 +1647,12 @@ int GlobalDepsAnalyzer::filterModule( const DenseSet<const Function*>& droppedMa
         std::cout << "malloc reachable?: " << isReachable(module.getNamedValue("malloc")) << std::endl;
         std::cout << "realloc reachable?: " << isReachable(module.getNamedValue("realloc")) << std::endl;
         std::cout << "free reachable?: " << isReachable(module.getNamedValue("free")) << std::endl;
+        std::cout << "calloc reachable?: " << isReachable(module.getNamedValue("calloc")) << std::endl;
 
         std::cout << "dlmalloc reachable?: " << isReachable(module.getNamedValue("dlmalloc")) << std::endl;
         std::cout << "dlrealloc reachable?: " << isReachable(module.getNamedValue("dlrealloc")) << std::endl;
         std::cout << "dlfree reachable?: " << isReachable(module.getNamedValue("dlfree")) << std::endl;
+        std::cout << "dlcalloc reachable?: " << isReachable(module.getNamedValue("dlcalloc")) << std::endl;
 
 	for (auto& a: make_early_inc_range(module.aliases()))
 	{
@@ -1720,13 +1729,16 @@ int GlobalDepsAnalyzer::filterModule( const DenseSet<const Function*>& droppedMa
 		//NOTE yeah.. dropAllReferences is not virtual.
 		if ( Function * f = dyn_cast<Function>(var) )
 			f->dropAllReferences();
-		else
+                else
 			var->dropAllReferences();
 	}
 	
 	// Remove dead constant users
 	for ( GlobalValue * var : eraseQueue )
 		var->removeDeadConstantUsers();
+
+	for ( GlobalValue * var : eraseQueue )
+          std::cout << "will delete: " << var->getName().str() << std::endl;
 
 	// Now we can safely invoke operator delete
 	for ( GlobalValue * var : eraseQueue )
