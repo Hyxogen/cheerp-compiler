@@ -695,7 +695,26 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
                                 //  We can't delete the body,
                                 //  because llvm doesn't like a weak alias to
                                 //  something without a definition
-                                // ffree->deleteBody();
+
+                                if (!llcPass) {
+                                        // llvm requires than an alias must
+                                        // point to a definition, so just
+                                        // removing the body will not work
+                                        /*reachableGlobals.erase(
+                                            module.getNamedAlias("free"));*/
+                                        ffree->deleteBody();
+
+                                        BasicBlock* Entry = BasicBlock::Create(module.getContext(), "entry", ffree);
+                                        IRBuilder<> Builder(Entry);
+                                        Builder.CreateRetVoid();
+                                        /*
+                                        Function *FNop =
+                                            module.getFunction("do_nothing");
+                                        reachableGlobals.insert(FNop);
+                                        ffree->replaceAllUsesWith(FNop);
+                                        */
+                                }
+
                                 asmJSExportedFuncions.erase(ffree);
 				Function* jsfree = module.getFunction("__genericjs__free");
 				// For jsfree, keep an empty body (could still be called if we don't run lto)
@@ -1214,7 +1233,7 @@ void GlobalDepsAnalyzer::visitGlobal( const GlobalValue * C, VisitedSet & visite
 		}
 		else if (const Function * F = dyn_cast<Function>(C) )
 		{
-			if (isFreeFunctionName(C->getName()))
+			if (F == getFunctionYes(*F->getParent(), "free") || isFreeFunctionName(C->getName()))
 			{
 				// Don't visit free right now. We do it only if
 				// actyally needed at the end
