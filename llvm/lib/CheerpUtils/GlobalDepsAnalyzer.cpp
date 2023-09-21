@@ -266,32 +266,6 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 
 							ci->eraseFromParent();
 							continue;
-							/*Function* F = cheerp::getFunctionMaybeAliased(module, "malloc");
-							assert(F);
-
-							FunctionAnalysisManager& FAM = MAM->getResult<FunctionAnalysisManagerModuleProxy>(module).getManager();
-							const llvm::TargetLibraryInfo* TLI = &FAM.getResult<TargetLibraryAnalysis>(*F);
-							inferNonMandatoryLibFuncAttrs(*F, LibFunc_malloc, *TLI);
-
-							Type* oldType = ci->getType();
-							if(oldType != F->getReturnType())
-							{
-								Instruction* newCast = new BitCastInst(UndefValue::get(F->getReturnType()), oldType, "", ci->getNextNode());
-								ci->replaceAllUsesWith(newCast);
-								ci->mutateType(F->getReturnType());
-								newCast->setOperand(0, ci);
-							}
-							//cheerp_allocate(nullptr, N) -> malloc(N), so we need to move argument(1) to argument(0)
-							CallInst* newCall = CallInst::Create(F, { ci->getOperand(1) }, "", ci);
-							ci->replaceAllUsesWith(newCall);
-
-							//Set up loop variable, so the next loop will check and possibly expand newCall
-							--instructionIterator;
-							advance = false;
-							assert(&*instructionIterator == newCall);
-
-							ci->eraseFromParent();
-							continue;*/
 						}
 						else if(II == Intrinsic::cheerp_reallocate)
 						{
