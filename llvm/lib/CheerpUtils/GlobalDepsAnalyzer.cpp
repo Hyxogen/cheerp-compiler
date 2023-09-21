@@ -133,6 +133,8 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 	assert(DL);
 	VisitedSet visited;
 
+	// We use emitMalloc, which is not capable of determining the aliasee of
+	// malloc, therefore we replace malloc with the aliasee implementation
 	GlobalAlias *mallocAlias = module.getNamedAlias("malloc");
 	if (mallocAlias) {
 		Function *actualMalloc =
