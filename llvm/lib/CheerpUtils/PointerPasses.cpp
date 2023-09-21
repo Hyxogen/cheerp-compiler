@@ -569,7 +569,7 @@ static Function* getOrCreateGenericJSFree(Module& M, bool isAllGenericJS)
 	Function* New = cast<Function>(M.getOrInsertFunction("__genericjs__free", Ty).getCallee());
 	if (!New->empty()) {
 		return New;
-        }
+	}
 	New->addFnAttr(Attribute::NoInline);
 	BasicBlock* Entry = BasicBlock::Create(M.getContext(),"entry", New);
 	IRBuilder<> Builder(Entry);
@@ -611,13 +611,13 @@ bool FreeAndDeleteRemoval::runOnModule(Module& M)
 	{
 		for (const Function& f: M)
 		{
-                        if (f.getSection() == StringRef("asmjs") &&
-                            !(&f == cheerp::getFunctionMaybeAliased(M, "free") ||
-                              cheerp::isFreeFunctionName(f.getName()))) {
-                                isAllGenericJS = false;
+			if (f.getSection() == StringRef("asmjs") &&
+			    !(&f == cheerp::getFunctionMaybeAliased(M, "free") ||
+			      cheerp::isFreeFunctionName(f.getName()))) {
+				isAllGenericJS = false;
 				break;
-                        }
-                }
+			}
+		}
 	}
 
 	std::vector<Use*> usesToBeReplaced;
@@ -662,15 +662,15 @@ bool FreeAndDeleteRemoval::runOnModule(Module& M)
 				}
 				else if (Constant* c = dyn_cast<Constant>(Usr))
 				{
-                                        if (isa<Function>(U.get()) &&
-                                            (cast<Function>(U.get()) == cheerp::getFunctionMaybeAliased(M, "free") ||
-                                             cheerp::isFreeFunctionName(
-                                                 cast<Function>(U.get())
-                                                     ->getName()))) {
-                                                usesToBeReplaced.push_back(&U);
+					if (isa<Function>(U.get()) &&
+					    (cast<Function>(U.get()) == cheerp::getFunctionMaybeAliased(M, "free") ||
+					     cheerp::isFreeFunctionName(
+						 cast<Function>(U.get())
+						     ->getName()))) {
+						usesToBeReplaced.push_back(&U);
 						Changed = true;
-                                        }
-                                }
+					}
+				}
 				else
 				{
 					U.set(getOrCreateGenericJSFree(M, isAllGenericJS));
@@ -726,10 +726,10 @@ bool FreeAndDeleteRemoval::runOnModule(Module& M)
 
 	if (!usesToBeReplaced.empty())
 	{
-                cheerp::replaceSomeUsesWith(usesToBeReplaced, getOrCreateGenericJSFree(M, isAllGenericJS));
+		cheerp::replaceSomeUsesWith(usesToBeReplaced, getOrCreateGenericJSFree(M, isAllGenericJS));
 	}
 
-        return Changed;
+	return Changed;
 }
 
 PreservedAnalyses FreeAndDeleteRemovalPass::run(Module& M, ModuleAnalysisManager& MAM)

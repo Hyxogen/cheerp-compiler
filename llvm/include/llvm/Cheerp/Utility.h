@@ -39,7 +39,7 @@ namespace cheerp
 const static int V8MaxLiteralDepth = 3;
 const static int V8MaxLiteralProperties = 8;
 
-inline llvm::GlobalValue* getNamedValuedMaybeAliased(const llvm::Module& module, llvm::StringRef name) {
+inline llvm::GlobalValue* getNamedValueMaybeAliased(const llvm::Module& module, llvm::StringRef name) {
 	llvm::GlobalValue* val = module.getNamedValue(name);
 
 	if (llvm::GlobalAlias* alias = llvm::dyn_cast_if_present<llvm::GlobalAlias>(val)) {
@@ -49,7 +49,7 @@ inline llvm::GlobalValue* getNamedValuedMaybeAliased(const llvm::Module& module,
 }
 
 inline llvm::Function* getFunctionMaybeAliased(const llvm::Module& module, llvm::StringRef name) {
-	return llvm::dyn_cast_if_present<llvm::Function>(getNamedValuedMaybeAliased(module, name));
+	return llvm::dyn_cast_if_present<llvm::Function>(getNamedValueMaybeAliased(module, name));
 }
 
 bool isNopCast(const llvm::Value* val);
