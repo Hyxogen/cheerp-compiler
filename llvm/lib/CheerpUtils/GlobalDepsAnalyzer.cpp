@@ -136,27 +136,28 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 	assert(DL);
 	VisitedSet visited;
 
-        GlobalAlias *mallocAlias = module.getNamedAlias("malloc");
-        if (mallocAlias) {
-          Function* actualMalloc = getFunctionMaybeAliased(module, "malloc");
+	GlobalAlias *mallocAlias = module.getNamedAlias("malloc");
+	if (mallocAlias) {
+		Function *actualMalloc =
+		    getFunctionMaybeAliased(module, "malloc");
 
-          assert(actualMalloc);
+		assert(actualMalloc);
 
-          mallocAlias->replaceAllUsesWith(actualMalloc);
-          //mallocAlias->dropAllReferences();
-          mallocAlias->eraseFromParent();
+		mallocAlias->replaceAllUsesWith(actualMalloc);
+		// mallocAlias->dropAllReferences();
+		mallocAlias->eraseFromParent();
 
-          ValueToValueMapTy VMap;
-          Function *newMalloc = CloneFunction(actualMalloc, VMap);
-          newMalloc->setName("malloc");
-          newMalloc->setSection(actualMalloc->getSection());
+		ValueToValueMapTy VMap;
+		Function *newMalloc = CloneFunction(actualMalloc, VMap);
+		newMalloc->setName("malloc");
+		newMalloc->setSection(actualMalloc->getSection());
 
-          actualMalloc->replaceAllUsesWith(newMalloc);
-          /*
-          actualMalloc->dropAllReferences();
-          delete actualMalloc;*/
-          //actualMalloc->eraseFromParent();
-        }
+		actualMalloc->replaceAllUsesWith(newMalloc);
+		/*
+		actualMalloc->dropAllReferences();
+		delete actualMalloc;*/
+		// actualMalloc->eraseFromParent();
+	}
 
 	// Replace the aliases with the actual values
 	for (auto& a: make_early_inc_range(module.aliases()))
@@ -164,7 +165,7 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 
 		// Not really sure about putting this here, since this will not
 		// allow for optimizing a unit individually
-                a.replaceAllUsesWith(a.getAliasee());
+		a.replaceAllUsesWith(a.getAliasee());
 
 		auto name = a.getName();
 		// We can't just remove these aliases, since they might be used in other optimization passes
