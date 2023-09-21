@@ -25,6 +25,7 @@
 #include "llvm/IR/ValueSymbolTable.h"
 #include "llvm/Support/FormattedStream.h"
 #include "llvm/Transforms/Utils/Local.h"
+#include "llvm/Transforms/Utils/BuildLibCalls.h"
 #include "llvm/Transforms/Utils/SimplifyLibCalls.h"
 #include "llvm/ADT/Triple.h"
 
@@ -222,6 +223,11 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 						{
 							Function* F = cheerp::getFunctionMaybeAliased(module, "malloc");
 							assert(F);
+
+							FunctionAnalysisManager& FAM = MAM->getResult<FunctionAnalysisManagerModuleProxy>(module).getManager();
+							const llvm::TargetLibraryInfo* TLI = &FAM.getResult<TargetLibraryAnalysis>(*F);
+							inferNonMandatoryLibFuncAttrs(*F, LibFunc_malloc, *TLI);
+
 							Type* oldType = ci->getType();
 							if(oldType != F->getReturnType())
 							{
