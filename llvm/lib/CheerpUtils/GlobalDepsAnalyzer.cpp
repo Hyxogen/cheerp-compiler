@@ -581,7 +581,6 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 		}
 	}
 
-	assert(!verifyModule(module, &errs()));
 	DenseSet<const Function*> droppedMathBuiltins;
 
 	// Drop the code for math functions that will be replaced by builtins
@@ -667,7 +666,6 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 	// Flush out all functions
 	processEnqueuedFunctions();
 
-	assert(!verifyModule(module, &errs()));
 	if(mayNeedAsmJSFree)
 	{
 		Function* ffree = cheerp::getFunctionMaybeAliased(module, "free");
@@ -768,7 +766,6 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 		}
 	};
 
-	//assert(!verifyModule(module, &errs()));
 	// Mark the __wasm_nullptr as reachable.
 	llvm::Function* wasmNullptr = module.getFunction(StringRef(wasmNullptrName));
 	markAsReachableIfPresent(wasmNullptr);
@@ -782,9 +779,7 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 		markAsReachableIfPresent(module.getFunction("__udivti3"));
 	}
 
-	//assert(!verifyModule(module, &errs()));
 	NumRemovedGlobals = filterModule(droppedMathBuiltins, module);
-	assert(!verifyModule(module, &errs()));
 
 	if(hasUndefinedSymbolErrors)
 		llvm::report_fatal_error("Strict linking enabled and undefined symbols found");
@@ -821,7 +816,6 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 			hasBuiltin[BuiltinInstr::ABS_F] = true;
 		}
 	}
-	assert(!verifyModule(module, &errs()));
 
 	//Build the map of existing functions types that are called indirectly to their representative (or nullptr if multiple representative exist)
 	struct FunctionData
@@ -855,7 +849,6 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 		return true;
 	};
 
-	assert(!verifyModule(module, &errs()));
 	std::vector<Function*> toUnreachable;
 	std::unordered_map<FunctionType*, IndirectFunctionsData, LinearMemoryHelper::FunctionSignatureHash, LinearMemoryHelper::FunctionSignatureCmp>
 		validIndirectCallTypesMap(10, LinearMemoryHelper::FunctionSignatureHash(/*isStrict*/!llcPass), LinearMemoryHelper::FunctionSignatureCmp(/*isStrict*/!llcPass));
@@ -898,7 +891,6 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 			continue;
 		validIndirectCallTypesMap[F.getFunctionType()].funcs.emplace_back(&F, hasDirectUse);
 	}
-	assert(!verifyModule(module, &errs()));
 
 	//Check agains the previous set what CallInstruction are actually impossible (and remove them)
 	std::vector<llvm::CallBase*> unreachList;
@@ -968,7 +960,6 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 			}
 		}
 	}
-	assert(!verifyModule(module, &errs()));
 
 	//Loop over every possible call site (either direct or indirect that matches the signature)
 	//and check whether it happens to be that a given argument is always the same global (while skipping over UndefValues)
@@ -1072,7 +1063,6 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 			}
 		}
 	}
-	assert(!verifyModule(module, &errs()));
 
 	std::unordered_set<llvm::Function*> modifiedFunctions;
 
@@ -1121,7 +1111,6 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 			toBeSubstitutedIndirectUses.push_back(&F);
 		}
 	}
-	assert(!verifyModule(module, &errs()));
 
 	for (Function* F : toBeSubstitutedIndirectUses)
 	{
