@@ -135,16 +135,16 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 	for (auto& a: make_early_inc_range(module.aliases()))
 	{
 
-                // Not really sure about putting this here, since this will not
-                // allow for optimizing a unit individually
-                a.replaceAllUsesWith( a.getAliasee() );
+		// Not really sure about putting this here, since this will not
+		// allow for optimizing a unit individually
+		a.replaceAllUsesWith( a.getAliasee() );
 
-                auto name = a.getName();
-                // We can't just remove these aliases, since they might be used in other optimization passes
-                if (name == StringRef("malloc") ||
-                    name == StringRef("realloc") || name == StringRef("free") ||
-                    name == StringRef("calloc"))
-                        continue;
+		auto name = a.getName();
+		// We can't just remove these aliases, since they might be used in other optimization passes
+		if (name == StringRef("malloc") ||
+		    name == StringRef("realloc") || name == StringRef("free") ||
+		    name == StringRef("calloc"))
+			continue;
 		a.eraseFromParent();
 	}
 
@@ -311,7 +311,7 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 						Instruction* andNegX = BinaryOperator::CreateAnd(X, negateX, "cttz_and", ci);
 						Instruction* ctlz = CallInst::Create(Intrinsic::getDeclaration(&module, Intrinsic::ctlz, {t}), {andNegX, ci->getOperand(1)}, "cttz_call", ci);
 						Instruction* sub = BinaryOperator::CreateSub(bitWidthMin1, ctlz, "cttz_sub", ci);
-                                                Instruction* cmp = ICmpInst::Create(Instruction::ICmp, ICmpInst::ICMP_NE, ConstantInt::get(t, 0), ci->getOperand(0), "cttz_cmp", ci);
+						Instruction* cmp = ICmpInst::Create(Instruction::ICmp, ICmpInst::ICMP_NE, ConstantInt::get(t, 0), ci->getOperand(0), "cttz_cmp", ci);
 						Instruction* res = SelectInst::Create(cmp, sub, bitWidth, "cttz_select", ci);
 
 						ci->replaceAllUsesWith(res);
@@ -675,20 +675,20 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 		{
 			if(!hasAsmJSMalloc)
 			{
-                                //  The symbol is still used around, so keep it
-                                //  but make it empty
+				//  The symbol is still used around, so keep it
+				//  but make it empty
 
-                                ffree->deleteBody();
+				ffree->deleteBody();
 
-                                // We can't just only remove the body, since
-                                // free might be an alias, and LLVM doesn't like
-                                // it when an alias doesn't have a definition
-                                BasicBlock *FreeEntry = BasicBlock::Create(
-                                    module.getContext(), "entry", ffree);
-                                IRBuilder<> FreeBuilder(FreeEntry);
-                                FreeBuilder.CreateRetVoid();
+				// We can't just only remove the body, since
+				// free might be an alias, and LLVM doesn't like
+				// it when an alias doesn't have a definition
+				BasicBlock *FreeEntry = BasicBlock::Create(
+				    module.getContext(), "entry", ffree);
+				IRBuilder<> FreeBuilder(FreeEntry);
+				FreeBuilder.CreateRetVoid();
 
-                                asmJSExportedFuncions.erase(ffree);
+				asmJSExportedFuncions.erase(ffree);
 				Function* jsfree = module.getFunction("__genericjs__free");
 				// For jsfree, keep an empty body (could still be called if we don't run lto)
 				if (jsfree)
@@ -701,7 +701,7 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 			}
 			else
 			{
-                                hasAsmJSCode = true;
+				hasAsmJSCode = true;
 				asmJSExportedFuncions.insert(ffree);
 				externals.push_back(ffree);
 				// Visit free and friends
@@ -713,7 +713,7 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 		}
 	}
 
-        // If we are in opt, there is a chance that a following
+	// If we are in opt, there is a chance that a following
 	// pass will convert malloc into a calloc, so keep that if we keep malloc
 	if(!llcPass && hasAsmJSMalloc)
 	{
@@ -1208,11 +1208,11 @@ void GlobalDepsAnalyzer::visitGlobal( const GlobalValue * C, VisitedSet & visite
 			}
 			else
 			{
-                                if (F == cheerp::getFunctionMaybeAliased(*F->getParent(), "malloc")) {
+				if (F == cheerp::getFunctionMaybeAliased(*F->getParent(), "malloc")) {
 					hasAsmJSMalloc = true;
-                                }
-                                /*
-                          //Check if function is malloc function through weak alias
+				}
+				/*
+			  //Check if function is malloc function through weak alias
 				if (C->getName() == StringRef("malloc"))
 					hasAsmJSMalloc = true;*/
 
@@ -1414,7 +1414,7 @@ void GlobalDepsAnalyzer::visitFunction(const Function* F, VisitedSet& visited)
 						Function* fmalloc = ::cheerp::getFunctionMaybeAliased(*module, "malloc");
 						if (fmalloc)
 						{
-                                                        SubExprVec vec;
+							SubExprVec vec;
 							visitGlobal(fmalloc, visited, vec );
 							if(!isAsmJS)
 								asmJSExportedFuncions.insert(fmalloc);
@@ -1638,15 +1638,14 @@ bool GlobalDepsAnalyzer::isMathIntrinsic(const llvm::Function* F)
 int GlobalDepsAnalyzer::filterModule( const DenseSet<const Function*>& droppedMathBuiltins, Module & module )
 {
 	std::vector< llvm::GlobalValue * > eraseQueue;
-	
-	for (auto& a: make_early_inc_range(module.aliases()))
-	{
-          if (!isReachable(&a)) {
-            if (!isReachable(a.getAliaseeObject())) {
-              eraseQueue.push_back(&a);
-              a.removeFromParent();
-            }
-          }
+
+	for (auto &a : make_early_inc_range(module.aliases())) {
+		if (!isReachable(&a)) {
+			if (!isReachable(a.getAliaseeObject())) {
+				eraseQueue.push_back(&a);
+				a.removeFromParent();
+			}
+		}
 	}
 
 	// Detach all the global variables, and put the unused ones in the eraseQueue
@@ -1708,7 +1707,7 @@ int GlobalDepsAnalyzer::filterModule( const DenseSet<const Function*>& droppedMa
 		//NOTE yeah.. dropAllReferences is not virtual.
 		if ( Function * f = dyn_cast<Function>(var) )
 			f->dropAllReferences();
-                else
+		else
 			var->dropAllReferences();
 	}
 	
