@@ -30,20 +30,6 @@ using namespace cheerp;
 using namespace llvm;
 using namespace std;
 
-static Function* getFunctionYes(llvm::Module& module, StringRef name) {
-  GlobalAlias* alias = module.getNamedAlias(name);
-  if (alias)
-    return dyn_cast<Function>(alias->getAliaseeObject());
-  return module.getFunction(name);
-}
-
-static Function* getFunctionYes(const llvm::Module& module, StringRef name) {
-  GlobalAlias* alias = module.getNamedAlias(name);
-  if (alias)
-    return dyn_cast<Function>(alias->getAliaseeObject());
-  return module.getFunction(name);
-}
-
 //#define WASM_DUMP_SECTIONS 1
 //#define WASM_DUMP_SECTION_DATA 1
 //#define WASM_DUMP_METHODS 1
@@ -2551,21 +2537,21 @@ bool CheerpWasmWriter::compileInlineInstruction(WasmBuffer& code, const Instruct
 					case Intrinsic::cheerp_allocate_array:
 					{
 						skipFirstParam = true;
-						calledFunc = getFunctionYes(module, "malloc");
+						calledFunc = cheerp::getFunctionMaybeAliased(module, "malloc");
 						if (!calledFunc)
 							llvm::report_fatal_error("missing malloc definition");
 						break;
 					}
 					case Intrinsic::cheerp_reallocate:
 					{
-						calledFunc = getFunctionYes(module, "realloc");
+						calledFunc = cheerp::getFunctionMaybeAliased(module, "realloc");
 						if (!calledFunc)
 							llvm::report_fatal_error("missing realloc definition");
 						break;
 					}
 					case Intrinsic::cheerp_deallocate:
 					{
-						calledFunc = getFunctionYes(module, "free");
+						calledFunc = cheerp::getFunctionMaybeAliased(module, "free");
 						if (!calledFunc)
 							llvm::report_fatal_error("missing free definition");
 						break;

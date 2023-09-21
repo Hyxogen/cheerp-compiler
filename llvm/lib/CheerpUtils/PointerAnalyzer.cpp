@@ -25,20 +25,6 @@
 
 using namespace llvm;
 
-static Function* getFunctionYes(llvm::Module& module, StringRef name) {
-  GlobalAlias* alias = module.getNamedAlias(name);
-  if (alias)
-    return dyn_cast<Function>(alias->getAliaseeObject());
-  return module.getFunction(name);
-}
-
-static Function* getFunctionYes(const llvm::Module& module, StringRef name) {
-  GlobalAlias* alias = module.getNamedAlias(name);
-  if (alias)
-    return dyn_cast<Function>(alias->getAliaseeObject());
-  return module.getFunction(name);
-}
-
 namespace cheerp {
 
 PointerKindWrapper PointerKindWrapper::staticDefaultValue(COMPLETE_OBJECT);
@@ -954,7 +940,7 @@ PointerKindWrapper& PointerUsageVisitor::visitUse(PointerKindWrapper& ret, const
 			return ret |= pointerKindData.getConstraintPtr(IndirectPointerKindConstraint(INDIRECT_ARG_CONSTRAINT, typeAndIndex));
 		}
 
-		if (calledFunction == getFunctionYes(*calledFunction->getParent(), "free") || isFreeFunctionName(calledFunction->getName()))
+		if (calledFunction == cheerp::getFunctionMaybeAliased(*calledFunction->getParent(), "free") || isFreeFunctionName(calledFunction->getName()))
 		{
 			if (TypeSupport::isTypedArrayType(U->get()->getType()->getPointerElementType(), true))
 			{

@@ -46,20 +46,6 @@ using namespace llvm;
 using namespace std;
 using namespace cheerp;
 
-static Function* getFunctionYes(llvm::Module& module, StringRef name) {
-  GlobalAlias* alias = module.getNamedAlias(name);
-  if (alias)
-    return dyn_cast<Function>(alias->getAliaseeObject());
-  return module.getFunction(name);
-}
-
-static Function* getFunctionYes(const llvm::Module& module, StringRef name) {
-  GlobalAlias* alias = module.getNamedAlias(name);
-  if (alias)
-    return dyn_cast<Function>(alias->getAliaseeObject());
-  return module.getFunction(name);
-}
-
 //De-comment this to debug the pointer kind of every function
 //#define CHEERP_DEBUG_POINTERS
 
@@ -724,7 +710,7 @@ CheerpWriter::COMPILE_INSTRUCTION_FEEDBACK CheerpWriter::compileFree(const Value
 	if(!needsLinearCheck)
 		return COMPILE_EMPTY;
 
-	Function* Free = getFunctionYes(module, "free");
+	Function* Free = cheerp::getFunctionMaybeAliased(module, "free");
 	if (Free)
 		stream << getName(Free, 0) << '(';
 	else
@@ -1081,11 +1067,11 @@ CheerpWriter::COMPILE_INSTRUCTION_FEEDBACK CheerpWriter::handleBuiltinCall(const
 		compileOperand(*it);
 		return COMPILE_OK;
 	}
-	else if(func == getFunctionYes(module, "free") || cheerp::isFreeFunctionName(ident) || intrinsicId==Intrinsic::cheerp_deallocate)
+	else if(func == cheerp::getFunctionMaybeAliased(module, "free") || cheerp::isFreeFunctionName(ident) || intrinsicId==Intrinsic::cheerp_deallocate)
 	{
 		if (asmjs || TypeSupport::isAsmJSPointer((*it)->getType()))
 		{
-			Function* ffree = getFunctionYes(module, "free");
+			Function* ffree = cheerp::getFunctionMaybeAliased(module, "free");
 			if (!ffree)
 				llvm::report_fatal_error("missing free definition");
 			if (ffree->empty() && asmjs)
@@ -1431,7 +1417,7 @@ CheerpWriter::COMPILE_INSTRUCTION_FEEDBACK CheerpWriter::handleBuiltinCall(const
 	if ((func->getIntrinsicID()==Intrinsic::cheerp_allocate || func->getIntrinsicID()==Intrinsic::cheerp_allocate_array) &&
 	    (asmjs || TypeSupport::isAsmJSPointed(callV.getParamElementType(0))))
 	{
-		Function* fmalloc = getFunctionYes(module, "malloc");
+		Function* fmalloc = cheerp::getFunctionMaybeAliased(module, "malloc");
 		if (!fmalloc)
 			llvm::report_fatal_error("missing malloc definition");
 		stream << getName(fmalloc, 0) << "(";
@@ -1441,7 +1427,7 @@ CheerpWriter::COMPILE_INSTRUCTION_FEEDBACK CheerpWriter::handleBuiltinCall(const
 	}
 	else if (asmjs && func->getIntrinsicID()==Intrinsic::cheerp_reallocate && (asmjs || TypeSupport::isAsmJSPointed(callV.getParamElementType(0))))
 	{
-		Function* frealloc = getFunctionYes(module, "realloc");
+		Function* frealloc = cheerp::getFunctionMaybeAliased(module, "realloc");
 		if (!frealloc)
 			llvm::report_fatal_error("missing realloc definition");
 		stream << getName(frealloc, 0) <<'(';

@@ -39,20 +39,6 @@ STATISTIC(NumAllocasTransformedToArrays, "Number of allocas of values transforme
 namespace cheerp {
 using namespace llvm;
 
-static Function* getFunctionYes(llvm::Module& module, StringRef name) {
-  GlobalAlias* alias = module.getNamedAlias(name);
-  if (alias)
-    return dyn_cast<Function>(alias->getAliaseeObject());
-  return module.getFunction(name);
-}
-
-static Function* getFunctionYes(const llvm::Module& module, StringRef name) {
-  GlobalAlias* alias = module.getNamedAlias(name);
-  if (alias)
-    return dyn_cast<Function>(alias->getAliaseeObject());
-  return module.getFunction(name);
-}
-
 /**
  * Collection of passes whose sole purpose is to help
  * the pointer analyzer generate better code
@@ -577,7 +563,7 @@ void FreeAndDeleteRemoval::deleteInstructionAndUnusedOperands(Instruction* I)
 
 static Function* getOrCreateGenericJSFree(Module& M, bool isAllGenericJS)
 {
-	Function* Orig = getFunctionYes(M, "free");
+	Function* Orig = cheerp::getFunctionMaybeAliased(M, "free");
 	assert(Orig);
 	FunctionType* Ty = Orig->getFunctionType();
 	Function* New = cast<Function>(M.getOrInsertFunction("__genericjs__free", Ty).getCallee());
@@ -620,13 +606,13 @@ bool FreeAndDeleteRemoval::runOnModule(Module& M)
 	bool Changed = false;
 
 	isAllGenericJS = true;
-	bool hasFree = getFunctionYes(M, "free") != nullptr;
+	bool hasFree = cheerp::getFunctionMaybeAliased(M, "free") != nullptr;
 	if(hasFree)
 	{
 		for (const Function& f: M)
 		{
                         if (f.getSection() == StringRef("asmjs") &&
-                            !(&f == getFunctionYes(M, "free") ||
+                            !(&f == cheerp::getFunctionMaybeAliased(M, "free") ||
                               cheerp::isFreeFunctionName(f.getName()))) {
                                 isAllGenericJS = false;
 				break;
@@ -637,7 +623,7 @@ bool FreeAndDeleteRemoval::runOnModule(Module& M)
 	std::vector<Use*> usesToBeReplaced;
 	for (Function& f: M)
 	{
-		if (&f == getFunctionYes(M, "free") || cheerp::isFreeFunctionName(f.getName()))
+		if (&f == cheerp::getFunctionMaybeAliased(M, "free") || cheerp::isFreeFunctionName(f.getName()))
 		{
 			auto UI = f.use_begin(), E = f.use_end();
 			for (; UI != E;)
@@ -677,7 +663,7 @@ bool FreeAndDeleteRemoval::runOnModule(Module& M)
 				else if (Constant* c = dyn_cast<Constant>(Usr))
 				{
                                         if (isa<Function>(U.get()) &&
-                                            (cast<Function>(U.get()) == getFunctionYes(M, "free") ||
+                                            (cast<Function>(U.get()) == cheerp::getFunctionMaybeAliased(M, "free") ||
                                              cheerp::isFreeFunctionName(
                                                  cast<Function>(U.get())
                                                      ->getName()))) {

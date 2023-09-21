@@ -34,20 +34,6 @@ using namespace llvm;
 
 STATISTIC(NumRemovedGlobals, "Number of unused globals which have been removed");
 
-static Function* getFunctionYes(llvm::Module& module, StringRef name) {
-  GlobalAlias* alias = module.getNamedAlias(name);
-  if (alias)
-    return dyn_cast<Function>(alias->getAliaseeObject());
-  return module.getFunction(name);
-}
-
-static Function* getFunctionYes(const llvm::Module& module, StringRef name) {
-  GlobalAlias* alias = module.getNamedAlias(name);
-  if (alias)
-    return dyn_cast<Function>(alias->getAliaseeObject());
-  return module.getFunction(name);
-}
-
 namespace cheerp {
 
 using namespace std;
@@ -233,7 +219,7 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 					{
 						if(II == Intrinsic::cheerp_allocate)
 						{
-							Function* F = getFunctionYes(module, "malloc");
+							Function* F = cheerp::getFunctionMaybeAliased(module, "malloc");
 							assert(F);
 							Type* oldType = ci->getType();
 							if(oldType != F->getReturnType())
@@ -257,7 +243,7 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 						}
 						else if(II == Intrinsic::cheerp_reallocate)
 						{
-							Function* F = getFunctionYes(module, "realloc");
+							Function* F = cheerp::getFunctionMaybeAliased(module, "realloc");
 							assert(F);
 							Type* oldType = ci->getType();
 							if(oldType != F->getReturnType())
@@ -274,7 +260,7 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 						}
 						else if(II == Intrinsic::cheerp_deallocate)
 						{
-							Function* F = getFunctionYes(module, "free");
+							Function* F = cheerp::getFunctionMaybeAliased(module, "free");
 							assert(F);
 							ci->setCalledFunction(F);
 							Type* oldType = ci->getOperand(0)->getType();
@@ -683,7 +669,7 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 	assert(!verifyModule(module, &errs()));
 	if(mayNeedAsmJSFree)
 	{
-		Function* ffree = getFunctionYes(module, "free");
+		Function* ffree = cheerp::getFunctionMaybeAliased(module, "free");
 		if (ffree)
 		{
 			if(!hasAsmJSMalloc)
@@ -737,7 +723,7 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 	// pass will convert malloc into a calloc, so keep that if we keep malloc
 	if(!llcPass && hasAsmJSMalloc)
 	{
-		Function* fcalloc = getFunctionYes(module, "calloc");
+		Function* fcalloc = cheerp::getFunctionMaybeAliased(module, "calloc");
 		if (fcalloc)
 		{
 			asmJSExportedFuncions.insert(fcalloc);
@@ -1220,7 +1206,7 @@ void GlobalDepsAnalyzer::visitGlobal( const GlobalValue * C, VisitedSet & visite
 		}
 		else if (const Function * F = dyn_cast<Function>(C) )
 		{
-			if (F == getFunctionYes(*F->getParent(), "free") || isFreeFunctionName(C->getName()))
+			if (F == cheerp::getFunctionMaybeAliased(*F->getParent(), "free") || isFreeFunctionName(C->getName()))
 			{
 				// Don't visit free right now. We do it only if
 				// actyally needed at the end
@@ -1228,7 +1214,7 @@ void GlobalDepsAnalyzer::visitGlobal( const GlobalValue * C, VisitedSet & visite
 			}
 			else
 			{
-                                if (F == getFunctionYes(*F->getParent(), "malloc")) {
+                                if (F == cheerp::getFunctionMaybeAliased(*F->getParent(), "malloc")) {
 					hasAsmJSMalloc = true;
                                 }
                                 /*
@@ -1431,7 +1417,7 @@ void GlobalDepsAnalyzer::visitFunction(const Function* F, VisitedSet& visited)
 				{
 					if (isAsmJS || TypeSupport::isAsmJSPointed(ci.getParamElementType(0)))
 					{
-						Function* fmalloc = ::getFunctionYes(*module, "malloc");
+						Function* fmalloc = ::cheerp::getFunctionMaybeAliased(*module, "malloc");
 						if (fmalloc)
 						{
                                                         SubExprVec vec;
@@ -1447,7 +1433,7 @@ void GlobalDepsAnalyzer::visitFunction(const Function* F, VisitedSet& visited)
 				{
 					if (isAsmJS || TypeSupport::isAsmJSPointed(ci.getParamElementType(0)))
 					{
-						Function* frealloc = getFunctionYes(*module, "realloc");
+						Function* frealloc = cheerp::getFunctionMaybeAliased(*module, "realloc");
 						if (frealloc)
 						{
 							SubExprVec vec;
