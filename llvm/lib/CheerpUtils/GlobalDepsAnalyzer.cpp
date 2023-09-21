@@ -1195,7 +1195,7 @@ void GlobalDepsAnalyzer::visitGlobal( const GlobalValue * C, VisitedSet & visite
 		}
 		else if (const Function * F = dyn_cast<Function>(C) )
 		{
-			if (F == cheerp::getFunctionMaybeAliased(*F->getParent(), "free") || isFreeFunctionName(C->getName()))
+			if (cheerp::isFreeFunction(*F->getParent(), F))
 			{
 				// Don't visit free right now. We do it only if
 				// actyally needed at the end

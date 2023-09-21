@@ -266,9 +266,17 @@ bool hasNonLoadStoreUses(const llvm::Value* v);
 llvm::Type* getGEPContainerType(const llvm::User* gep);
 
 // CHEERP: TODO remove this
-[[deprecated("free might be a alias")]] inline bool isFreeFunctionName(llvm::StringRef name)
+[[deprecated("free might be an alias")]] inline bool isFreeFunctionName(llvm::StringRef name)
 {
 	return name=="free" || name=="_ZdlPv" || name=="_ZdaPv";
+}
+
+inline bool isFreeFunction(const llvm::Module& module, const llvm::Function* F) {
+	auto name = F->getName();
+	if (name =="free" || name=="_ZdlPv" || name=="_ZdaPv") {
+		return true;
+	}
+	return F == getFunctionMaybeAliased(module, "free");
 }
 
 struct LoopWithDepth

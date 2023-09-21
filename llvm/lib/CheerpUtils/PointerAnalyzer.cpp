@@ -940,7 +940,7 @@ PointerKindWrapper& PointerUsageVisitor::visitUse(PointerKindWrapper& ret, const
 			return ret |= pointerKindData.getConstraintPtr(IndirectPointerKindConstraint(INDIRECT_ARG_CONSTRAINT, typeAndIndex));
 		}
 
-		if (calledFunction == cheerp::getFunctionMaybeAliased(*calledFunction->getParent(), "free") || isFreeFunctionName(calledFunction->getName()))
+		if (isFreeFunction(*calledFunction->getParent(), calledFunction))
 		{
 			if (TypeSupport::isTypedArrayType(U->get()->getType()->getPointerElementType(), true))
 			{

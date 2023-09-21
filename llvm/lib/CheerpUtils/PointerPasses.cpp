@@ -612,8 +612,7 @@ bool FreeAndDeleteRemoval::runOnModule(Module& M)
 		for (const Function& f: M)
 		{
 			if (f.getSection() == StringRef("asmjs") &&
-			    !(&f == cheerp::getFunctionMaybeAliased(M, "free") ||
-			      cheerp::isFreeFunctionName(f.getName()))) {
+			    !cheerp::isFreeFunction(M, &f)) {
 				isAllGenericJS = false;
 				break;
 			}
@@ -623,7 +622,7 @@ bool FreeAndDeleteRemoval::runOnModule(Module& M)
 	std::vector<Use*> usesToBeReplaced;
 	for (Function& f: M)
 	{
-		if (&f == cheerp::getFunctionMaybeAliased(M, "free") || cheerp::isFreeFunctionName(f.getName()))
+		if (cheerp::isFreeFunction(M, &f))
 		{
 			auto UI = f.use_begin(), E = f.use_end();
 			for (; UI != E;)
@@ -663,10 +662,8 @@ bool FreeAndDeleteRemoval::runOnModule(Module& M)
 				else if (Constant* c = dyn_cast<Constant>(Usr))
 				{
 					if (isa<Function>(U.get()) &&
-					    (cast<Function>(U.get()) == cheerp::getFunctionMaybeAliased(M, "free") ||
-					     cheerp::isFreeFunctionName(
-						 cast<Function>(U.get())
-						     ->getName()))) {
+					    cheerp::isFreeFunction(
+						M, cast<Function>(U.get()))) {
 						usesToBeReplaced.push_back(&U);
 						Changed = true;
 					}
