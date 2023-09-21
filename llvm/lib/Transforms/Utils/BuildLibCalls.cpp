@@ -262,11 +262,7 @@ bool llvm::inferNonMandatoryLibFuncAttrs(Function &F,
   LibFunc TheLibFunc;
   if (!(TLI.getLibFunc(F, TheLibFunc) && TLI.has(TheLibFunc)))
     return false;
-  return inferNonMandatoryLibFuncAttrs(F, TheLibFunc, TLI);
-}
 
-bool llvm::inferNonMandatoryLibFuncAttrs(Function &F, LibFunc TheLibFunc,
-                                         const TargetLibraryInfo &TLI) {
   bool Changed = false;
 
   if (F.getParent() != nullptr && F.getParent()->getRtLibUseGOT())

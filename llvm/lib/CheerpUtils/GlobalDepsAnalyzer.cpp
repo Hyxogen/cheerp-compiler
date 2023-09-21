@@ -26,6 +26,7 @@
 #include "llvm/Support/FormattedStream.h"
 #include "llvm/Transforms/Utils/Local.h"
 #include "llvm/Transforms/Utils/BuildLibCalls.h"
+#include "llvm/Transforms/Utils/Cloning.h"
 #include "llvm/Transforms/Utils/SimplifyLibCalls.h"
 #include "llvm/ADT/Triple.h"
 
@@ -124,6 +125,9 @@ void GlobalDepsAnalyzer::extendLifetime(Function* F)
 	visitGlobal( F, visited, vec );
 	assert( visited.empty() );
 }
+struct Mapper : public ValueMapTypeRemapper {
+        Type *remapType(Type *T) override { return T; }
+};
 
 bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 {
@@ -132,13 +136,35 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 	assert(DL);
 	VisitedSet visited;
 
+        GlobalAlias *mallocAlias = module.getNamedAlias("malloc");
+        if (mallocAlias) {
+          Function* actualMalloc = getFunctionMaybeAliased(module, "malloc");
+
+          assert(actualMalloc);
+
+          mallocAlias->replaceAllUsesWith(actualMalloc);
+          //mallocAlias->dropAllReferences();
+          mallocAlias->eraseFromParent();
+
+          ValueToValueMapTy VMap;
+          Function *newMalloc = CloneFunction(actualMalloc, VMap);
+          newMalloc->setName("malloc");
+          newMalloc->setSection(actualMalloc->getSection());
+
+          actualMalloc->replaceAllUsesWith(newMalloc);
+          /*
+          actualMalloc->dropAllReferences();
+          delete actualMalloc;*/
+          //actualMalloc->eraseFromParent();
+        }
+
 	// Replace the aliases with the actual values
 	for (auto& a: make_early_inc_range(module.aliases()))
 	{
 
 		// Not really sure about putting this here, since this will not
 		// allow for optimizing a unit individually
-		a.replaceAllUsesWith( a.getAliasee() );
+                a.replaceAllUsesWith(a.getAliasee());
 
 		auto name = a.getName();
 		// We can't just remove these aliases, since they might be used in other optimization passes
@@ -221,7 +247,30 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 					{
 						if(II == Intrinsic::cheerp_allocate)
 						{
-							Function* F = cheerp::getFunctionMaybeAliased(module, "malloc");
+							//cheerp_allocate(nullptr, N) -> malloc(N), so we need to move argument(1) to argument(0)
+							IRBuilder<> Builder(ci);
+							FunctionAnalysisManager& FAM = MAM->getResult<FunctionAnalysisManagerModuleProxy>(module).getManager();
+							const llvm::TargetLibraryInfo* TLI = &FAM.getResult<TargetLibraryAnalysis>(F);
+							assert(TLI);
+							Value* newCall = emitMalloc(ci->getOperand(1), Builder, *DL, TLI);
+							Type* oldType = ci->getType();
+							if(oldType != newCall->getType())
+							{
+								Instruction* newCast = new BitCastInst(UndefValue::get(newCall->getType()), oldType, "", ci->getNextNode());
+								ci->replaceAllUsesWith(newCast);
+								ci->mutateType(newCall->getType());
+								newCast->setOperand(0, ci);
+							}
+							ci->replaceAllUsesWith(newCall);
+
+							//Set up loop variable, so the next loop will check and possibly expand newCall
+							--instructionIterator;
+							advance = false;
+							assert(&*instructionIterator == newCall);
+
+							ci->eraseFromParent();
+							continue;
+							/*Function* F = cheerp::getFunctionMaybeAliased(module, "malloc");
 							assert(F);
 
 							FunctionAnalysisManager& FAM = MAM->getResult<FunctionAnalysisManagerModuleProxy>(module).getManager();
@@ -246,7 +295,7 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 							assert(&*instructionIterator == newCall);
 
 							ci->eraseFromParent();
-							continue;
+							continue;*/
 						}
 						else if(II == Intrinsic::cheerp_reallocate)
 						{

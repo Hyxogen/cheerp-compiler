@@ -31,7 +31,6 @@ namespace llvm {
   bool inferNonMandatoryLibFuncAttrs(Module *M, StringRef Name,
                                      const TargetLibraryInfo &TLI);
   bool inferNonMandatoryLibFuncAttrs(Function &F, const TargetLibraryInfo &TLI);
-  bool inferNonMandatoryLibFuncAttrs(Function &F, LibFunc TheLibFunc, const TargetLibraryInfo &TLI);
 
   /// Calls getOrInsertFunction() and then makes sure to add mandatory
   /// argument attributes.
