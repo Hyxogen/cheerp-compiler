@@ -1211,10 +1211,6 @@ void GlobalDepsAnalyzer::visitGlobal( const GlobalValue * C, VisitedSet & visite
 				if (F == cheerp::getFunctionMaybeAliased(*F->getParent(), "malloc")) {
 					hasAsmJSMalloc = true;
 				}
-				/*
-			  //Check if function is malloc function through weak alias
-				if (C->getName() == StringRef("malloc"))
-					hasAsmJSMalloc = true;*/
 
 				if (C->getSection() == StringRef("asmjs"))
 				{
