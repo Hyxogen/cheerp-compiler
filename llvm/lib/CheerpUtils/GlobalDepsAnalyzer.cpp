@@ -140,6 +140,7 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
                 a.replaceAllUsesWith( a.getAliasee() );
 
                 auto name = a.getName();
+                // We can't just remove these aliases, since they might be used in other optimization passes
                 if (name == StringRef("malloc") ||
                     name == StringRef("realloc") || name == StringRef("free") ||
                     name == StringRef("calloc"))
