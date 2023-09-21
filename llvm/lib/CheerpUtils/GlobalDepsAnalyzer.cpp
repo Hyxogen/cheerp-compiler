@@ -125,9 +125,6 @@ void GlobalDepsAnalyzer::extendLifetime(Function* F)
 	visitGlobal( F, visited, vec );
 	assert( visited.empty() );
 }
-struct Mapper : public ValueMapTypeRemapper {
-        Type *remapType(Type *T) override { return T; }
-};
 
 bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 {
