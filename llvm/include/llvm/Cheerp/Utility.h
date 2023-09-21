@@ -40,16 +40,16 @@ const static int V8MaxLiteralDepth = 3;
 const static int V8MaxLiteralProperties = 8;
 
 inline llvm::GlobalValue* getNamedValuedMaybeAliased(const llvm::Module& module, llvm::StringRef name) {
-  llvm::GlobalValue* val = module.getNamedValue(name);
+	llvm::GlobalValue* val = module.getNamedValue(name);
 
-  if (llvm::GlobalAlias* alias = llvm::dyn_cast_if_present<llvm::GlobalAlias>(val)) {
-    return alias->getAliaseeObject();
-  }
-  return val;
+	if (llvm::GlobalAlias* alias = llvm::dyn_cast_if_present<llvm::GlobalAlias>(val)) {
+		return alias->getAliaseeObject();
+	}
+	return val;
 }
 
 inline llvm::Function* getFunctionMaybeAliased(const llvm::Module& module, llvm::StringRef name) {
-  return llvm::dyn_cast_if_present<llvm::Function>(getNamedValuedMaybeAliased(module, name));
+	return llvm::dyn_cast_if_present<llvm::Function>(getNamedValuedMaybeAliased(module, name));
 }
 
 bool isNopCast(const llvm::Value* val);
