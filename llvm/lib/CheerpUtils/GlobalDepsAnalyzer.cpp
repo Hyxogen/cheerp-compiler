@@ -144,7 +144,6 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 		assert(actualMalloc);
 
 		mallocAlias->replaceAllUsesWith(actualMalloc);
-		// mallocAlias->dropAllReferences();
 		mallocAlias->eraseFromParent();
 
 		ValueToValueMapTy VMap;
@@ -153,10 +152,6 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 		newMalloc->setSection(actualMalloc->getSection());
 
 		actualMalloc->replaceAllUsesWith(newMalloc);
-		/*
-		actualMalloc->dropAllReferences();
-		delete actualMalloc;*/
-		// actualMalloc->eraseFromParent();
 	}
 
 	// Replace the aliases with the actual values
