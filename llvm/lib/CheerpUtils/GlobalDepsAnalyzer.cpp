@@ -674,7 +674,6 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 		{
 			if(!hasAsmJSMalloc)
 			{
-                                //std::cout << "!hasAsmJSMalloc" << std::endl;
                                 //  The symbol is still used around, so keep it
                                 //  but make it empty
 
@@ -701,7 +700,6 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 			}
 			else
 			{
-                                //std::cout << "hasAsmJSMalloc" << std::endl;
                                 hasAsmJSCode = true;
 				asmJSExportedFuncions.insert(ffree);
 				externals.push_back(ffree);
@@ -711,13 +709,8 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 				reachableGlobals.insert(ffree);
 				reachableGlobals.insert(module.getNamedValue("free"));
 			}
-		} else {
-                        //std::cout << "!free" << std::endl;
-                }
-	} else {
-                //std::cout << "!mayNeedAsmJSFree" << std::endl;
-        }
-	//assert(!verifyModule(module, &errs()));
+		}
+	}
 
         // If we are in opt, there is a chance that a following
 	// pass will convert malloc into a calloc, so keep that if we keep malloc
@@ -1645,28 +1638,12 @@ int GlobalDepsAnalyzer::filterModule( const DenseSet<const Function*>& droppedMa
 {
 	std::vector< llvm::GlobalValue * > eraseQueue;
 	
-        //std::cout << "malloc reachable?: " << isReachable(module.getNamedValue("malloc")) << std::endl;
-        //std::cout << "realloc reachable?: " << isReachable(module.getNamedValue("realloc")) << std::endl;
-        //std::cout << "free reachable?: " << isReachable(module.getNamedValue("free")) << std::endl;
-        //std::cout << "calloc reachable?: " << isReachable(module.getNamedValue("calloc")) << std::endl;
-
-        //std::cout << "dlmalloc reachable?: " << isReachable(module.getNamedValue("dlmalloc")) << std::endl;
-        //std::cout << "dlrealloc reachable?: " << isReachable(module.getNamedValue("dlrealloc")) << std::endl;
-        //std::cout << "dlfree reachable?: " << isReachable(module.getNamedValue("dlfree")) << std::endl;
-        //std::cout << "dlcalloc reachable?: " << isReachable(module.getNamedValue("dlcalloc")) << std::endl;
-
 	for (auto& a: make_early_inc_range(module.aliases()))
 	{
           if (!isReachable(&a)) {
-            //auto name = a.getName();
-            //if (name == StringRef("malloc") || name == StringRef("
             if (!isReachable(a.getAliaseeObject())) {
               eraseQueue.push_back(&a);
               a.removeFromParent();
-            } else {
-              std::cout << "not deleting: " << a.getName().str()
-                        << " because aliasee still reachable: "
-                        << a.getAliaseeObject()->getName().str() << std::endl;
             }
           }
 	}
