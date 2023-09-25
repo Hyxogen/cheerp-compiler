@@ -2187,6 +2187,7 @@ void ModuleAddressSanitizer::InstrumentGlobalsWithMetadataArray(
   auto AllGlobals = new GlobalVariable(
       M, ArrayOfGlobalStructTy, false, GlobalVariable::InternalLinkage,
       ConstantArray::get(ArrayOfGlobalStructTy, MetadataInitializers), "");
+  AllGlobals->setSection("asmjs"); // CHEERPASAN: TODO only for cheerpwasm
   if (Mapping.Scale > 3)
     AllGlobals->setAlignment(Align(1ULL << Mapping.Scale));
 
@@ -2549,9 +2550,11 @@ void AddressSanitizer::initializeCallbacks(Module &M) {
       M.getOrInsertFunction(kAsanPtrCmp, IRB.getVoidTy(), IntptrTy, IntptrTy);
   AsanPtrSubFunction =
       M.getOrInsertFunction(kAsanPtrSub, IRB.getVoidTy(), IntptrTy, IntptrTy);
-  if (Mapping.InGlobal)
+  if (Mapping.InGlobal) {
     AsanShadowGlobal = M.getOrInsertGlobal("__asan_shadow",
                                            ArrayType::get(IRB.getInt8Ty(), 0));
+    cast<GlobalVariable>(AsanShadowGlobal)->setSection("asmjs"); // CHEERPASAN: TODO only for cheerpwasm
+  }
 
   AMDGPUAddressShared = M.getOrInsertFunction(
       kAMDGPUAddressSharedName, IRB.getInt1Ty(), IRB.getInt8PtrTy());

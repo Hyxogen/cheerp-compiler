@@ -66,6 +66,7 @@ GlobalVariable *llvm::createPrivateGlobalForString(Module &M, StringRef Str,
   GlobalVariable *GV =
       new GlobalVariable(M, StrConst->getType(), true,
                          GlobalValue::PrivateLinkage, StrConst, NamePrefix);
+  GV->setSection("asmjs"); // CHEERPASAN: TODO only for cheerpwasm
   if (AllowMerging)
     GV->setUnnamedAddr(GlobalValue::UnnamedAddr::Global);
   GV->setAlignment(Align(1)); // Strings may not be merged w/o setting
