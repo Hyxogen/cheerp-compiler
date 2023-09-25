@@ -14,6 +14,14 @@
 #ifndef SANITIZER_ATOMIC_CLANG_H
 #define SANITIZER_ATOMIC_CLANG_H
 
+#if SANITIZER_CHEERPWASM
+# include "interception/interception.h"
+# include <cstdint>
+# include <cstring>
+
+DECLARE_REAL(void*, memcpy, void*, const void*, size_t)
+#endif
+
 #if defined(__i386__) || defined(__x86_64__)
 # include "sanitizer_atomic_clang_x86.h"
 #else
@@ -35,32 +43,55 @@ namespace __sanitizer {
 // for mappings of the memory model to different processors.
 
 inline void atomic_signal_fence(memory_order) {
+#if SANITIZER_CHEERPWASM
+#else
   __asm__ __volatile__("" ::: "memory");
+#endif
 }
 
 inline void atomic_thread_fence(memory_order) {
+#if SANITIZER_CHEERPWASM
+#else
   __sync_synchronize();
+#endif
 }
 
 template<typename T>
 inline typename T::Type atomic_fetch_add(volatile T *a,
     typename T::Type v, memory_order mo) {
+#if SANITIZER_CHEERPWASM
+  typename T::Type prev = a->val_dont_use;
+  a->val_dont_use += v;
+  return a;
+#else
   (void)mo;
   DCHECK(!((uptr)a % sizeof(*a)));
   return __sync_fetch_and_add(&a->val_dont_use, v);
+#endif
 }
 
 template<typename T>
 inline typename T::Type atomic_fetch_sub(volatile T *a,
     typename T::Type v, memory_order mo) {
+#if SANITIZER_CHEERPWASM
+  typename T::Type prev = a->val_dont_use;
+  a->val_dont_use -= v;
+  return a;
+#else
   (void)mo;
   DCHECK(!((uptr)a % sizeof(*a)));
   return __sync_fetch_and_add(&a->val_dont_use, -v);
+#endif
 }
 
 template<typename T>
 inline typename T::Type atomic_exchange(volatile T *a,
     typename T::Type v, memory_order mo) {
+#if SANITIZER_CHEERPWASM
+  typename T::Type prev = a->val_dont_use;
+  a->val_dont_use = v;
+  return prev;
+#else
   DCHECK(!((uptr)a % sizeof(*a)));
   if (mo & (memory_order_release | memory_order_acq_rel | memory_order_seq_cst))
     __sync_synchronize();
@@ -68,18 +99,30 @@ inline typename T::Type atomic_exchange(volatile T *a,
   if (mo == memory_order_seq_cst)
     __sync_synchronize();
   return v;
+#endif
 }
 
 template <typename T>
 inline bool atomic_compare_exchange_strong(volatile T *a, typename T::Type *cmp,
                                            typename T::Type xchg,
                                            memory_order mo) {
+#if SANITIZER_CHEERPWASM
+  typename T::Type* aptr = const_cast<typename T::Type*>(&a->val_dont_use);
+  if (memcmp(aptr, cmp, sizeof a->val_dont_use) == 0) {
+    REAL(memcpy)(aptr, &xchg, sizeof a->val_dont_use);
+    return true;
+  } else {
+    REAL(memcpy)(cmp, aptr, sizeof a->val_dont_use);
+    return false;
+  }
+#else
   // Transitioned from __sync_val_compare_and_swap to support targets like
   // SPARC V8 that cannot inline atomic cmpxchg.  __atomic_compare_exchange
   // can then be resolved from libatomic.  __ATOMIC_SEQ_CST is used to best
   // match the __sync builtin memory order.
   return __atomic_compare_exchange(&a->val_dont_use, cmp, &xchg, false,
                                    __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+#endif
 }
 
 template<typename T>
