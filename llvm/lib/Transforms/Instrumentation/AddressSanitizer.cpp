@@ -2186,7 +2186,7 @@ void ModuleAddressSanitizer::InstrumentGlobalsWithMetadataArray(
       ArrayType::get(MetadataInitializers[0]->getType(), N);
   auto AllGlobals = new GlobalVariable(
       M, ArrayOfGlobalStructTy, false, GlobalVariable::InternalLinkage,
-      ConstantArray::get(ArrayOfGlobalStructTy, MetadataInitializers), "");
+      ConstantArray::get(ArrayOfGlobalStructTy, MetadataInitializers), "__asan_all_globals");
   AllGlobals->setSection("asmjs"); // CHEERPASAN: TODO only for cheerpwasm
   if (Mapping.Scale > 3)
     AllGlobals->setAlignment(Align(1ULL << Mapping.Scale));
