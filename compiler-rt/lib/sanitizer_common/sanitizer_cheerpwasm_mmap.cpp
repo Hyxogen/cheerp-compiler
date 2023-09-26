@@ -52,13 +52,17 @@ public:
 static Page pages[WASM_MAX_PAGES];
 static uptr max_page_count = 0;
 
+static uptr PageCount() {
+  return sizeof(pages) / sizeof(pages[0]);
+}
+
 static uptr FindPages(uptr start, uptr page_count) {
   CHECK_LT(start, page_count);
 
   uptr best = -1;
   uptr best_len = 0;
 
-  for (uptr idx = start; idx < max_page_count; ++idx) {
+  for (uptr idx = start; idx < PageCount(); ++idx) {
     Page& page = pages[idx];
 
     if (page.IsFree()) {
@@ -88,7 +92,7 @@ static bool IsFree(uptr page, uptr page_count) {
 }
 
 static void ReservePages(uptr page, uptr page_count) {
-  CHECK_LT(page, max_page_count);
+  CHECK_LT(page, PageCount());
 
   uptr end = page + page_count;
   for (uptr idx = page; idx < end; ++idx) {
@@ -97,7 +101,7 @@ static void ReservePages(uptr page, uptr page_count) {
 }
 
 static void FreePages(uptr page, uptr len) {
-  CHECK_LT(page, max_page_count);
+  CHECK_LT(page, PageCount());
 
   uptr end = page + (len / WASM_PAGESIZE);
   for (uptr idx = page; page < end; ++ idx) {
@@ -145,7 +149,7 @@ void SetupMemoryMapping() {
   max_page_count = _maxAddress / WASM_PAGESIZE;
   printf("maxAddress %u, max_page_count: %zu\n", _maxAddress, max_page_count);
 
-  for (uptr idx = 0; idx < sizeof(pages) / (sizeof(pages[0])); ++idx) {
+  for (uptr idx = 0; idx < PageCount(); ++idx) {
     pages[idx].MakeFree();
   }
 
