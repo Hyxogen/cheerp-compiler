@@ -15,7 +15,7 @@
 
 // asan_fuchsia.cpp and asan_cheerpwasm.cpp have their own
 // InitializeShadowMemory implementation.
-#if !SANITIZER_FUCHSIA && !SANITIZER_CHEERPWASM
+#if !SANITIZER_FUCHSIA
 
 #  include "asan_internal.h"
 #  include "asan_mapping.h"
@@ -23,7 +23,7 @@
 namespace __asan {
 
 static void ProtectGap(uptr addr, uptr size) {
-  if (!flags()->protect_shadow_gap) {
+  if (SANITIZER_CHEERPWASM || !flags()->protect_shadow_gap) {
     // The shadow gap is unprotected, so there is a chance that someone
     // is actually using this memory. Which means it needs a shadow...
     uptr GapShadowBeg = RoundDownTo(MEM_TO_SHADOW(addr), GetPageSizeCached());

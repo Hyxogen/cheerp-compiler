@@ -389,6 +389,10 @@ enum LinkerInitialized { LINKER_INITIALIZED = 0 };
 #  define GET_CALLER_PC()                              \
     ((__sanitizer::uptr) 0)
 #  define GET_CURRENT_FRAME() ((__sanitizer::uptr)0)
+extern "C" [[noreturn]] void abort(void);
+inline void Trap() {
+  abort();
+}
 #elif !defined(_MSC_VER) || defined(__clang__)
 #  define GET_CALLER_PC()                              \
     ((__sanitizer::uptr)__builtin_extract_return_addr( \

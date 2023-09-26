@@ -3,6 +3,7 @@ TARGET := libasan.bc
 CC	:= /home/daan/opt/cheerp/bin/clang
 CXX	:= /home/daan/opt/cheerp/bin/clang++
 CXXFLAGS := -O0 -g0 -target cheerp-wasm -I. -DSANITIZER_CHEERPWASM=1
+LINK_FLAGS := -cheerp-linear-heap-size=4095 -cheerp-wasm-enable=growmem
 
 LINK_CMD := /home/daan/opt/cheerp/bin/llvm-link
 
@@ -54,6 +55,8 @@ CXX_FILES := \
   		sanitizer_common/sanitizer_libignore.cpp \
   		sanitizer_common/sanitizer_linux.cpp \
   		sanitizer_common/sanitizer_linux_s390.cpp \
+  		sanitizer_common/sanitizer_cheerpwasm.cpp \
+  		sanitizer_common/sanitizer_cheerpwasm_mmap.cpp \
   		sanitizer_common/sanitizer_mac.cpp \
   		sanitizer_common/sanitizer_mutex.cpp \
   		sanitizer_common/sanitizer_netbsd.cpp \
@@ -78,6 +81,7 @@ CXX_FILES := \
   		sanitizer_common/sanitizer_tls_get_addr.cpp \
   		sanitizer_common/sanitizer_thread_registry.cpp \
   		sanitizer_common/sanitizer_type_traits.cpp \
+  		sanitizer_common/sanitizer_termination.cpp \
   		sanitizer_common/sanitizer_win.cpp
 
 HEADER_DEPS	:= $(CXX_FILES:.cpp=.d)
@@ -97,18 +101,11 @@ $(TARGET): $(OBJ_FILES)
 
 .PHONY: test
 test: $(TARGET)
-	-@rc=0; count=0; res=0; \
-	for file in $(TEST_C_FILES); do \
-		./test.sh "$$file"; \
-		res="$$?"; \
-		if [ "$$res" -eq 0 ]; \
-		then printf PASSED; \
-		else printf FAILED; \
-		fi; \
-		echo "	$$file"; \
-		rc=`expr $$rc + $$(($$res != 0))`; count=`expr $$count + 1`; \
-	done; \
-	echo; echo "Executed $$count tests	Failed tests $$rc"
+	$(CC) $(LINK_FLAGS) nullptr_deref.c libasan.bc -fsanitize=address -g0 -cheerp-pretty-code -target cheerp-wasm
+
+.PHONY: run
+run: test
+	node a.out
 
 
 .PHONY: clean

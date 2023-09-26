@@ -17,10 +17,11 @@
 
 namespace __asan {
 
+  /*
 void InitializeShadowMemory() {
-  // TODO allocate shadow memory based on the upper limit used during
+  // CHEERPASAN: TODO allocate shadow memory based on the upper limit used during
   // compilation
-  // TODO set highMemEnd midMemEnd etc. in __asan_init
+  // CHEERPASAN: TODO set highMemEnd midMemEnd etc. in __asan_init
 
   size_t allocated_pages = __builtin_cheerp_grow_memory(0);
   size_t needed_pages = (kLowShadowEnd + (WASM_PAGE_SIZE - 1)) / WASM_PAGE_SIZE;
@@ -36,13 +37,15 @@ void InitializeShadowMemory() {
   void *low_beg = (void *)kLowShadowBeg;
   void *null_shadow = (void *)MEM_TO_SHADOW(0);
   char null_shadow_val = *(char *)null_shadow;
-}
+}*/
 
 void AsanCheckDynamicRTPrereqs() {}
 void AsanCheckIncompatibleRT() {}
 void InitializePlatformInterceptors() {}
 void InitializePlatformExceptionHandlers() {}
 bool IsSystemHeapAddress (uptr addr) { return false; }
+void ReplaceSystemMalloc() {}
+void AsanTSDInit(void (*)(void*)) {}
 
 void *AsanDoesNotSupportStaticLinkage() {
   // On Linux, this is some magic that fails linking with -static.
