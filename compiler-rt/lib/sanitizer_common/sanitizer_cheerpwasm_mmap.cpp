@@ -16,6 +16,7 @@ uint32_t _maxAddress = _heapEnd; //TODO fix this properly, this is a hack
 
 namespace __sanitizer {
 
+//TODO make mmap pages smaller
 #define WASM_PAGESIZE (64*1024)
 #define WASM_MAX_PAGES (65536)
 //#define MMAP_PAGESIZE 4096
@@ -104,7 +105,7 @@ static void FreePages(uptr page, uptr len) {
   CHECK_LT(page, PageCount());
 
   uptr end = page + (len / WASM_PAGESIZE);
-  for (uptr idx = page; page < end; ++ idx) {
+  for (uptr idx = page; idx < end; ++ idx) {
     pages[idx].MakeFree();
   }
 
@@ -112,6 +113,8 @@ static void FreePages(uptr page, uptr len) {
     pages[end].FreeStarting(static_cast<uint16_t>(len % WASM_PAGESIZE));
   }
 }
+
+DECLARE_REAL(void*, memset, void*, int, size_t)
 
 uptr InternalMmap(uptr addr, uptr len, int prot, int flags, int fildes) {
   CHECK_EQ(0, addr % WASM_PAGESIZE);
@@ -128,14 +131,20 @@ uptr InternalMmap(uptr addr, uptr len, int prot, int flags, int fildes) {
     return -1;
   }
 
-  uptr page = FindPages(addr / WASM_PAGESIZE, page_count);
+  uptr page = addr / WASM_PAGESIZE;
+  if (!(flags & MAP_FIXED)) {
+    page = FindPages(addr / WASM_PAGESIZE, page_count);
+  }
+
   if (page == -1) {
     errno = ENOMEM;
     return -1;
   }
 
   ReservePages(page, page_count);
-  return page;
+  uptr res = page * WASM_PAGESIZE;
+  REAL(memset)(reinterpret_cast<void*>(res), 0, len);
+  return page * WASM_PAGESIZE;
 }
 
 void InternalMunmap(uptr addr, uptr len) {
@@ -143,7 +152,7 @@ void InternalMunmap(uptr addr, uptr len) {
   FreePages(addr / WASM_PAGESIZE, len);
 }
 
-//TODO add a check variable if initialized
+//TODO add a check if trying to mmap without having it initialized here
 void SetupMemoryMapping() {
   size_t used = __builtin_cheerp_grow_memory(0);
   max_page_count = _maxAddress / WASM_PAGESIZE;
@@ -183,6 +192,46 @@ bool MemoryRangeIsAvailable(uptr range_start, uptr range_end) {
   range_start = RoundDownTo(range_start, WASM_PAGESIZE);
   range_end = RoundUpTo(range_start, WASM_PAGESIZE);
   return IsFree(range_start, range_end);
+}
+
+uptr GetMmapGranularity() {
+  return WASM_PAGESIZE;
+}
+
+void UnmapFromTo(uptr from, uptr to) {
+  if (to == from)
+    return;
+  CHECK(to >= from);
+  InternalMunmap(from, to - from);
+}
+
+//Doesn't actually protect memory on cheerp
+void *MmapNoAccess(uptr size) {
+  unsigned flags = MAP_PRIVATE | MAP_ANON | MAP_NORESERVE;
+  return (void *)InternalMmap(0, size, PROT_NONE, flags, -1);
+}
+
+static bool MmapFixed(uptr fixed_addr, uptr size, int additional_flags,
+                      const char *name) {
+  size = RoundUpTo(size, GetPageSizeCached());
+  fixed_addr = RoundDownTo(fixed_addr, GetPageSizeCached());
+  uptr p =
+      InternalMmap(fixed_addr, size, PROT_READ | PROT_WRITE,
+                   MAP_PRIVATE | MAP_FIXED | additional_flags | MAP_ANON, -1);
+  int reserrno = errno;
+  if (p == -1) {
+    Report(
+        "ERROR: %s failed to "
+        "allocate 0x%zx (%zd) bytes at address %zx (errno: %d)\n",
+        SanitizerToolName, size, size, fixed_addr, reserrno);
+    return false;
+  }
+  IncreaseTotalMmap(size);
+  return true;
+}
+
+bool MmapFixedNoReserve(uptr fixed_addr, uptr size, const char *name) {
+  return MmapFixed(fixed_addr, size, MAP_NORESERVE, name);
 }
 
 } //namespace __sanitizer

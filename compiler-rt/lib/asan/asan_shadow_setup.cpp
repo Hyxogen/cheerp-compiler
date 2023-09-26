@@ -24,6 +24,7 @@ namespace __asan {
 
 static void ProtectGap(uptr addr, uptr size) {
   if (SANITIZER_CHEERPWASM || !flags()->protect_shadow_gap) {
+    abort();
     // The shadow gap is unprotected, so there is a chance that someone
     // is actually using this memory. Which means it needs a shadow...
     uptr GapShadowBeg = RoundDownTo(MEM_TO_SHADOW(addr), GetPageSizeCached());
@@ -65,7 +66,7 @@ void InitializeShadowMemory() {
   bool full_shadow_is_available = false;
   if (shadow_start == kDefaultShadowSentinel) {
     shadow_start = FindDynamicShadowStart();
-    if (SANITIZER_LINUX) full_shadow_is_available = true;
+    if (SANITIZER_LINUX || SANITIZER_CHEERPWASM) full_shadow_is_available = true;
   }
   // Update the shadow memory address (potentially) used by instrumentation.
   __asan_shadow_memory_dynamic_address = shadow_start;

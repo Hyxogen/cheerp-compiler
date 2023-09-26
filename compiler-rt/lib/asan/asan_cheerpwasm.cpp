@@ -39,6 +39,12 @@ void InitializeShadowMemory() {
   char null_shadow_val = *(char *)null_shadow;
 }*/
 
+uptr FindDynamicShadowStart() {
+  uptr shadow_size_bytes = MemToShadowSize(kHighMemEnd);
+  return MapDynamicShadow(shadow_size_bytes, ASAN_SHADOW_SCALE,
+                          /*min_shadow_base_alignment*/ 0, kHighMemEnd);
+}
+
 void AsanCheckDynamicRTPrereqs() {}
 void AsanCheckIncompatibleRT() {}
 void InitializePlatformInterceptors() {}

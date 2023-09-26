@@ -6,8 +6,7 @@
 
 namespace __sanitizer {
 
-uptr InternalMmap(uptr addr, uptr len, int prot, int flags, int fildes);
-void InternalMunmap(uptr addr, uptr len);
+void UnmapFromTo(uptr from, uptr to);
 void SetupMemoryMapping();
 
 }
