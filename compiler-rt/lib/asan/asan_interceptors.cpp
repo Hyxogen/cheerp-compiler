@@ -23,10 +23,10 @@
 #include "lsan/lsan_common.h"
 #include "sanitizer_common/sanitizer_libc.h"
 
-// There is no general interception at all on Fuchsia.
+// There is no general interception at all on Fuchsia or Cheerp.
 // Only the functions in asan_interceptors_memintrinsics.cpp are
 // really defined to replace libc functions.
-#if !SANITIZER_FUCHSIA
+#if !SANITIZER_FUCHSIA && !SANITIZER_CHEERPWASM
 
 #  if SANITIZER_POSIX
 #    include "sanitizer_common/sanitizer_posix.h"

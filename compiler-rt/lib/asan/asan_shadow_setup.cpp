@@ -13,8 +13,9 @@
 
 #include "sanitizer_common/sanitizer_platform.h"
 
-// asan_fuchsia.cpp has their own InitializeShadowMemory implementation.
-#if !SANITIZER_FUCHSIA
+// asan_fuchsia.cpp and asan_cheerpwasm.cpp have their own
+// InitializeShadowMemory implementation.
+#if !SANITIZER_FUCHSIA && !SANITIZER_CHEERPWASM
 
 #  include "asan_internal.h"
 #  include "asan_mapping.h"

@@ -62,7 +62,7 @@ inline typename T::Type atomic_fetch_add(volatile T *a,
 #if SANITIZER_CHEERPWASM
   typename T::Type prev = a->val_dont_use;
   a->val_dont_use += v;
-  return a;
+  return prev;
 #else
   (void)mo;
   DCHECK(!((uptr)a % sizeof(*a)));
@@ -76,7 +76,7 @@ inline typename T::Type atomic_fetch_sub(volatile T *a,
 #if SANITIZER_CHEERPWASM
   typename T::Type prev = a->val_dont_use;
   a->val_dont_use -= v;
-  return a;
+  return prev;
 #else
   (void)mo;
   DCHECK(!((uptr)a % sizeof(*a)));

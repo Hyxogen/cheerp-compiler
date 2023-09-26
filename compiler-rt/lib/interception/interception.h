@@ -202,7 +202,7 @@ const interpose_substitution substitution_##func_name[] \
 // macros does its job. In exceptional cases you may need to call REAL(foo)
 // without defining INTERCEPTOR(..., foo, ...). For example, if you override
 // foo with an interceptor for other function.
-#if !SANITIZER_APPLE && !SANITIZER_FUCHSIA
+#if !SANITIZER_APPLE && !SANITIZER_FUCHSIA && !SANITIZER_CHEERPWASM
 #  define DEFINE_REAL(ret_type, func, ...)            \
     typedef ret_type (*FUNC_TYPE(func))(__VA_ARGS__); \
     namespace __interception {                        \

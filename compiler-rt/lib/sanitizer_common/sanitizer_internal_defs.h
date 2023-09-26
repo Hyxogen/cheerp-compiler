@@ -385,7 +385,11 @@ void NORETURN CheckFailed(const char *file, int line, const char *cond,
 
 enum LinkerInitialized { LINKER_INITIALIZED = 0 };
 
-#if !defined(_MSC_VER) || defined(__clang__)
+#if SANITIZER_CHEERPWASM
+#  define GET_CALLER_PC()                              \
+    ((__sanitizer::uptr) 0)
+#  define GET_CURRENT_FRAME() ((__sanitizer::uptr)0)
+#elif !defined(_MSC_VER) || defined(__clang__)
 #  define GET_CALLER_PC()                              \
     ((__sanitizer::uptr)__builtin_extract_return_addr( \
         __builtin_return_address(0)))
