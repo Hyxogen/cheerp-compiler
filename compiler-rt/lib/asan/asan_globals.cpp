@@ -26,6 +26,8 @@
 #include "sanitizer_common/sanitizer_stackdepot.h"
 #include "sanitizer_common/sanitizer_symbolizer.h"
 
+#include <cstdio>
+
 namespace __asan {
 
 typedef __asan_global Global;
@@ -315,6 +317,7 @@ using namespace __asan;
 // Apply __asan_register_globals to all globals found in the same loaded
 // executable or shared library as `flag'. The flag tracks whether globals have
 // already been registered or not for this image.
+#if !SANITIZER_CHEERPWASM
 void __asan_register_image_globals(uptr *flag) {
   if (*flag)
     return;
@@ -349,6 +352,7 @@ void __asan_unregister_elf_globals(uptr *flag, void *start, void *stop) {
   __asan_unregister_globals(reinterpret_cast<uptr>(globals_start), globals_stop - globals_start);
   *flag = 0;
 }
+#endif
 
 // Register an array of globals.
 #if SANITIZER_CHEERPWASM
@@ -357,7 +361,9 @@ void __asan_register_globals(uptr globals_ptr, uptr n) {
 #else
 void __asan_register_globals(__asan_global *globals, uptr n) {
 #endif
+  //printf("registering %u globals\n", n);
   if (!flags()->report_globals) return;
+  //printf("yes\n");
   GET_STACK_TRACE_MALLOC;
   u32 stack_id = StackDepotPut(stack);
   Lock lock(&mu_for_globals);
@@ -388,6 +394,9 @@ void __asan_register_globals(__asan_global *globals, uptr n) {
             globals[i].odr_indicator == 0);
       continue;
     }
+    //printf("%s: addr: %x, size: %u (%x)\n", globals[i].name, globals[i].beg, globals[i].size, globals[i].size);
+    //REAL(memset)((void*)MEM_TO_SHADOW(globals[i].beg), 0, globals[i].size);
+    FastPoisonShadow(globals[i].beg, globals[i].size, 0);// CHEERPASAN: TODO check if right
     RegisterGlobal(&globals[i]);
   }
 
@@ -412,6 +421,7 @@ void __asan_unregister_globals(__asan_global *globals, uptr n) {
       // See comment in __asan_register_globals.
       continue;
     }
+    FastPoisonShadow(globals[i].beg, globals[i].size, 0xff);// CHEERPASAN: TODO check if right
     UnregisterGlobal(&globals[i]);
   }
 

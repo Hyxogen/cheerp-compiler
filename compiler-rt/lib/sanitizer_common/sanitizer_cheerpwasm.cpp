@@ -34,7 +34,7 @@ uptr GetPageSize() {
 }
 
 tid_t GetTid() {
-  return 1;
+  return 0;
 }
 
 void ReportFile::Write(const char *buffer, uptr length) {
