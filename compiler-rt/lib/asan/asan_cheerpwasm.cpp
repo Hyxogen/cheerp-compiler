@@ -77,7 +77,6 @@ struct tsd_key {
 static /*thread_local*/ struct tsd_key key;
 
 void AsanTSDInit(void (*destructor)(void *tsd)) {
-  printf("intialized: %x\n", reinterpret_cast<uptr>(destructor));
   CHECK(!tsd_destructor);
   tsd_destructor = destructor;
 }

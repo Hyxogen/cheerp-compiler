@@ -161,8 +161,6 @@ void InternalMunmap(uptr addr, uptr len) {
 void SetupMemoryMapping() {
   size_t used = __builtin_cheerp_grow_memory(0);
   max_page_count = reinterpret_cast<uptr>(_maxAddress) / WASM_PAGESIZE;
-  printf("maxAddress %u, max_page_count: %zu\n", reinterpret_cast<uptr>(_maxAddress), max_page_count);
-  printf("MMAP_PAGESIZE: %u, MMAP_PAGECOUNT: %u\n", MMAP_PAGESIZE, MMAP_PAGECOUNT);
 
   for (uptr idx = 0; idx < PageCount(); ++idx) {
     pages[idx].MakeFree();
@@ -185,7 +183,6 @@ uptr GetMaxUserVirtualAddress() {
 
 void *MmapOrDie(uptr size, const char *mem_type, bool raw_report) {
   size = RoundUpTo(size, GetPageSizeCached());
-  printf("%s\n", mem_type);
   uptr res =
       InternalMmap(0, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1);
   if (UNLIKELY(res == -1))
@@ -224,7 +221,6 @@ void *MmapNoAccess(uptr size) {
 
 static bool MmapFixed(uptr fixed_addr, uptr size, int additional_flags,
                       const char *name) {
-  printf("allocate named: %s\n", name);
   size = RoundUpTo(size, GetPageSizeCached());
   fixed_addr = RoundDownTo(fixed_addr, GetPageSizeCached());
   uptr p =
@@ -247,7 +243,6 @@ bool MmapFixedNoReserve(uptr fixed_addr, uptr size, const char *name) {
 }
 
 void *MmapOrDieOnFatalError(uptr size, const char *mem_type) {
-  printf("MmapOrDieOnFatalError: %s\n", mem_type);
   size = RoundUpTo(size, GetPageSizeCached());
   uptr res = InternalMmap(0, size, PROT_READ | PROT_WRITE,
                           MAP_PRIVATE | MAP_ANON, -1);

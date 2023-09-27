@@ -24,8 +24,6 @@
 #  include "asan_poisoning.h"
 #endif
 
-#include <cstdio>
-
 namespace __asan {
 
 static void ProtectGap(uptr addr, uptr size) {
@@ -94,12 +92,6 @@ void InitializeShadowMemory() {
 
   if (full_shadow_is_available) {
     // mmap the low shadow plus at least one page at the left.
-    printf(
-        "low mem:\t%x-%x\nlow shadow:\t%x-%x\ngap:\t\t%x-%x\nhigh "
-        "shadow:\t%x-%x\nhigh mem:\t%x-%x\n",
-        kLowMemBeg, kLowMemEnd, shadow_start, kLowShadowEnd, kShadowGapBeg,
-        kShadowGapEnd, kHighShadowBeg, kHighShadowEnd, kHighMemBeg,
-        kHighMemEnd);
     if (kLowShadowBeg) {
       ReserveShadowMemoryRange(shadow_start, kLowShadowEnd, "low shadow");
     }

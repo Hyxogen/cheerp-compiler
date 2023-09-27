@@ -538,7 +538,6 @@ struct Allocator {
       ReportOutOfMemory(size, stack);
     }
 
-    printf("can poison memory?: %d\n", (int) CanPoisonMemory());
     if (*(u8 *)MEM_TO_SHADOW((uptr)allocated) == 0 && CanPoisonMemory()) {
       // Heap poisoning is enabled, but the allocator provides an unpoisoned
       // chunk. This is possible if CanPoisonMemory() was false for some

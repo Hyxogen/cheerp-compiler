@@ -35,8 +35,6 @@
 
 #if SANITIZER_CHEERPWASM
 #include "sanitizer_common/sanitizer_cheerpwasm_mmap.h"
-#include <cstdio>
-#include <cstdlib>
 #endif
 
 uptr __asan_shadow_memory_dynamic_address;  // Global interface symbol.
@@ -629,9 +627,6 @@ void NOINLINE __asan_set_death_callback(void (*callback)(void)) {
 void __asan_init() {
   AsanActivate();
   AsanInitInternal();
-  printf("ptr: %p, NULL VALUE: %hhx\n",
-         reinterpret_cast<void *>(__asan_shadow_memory_dynamic_address),
-         *reinterpret_cast<uint8_t *>(__asan_shadow_memory_dynamic_address));
 }
 
 void __asan_version_mismatch_check() {
