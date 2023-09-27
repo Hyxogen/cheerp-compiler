@@ -20,6 +20,10 @@
 #  include "asan_internal.h"
 #  include "asan_mapping.h"
 
+#if SANITIZER_CHEERPWASM
+#  include "asan_poisoning.h"
+#endif
+
 #include <cstdio>
 
 namespace __asan {
@@ -103,6 +107,9 @@ void InitializeShadowMemory() {
     ReserveShadowMemoryRange(kHighShadowBeg, kHighShadowEnd, "high shadow");
     // protect the gap.
     ProtectGap(kShadowGapBeg, kShadowGapEnd - kShadowGapBeg + 1);
+#if SANITIZER_CHEERPWASM
+    REAL(memset)(reinterpret_cast<void*>(shadow_start), 0xfe, kHighShadowEnd - shadow_start);// CHEERPASAN: TODO this doesn't seem right, what does asan do for linux?
+#endif
     CHECK_EQ(kShadowGapEnd, kHighShadowBeg - 1);
   } else if (kMidMemBeg &&
              MemoryRangeIsAvailable(shadow_start, kMidMemBeg - 1) &&

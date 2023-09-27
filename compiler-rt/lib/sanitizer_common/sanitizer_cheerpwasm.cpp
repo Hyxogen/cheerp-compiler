@@ -7,6 +7,7 @@
 #include "sanitizer_cheerpwasm_mmap.h"
 
 #include <cstdio>
+#include <cstdlib>
 
 namespace __sanitizer {
 
@@ -93,6 +94,10 @@ uptr internal_getpid() { return 1; }
 void GetThreadStackAndTls(bool main, uptr *stk_addr, uptr *stk_size,
                           uptr *tls_addr, uptr *tls_size) {}
 void SetAlternateSignalStack() {}
+
+void internal__exit(int exitcode) {
+  exit(exitcode);
+}
 
 } // namespace __sanitizer
 
