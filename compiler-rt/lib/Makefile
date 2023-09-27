@@ -82,6 +82,7 @@ CXX_FILES := \
   		sanitizer_common/sanitizer_thread_registry.cpp \
   		sanitizer_common/sanitizer_type_traits.cpp \
   		sanitizer_common/sanitizer_termination.cpp \
+  		sanitizer_common/sanitizer_symbolizer_cheerpwasm.cpp \
   		sanitizer_common/sanitizer_win.cpp
 
 HEADER_DEPS	:= $(CXX_FILES:.cpp=.d)

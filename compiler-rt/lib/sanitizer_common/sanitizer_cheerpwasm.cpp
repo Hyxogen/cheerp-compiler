@@ -90,6 +90,10 @@ void InitializeCoverage(bool, char const*) {}
 void InitTlsSize() {}
 uptr internal_getpid() { return 1; }
 
+void GetThreadStackAndTls(bool main, uptr *stk_addr, uptr *stk_size,
+                          uptr *tls_addr, uptr *tls_size) {}
+void SetAlternateSignalStack() {}
+
 } // namespace __sanitizer
 
 #endif // SANITIZER_CHEERPWASM
