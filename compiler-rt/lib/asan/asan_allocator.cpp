@@ -31,6 +31,8 @@
 #include "sanitizer_common/sanitizer_quarantine.h"
 #include "sanitizer_common/sanitizer_stackdepot.h"
 
+#include <cstdio>
+
 namespace __asan {
 
 // Valid redzone sizes are 16, 32, 64, ... 2048, so we encode them in 3 bits.
@@ -536,6 +538,7 @@ struct Allocator {
       ReportOutOfMemory(size, stack);
     }
 
+    printf("can poison memory?: %d\n", (int) CanPoisonMemory());
     if (*(u8 *)MEM_TO_SHADOW((uptr)allocated) == 0 && CanPoisonMemory()) {
       // Heap poisoning is enabled, but the allocator provides an unpoisoned
       // chunk. This is possible if CanPoisonMemory() was false for some

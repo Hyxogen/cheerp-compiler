@@ -23,6 +23,7 @@ CXX_FILES := \
   		asan/asan_linux.cpp \
   		asan/asan_mac.cpp \
   		asan/asan_malloc_linux.cpp \
+  		asan/asan_malloc_cheerpwasm.cpp \
   		asan/asan_malloc_mac.cpp \
   		asan/asan_malloc_win.cpp \
   		asan/asan_memory_profile.cpp \
@@ -103,7 +104,8 @@ $(TARGET): $(OBJ_FILES)
 
 .PHONY: test
 test: $(TARGET)
-	$(CC) $(LINK_FLAGS) nullptr_deref.c libasan.bc -fsanitize=address -g0 -cheerp-pretty-code -target cheerp-wasm
+	#$(CC) $(LINK_FLAGS) nullptr_deref.c libasan.bc -fsanitize=address -g0 -cheerp-pretty-code -target cheerp-wasm
+	$(CXX) $(LINK_FLAGS) heap-overflow.cpp libasan.bc -fsanitize=address -g0 -cheerp-pretty-code -target cheerp-wasm
 
 .PHONY: run
 run: test

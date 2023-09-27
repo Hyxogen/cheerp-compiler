@@ -12,7 +12,8 @@
 extern uint32_t _heapStart;
 extern uint32_t _heapEnd;
 //extern uint32_t _maxAddress;
-uint32_t _maxAddress = _heapEnd; //TODO fix this properly, this is a hack
+//uint32_t _maxAddress = _heapEnd; //TODO fix this properly, this is a hack
+__attribute__((cheerp_asmjs)) char* volatile _maxAddress = (char*)0xdeadbeef;
 
 namespace __sanitizer {
 
@@ -159,8 +160,8 @@ void InternalMunmap(uptr addr, uptr len) {
 //TODO add a check if trying to mmap without having it initialized here
 void SetupMemoryMapping() {
   size_t used = __builtin_cheerp_grow_memory(0);
-  max_page_count = _maxAddress / WASM_PAGESIZE;
-  printf("maxAddress %u, max_page_count: %zu\n", _maxAddress, max_page_count);
+  max_page_count = reinterpret_cast<uptr>(_maxAddress) / WASM_PAGESIZE;
+  printf("maxAddress %u, max_page_count: %zu\n", reinterpret_cast<uptr>(_maxAddress), max_page_count);
   printf("MMAP_PAGESIZE: %u, MMAP_PAGECOUNT: %u\n", MMAP_PAGESIZE, MMAP_PAGECOUNT);
 
   for (uptr idx = 0; idx < PageCount(); ++idx) {
@@ -223,6 +224,7 @@ void *MmapNoAccess(uptr size) {
 
 static bool MmapFixed(uptr fixed_addr, uptr size, int additional_flags,
                       const char *name) {
+  printf("allocate named: %s\n", name);
   size = RoundUpTo(size, GetPageSizeCached());
   fixed_addr = RoundDownTo(fixed_addr, GetPageSizeCached());
   uptr p =
@@ -242,6 +244,45 @@ static bool MmapFixed(uptr fixed_addr, uptr size, int additional_flags,
 
 bool MmapFixedNoReserve(uptr fixed_addr, uptr size, const char *name) {
   return MmapFixed(fixed_addr, size, MAP_NORESERVE, name);
+}
+
+void *MmapOrDieOnFatalError(uptr size, const char *mem_type) {
+  printf("MmapOrDieOnFatalError: %s\n", mem_type);
+  size = RoundUpTo(size, GetPageSizeCached());
+  uptr res = InternalMmap(0, size, PROT_READ | PROT_WRITE,
+                          MAP_PRIVATE | MAP_ANON, -1);
+  int reserrno = errno;
+  if (UNLIKELY(res == -1)) {
+    if (reserrno == ENOMEM)
+      return nullptr;
+    ReportMmapFailureAndDie(size, mem_type, "allocate", reserrno);
+  }
+  IncreaseTotalMmap(size);
+  return (void *)res;
+}
+
+// We want to map a chunk of address space aligned to 'alignment'.
+// We do it by mapping a bit more and then unmapping redundant pieces.
+// We probably can do it with fewer syscalls in some OS-dependent way.
+void *MmapAlignedOrDieOnFatalError(uptr size, uptr alignment,
+                                   const char *mem_type) {
+  CHECK(IsPowerOfTwo(size));
+  CHECK(IsPowerOfTwo(alignment));
+  uptr map_size = size + alignment;
+  uptr map_res = (uptr)MmapOrDieOnFatalError(map_size, mem_type);
+  if (UNLIKELY(!map_res))
+    return nullptr;
+  uptr map_end = map_res + map_size;
+  uptr res = map_res;
+  if (!IsAligned(res, alignment)) {
+    res = (map_res + alignment - 1) & ~(alignment - 1);
+    UnmapOrDie((void*)map_res, res - map_res);
+  }
+  uptr end = res + size;
+  end = RoundUpTo(end, GetPageSizeCached());
+  if (end != map_end)
+    UnmapOrDie((void*)end, map_end - end);
+  return (void*)res;
 }
 
 } //namespace __sanitizer

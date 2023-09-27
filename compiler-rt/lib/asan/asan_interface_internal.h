@@ -74,10 +74,17 @@ extern "C" {
 
   // These two functions should be called by the instrumented code.
   // 'globals' is an array of structures describing 'n' globals.
+#if SANITIZER_CHEERPWASM
+  SANITIZER_INTERFACE_ATTRIBUTE
+  void __asan_register_globals(uptr globals_ptr, uptr n);
+  SANITIZER_INTERFACE_ATTRIBUTE
+  void __asan_unregister_globals(uptr globals_ptr, uptr n);
+#else
   SANITIZER_INTERFACE_ATTRIBUTE
   void __asan_register_globals(__asan_global *globals, uptr n);
   SANITIZER_INTERFACE_ATTRIBUTE
   void __asan_unregister_globals(__asan_global *globals, uptr n);
+#endif
 
   // These two functions should be called before and after dynamic initializers
   // of a single module run, respectively.

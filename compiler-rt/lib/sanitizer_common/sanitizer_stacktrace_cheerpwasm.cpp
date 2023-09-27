@@ -9,6 +9,8 @@ void BufferedStackTrace::Unwind(u32 max_depth, uptr pc, uptr bp, void *context,
                                 bool request_fast_unwind) {}
 
 void StackTrace::Print() const {}
+uptr StackTrace::GetCurrentPc() { return 0; }
+u32 StackDepotPut(StackTrace stack) { return 0; } //not sure what this should return
 
 } // namespace __sanitizer
 

@@ -336,7 +336,7 @@ void __asan_register_elf_globals(uptr *flag, void *start, void *stop) {
   CHECK_EQ(0, ((uptr)stop - (uptr)start) % sizeof(__asan_global));
   __asan_global *globals_start = (__asan_global*)start;
   __asan_global *globals_stop = (__asan_global*)stop;
-  __asan_register_globals(globals_start, globals_stop - globals_start);
+  __asan_register_globals(reinterpret_cast<uptr>(globals_start), globals_stop - globals_start);
   *flag = 1;
 }
 
@@ -346,12 +346,17 @@ void __asan_unregister_elf_globals(uptr *flag, void *start, void *stop) {
   CHECK_EQ(0, ((uptr)stop - (uptr)start) % sizeof(__asan_global));
   __asan_global *globals_start = (__asan_global*)start;
   __asan_global *globals_stop = (__asan_global*)stop;
-  __asan_unregister_globals(globals_start, globals_stop - globals_start);
+  __asan_unregister_globals(reinterpret_cast<uptr>(globals_start), globals_stop - globals_start);
   *flag = 0;
 }
 
 // Register an array of globals.
+#if SANITIZER_CHEERPWASM
+void __asan_register_globals(uptr globals_ptr, uptr n) {
+  __asan_global *globals = reinterpret_cast<__asan_global*>(globals_ptr);
+#else
 void __asan_register_globals(__asan_global *globals, uptr n) {
+#endif
   if (!flags()->report_globals) return;
   GET_STACK_TRACE_MALLOC;
   u32 stack_id = StackDepotPut(stack);
@@ -393,7 +398,12 @@ void __asan_register_globals(__asan_global *globals, uptr n) {
 
 // Unregister an array of globals.
 // We must do this when a shared objects gets dlclosed.
+#if SANITIZER_CHEERPWASM
+void __asan_unregister_globals(uptr globals_ptr, uptr n) {
+  __asan_global *globals = (__asan_global*) globals_ptr;
+#else
 void __asan_unregister_globals(__asan_global *globals, uptr n) {
+#endif
   if (!flags()->report_globals) return;
   Lock lock(&mu_for_globals);
   for (uptr i = 0; i < n; i++) {
