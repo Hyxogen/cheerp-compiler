@@ -1,5 +1,7 @@
 /*.out
-/*.wasm
+*.wasm
+*.tmp
+*.script
 /*.js
 /compile_commands.json
 /tags
