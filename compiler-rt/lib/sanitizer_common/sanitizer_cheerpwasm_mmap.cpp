@@ -24,7 +24,7 @@ namespace __sanitizer {
 constexpr static uptr WASM_PAGESIZE = 64 * 1024;
 constexpr static uptr WASM_MAX_PAGES = 65536;
 constexpr static uptr MMAP_PAGESIZE = 4096;
-constexpr static uptr MMAP_PAGECOUNT = (WASM_PAGESIZE*WASM_MAX_PAGES)/MMAP_PAGESIZE;
+constexpr static uptr MMAP_PAGECOUNT = ((uptr) -1)/MMAP_PAGESIZE;
 
 struct Page {
 private:
@@ -54,7 +54,7 @@ public:
   }
 };
 
-static Page pages[WASM_MAX_PAGES];
+static Page pages[MMAP_PAGECOUNT];
 static uptr max_page_count = 0;
 
 static uptr PageCount() {
@@ -62,7 +62,7 @@ static uptr PageCount() {
 }
 
 static uptr FindPages(uptr start, uptr page_count) {
-  CHECK_LT(start, page_count);
+  CHECK_LT(start, PageCount());
 
   uptr best = -1;
   uptr best_len = 0;
@@ -108,36 +108,36 @@ static void ReservePages(uptr page, uptr page_count) {
 static void FreePages(uptr page, uptr len) {
   CHECK_LT(page, PageCount());
 
-  uptr end = page + (len / WASM_PAGESIZE);
+  uptr end = page + (len / MMAP_PAGESIZE);
   for (uptr idx = page; idx < end; ++ idx) {
     pages[idx].MakeFree();
   }
 
-  if (len % WASM_PAGESIZE) {
-    pages[end].FreeStarting(static_cast<uint16_t>(len % WASM_PAGESIZE));
+  if (len % MMAP_PAGESIZE) {
+    pages[end].FreeStarting(static_cast<uint16_t>(len % MMAP_PAGESIZE));
   }
 }
 
 DECLARE_REAL(void*, memset, void*, int, size_t)
 
 uptr InternalMmap(uptr addr, uptr len, int prot, int flags, int fildes) {
-  CHECK_EQ(0, addr % WASM_PAGESIZE);
+  CHECK_EQ(0, addr % MMAP_PAGESIZE);
 
-  if (len % WASM_PAGESIZE) {
-    len += WASM_PAGESIZE - (len % WASM_PAGESIZE);
+  if (len % MMAP_PAGESIZE) {
+    len += MMAP_PAGESIZE - (len % MMAP_PAGESIZE);
   }
-  CHECK_EQ(0, len % WASM_PAGESIZE);
+  CHECK_EQ(0, len % MMAP_PAGESIZE);
 
-  uptr page_count = len / WASM_PAGESIZE;
+  uptr page_count = len / MMAP_PAGESIZE;
 
   if (!(flags & (MAP_ANON | MAP_ANONYMOUS))) {
     errno = EINVAL;
     return -1;
   }
 
-  uptr page = addr / WASM_PAGESIZE;
+  uptr page = addr / MMAP_PAGESIZE;
   if (!(flags & MAP_FIXED)) {
-    page = FindPages(addr / WASM_PAGESIZE, page_count);
+    page = FindPages(addr / MMAP_PAGESIZE, page_count);
   }
 
   if (page == -1) {
@@ -146,14 +146,14 @@ uptr InternalMmap(uptr addr, uptr len, int prot, int flags, int fildes) {
   }
 
   ReservePages(page, page_count);
-  uptr res = page * WASM_PAGESIZE;
+  uptr res = page * MMAP_PAGESIZE;
   REAL(memset)(reinterpret_cast<void*>(res), 0, len);
-  return page * WASM_PAGESIZE;
+  return res;
 }
 
 void InternalMunmap(uptr addr, uptr len) {
-  CHECK_EQ(0, addr % WASM_PAGESIZE);
-  FreePages(addr / WASM_PAGESIZE, len);
+  CHECK_EQ(0, addr % MMAP_PAGESIZE);
+  FreePages(addr / MMAP_PAGESIZE, len);
 }
 
 //TODO add a check if trying to mmap without having it initialized here
@@ -161,6 +161,7 @@ void SetupMemoryMapping() {
   size_t used = __builtin_cheerp_grow_memory(0);
   max_page_count = _maxAddress / WASM_PAGESIZE;
   printf("maxAddress %u, max_page_count: %zu\n", _maxAddress, max_page_count);
+  printf("MMAP_PAGESIZE: %u, MMAP_PAGECOUNT: %u\n", MMAP_PAGESIZE, MMAP_PAGECOUNT);
 
   for (uptr idx = 0; idx < PageCount(); ++idx) {
     pages[idx].MakeFree();
@@ -173,11 +174,12 @@ void SetupMemoryMapping() {
     }
   }
 
-  ReservePages(0, used);// use _heapStart instead of __buitin_cheerp_grow_memory(0) for how many pages are already used
+  uptr i = ((used * WASM_PAGESIZE) + (MMAP_PAGESIZE - 1))  / MMAP_PAGESIZE;
+  ReservePages(0, i);// use _heapStart instead of __buitin_cheerp_grow_memory(0) for how many pages are already used
 }
 
 uptr GetMaxUserVirtualAddress() {
-  return _maxAddress;
+  return ~(uptr) 0;
 }
 
 void *MmapOrDie(uptr size, const char *mem_type, bool raw_report) {
@@ -197,13 +199,13 @@ void UnmapOrDie(void *addr, uptr size) {
 }
 
 bool MemoryRangeIsAvailable(uptr range_start, uptr range_end) {
-  range_start = RoundDownTo(range_start, WASM_PAGESIZE);
-  range_end = RoundUpTo(range_start, WASM_PAGESIZE);
+  range_start = RoundDownTo(range_start, MMAP_PAGESIZE);
+  range_end = RoundUpTo(range_start, MMAP_PAGESIZE);
   return IsFree(range_start, range_end);
 }
 
 uptr GetMmapGranularity() {
-  return WASM_PAGESIZE;
+  return MMAP_PAGESIZE;
 }
 
 void UnmapFromTo(uptr from, uptr to) {

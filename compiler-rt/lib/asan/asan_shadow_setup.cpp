@@ -26,7 +26,6 @@ namespace __asan {
 
 static void ProtectGap(uptr addr, uptr size) {
   if (SANITIZER_CHEERPWASM || !flags()->protect_shadow_gap) {
-    abort();
     // The shadow gap is unprotected, so there is a chance that someone
     // is actually using this memory. Which means it needs a shadow...
     uptr GapShadowBeg = RoundDownTo(MEM_TO_SHADOW(addr), GetPageSizeCached());
@@ -91,18 +90,17 @@ void InitializeShadowMemory() {
 
   if (full_shadow_is_available) {
     // mmap the low shadow plus at least one page at the left.
-    printf("low shadow:\t%x-%x\ngap:\t\t%x-%x\nhigh shadow:\t%x-%x\n", shadow_start,
-           kLowShadowEnd, kShadowGapBeg, kShadowGapEnd, kHighShadowBeg,
-           kHighShadowEnd);
-    printf("a\n");
+    printf(
+        "low mem:\t%x-%x\nlow shadow:\t%x-%x\ngap:\t\t%x-%x\nhigh "
+        "shadow:\t%x-%x\nhigh mem:\t%x-%x\n",
+        kLowMemBeg, kLowMemEnd, shadow_start, kLowShadowEnd, kShadowGapBeg,
+        kShadowGapEnd, kHighShadowBeg, kHighShadowEnd, kHighMemBeg,
+        kHighMemEnd);
     if (kLowShadowBeg) {
       ReserveShadowMemoryRange(shadow_start, kLowShadowEnd, "low shadow");
-      printf("b\n");
     }
-    printf("c\n");
     // mmap the high shadow.
     ReserveShadowMemoryRange(kHighShadowBeg, kHighShadowEnd, "high shadow");
-    printf("d\n");
     // protect the gap.
     ProtectGap(kShadowGapBeg, kShadowGapEnd - kShadowGapBeg + 1);
     CHECK_EQ(kShadowGapEnd, kHighShadowBeg - 1);

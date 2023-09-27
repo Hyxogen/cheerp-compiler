@@ -3,7 +3,7 @@ TARGET := libasan.bc
 CC	:= /home/daan/opt/cheerp/bin/clang
 CXX	:= /home/daan/opt/cheerp/bin/clang++
 CXXFLAGS := -O0 -g0 -target cheerp-wasm -I. -DSANITIZER_CHEERPWASM=1
-LINK_FLAGS := -cheerp-linear-heap-size=4095 -cheerp-wasm-enable=growmem
+LINK_FLAGS := -cheerp-linear-heap-size=2048 -cheerp-wasm-enable=growmem
 
 LINK_CMD := /home/daan/opt/cheerp/bin/llvm-link
 
