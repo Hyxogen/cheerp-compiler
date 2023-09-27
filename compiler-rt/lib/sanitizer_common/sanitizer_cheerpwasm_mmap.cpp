@@ -9,11 +9,11 @@
 
 #include <cstdio>
 
-extern uint32_t _heapStart;
-extern uint32_t _heapEnd;
-//extern uint32_t _maxAddress;
-//uint32_t _maxAddress = _heapEnd; //TODO fix this properly, this is a hack
+extern "C" {
+extern char* volatile _heapStart;
+extern char* volatile _heapEnd;
 __attribute__((cheerp_asmjs)) char* volatile _maxAddress = (char*)0xdeadbeef;
+}
 
 namespace __sanitizer {
 
@@ -159,7 +159,10 @@ void InternalMunmap(uptr addr, uptr len) {
 
 //TODO add a check if trying to mmap without having it initialized here
 void SetupMemoryMapping() {
-  size_t used = __builtin_cheerp_grow_memory(0);
+  int used = __builtin_cheerp_grow_memory(0);
+  if (used == -1) {
+    abort();
+  }
   max_page_count = reinterpret_cast<uptr>(_maxAddress) / WASM_PAGESIZE;
 
   for (uptr idx = 0; idx < PageCount(); ++idx) {
@@ -173,7 +176,11 @@ void SetupMemoryMapping() {
     }
   }
 
-  uptr i = ((used * WASM_PAGESIZE) + (MMAP_PAGESIZE - 1))  / MMAP_PAGESIZE;
+  uptr i = (reinterpret_cast<uptr>(_heapStart) + (MMAP_PAGESIZE -1)) / MMAP_PAGESIZE;
+  //uptr i = ((used * WASM_PAGESIZE) + (MMAP_PAGESIZE - 1))  / MMAP_PAGESIZE;
+  /*printf(
+      "unrounded %zu, already using %u pages, heapStart: %p, internal: %zu\n",
+      used, i, (void*) _heapStart, sizeof(pages));*/
   ReservePages(0, i);// use _heapStart instead of __buitin_cheerp_grow_memory(0) for how many pages are already used
 }
 
