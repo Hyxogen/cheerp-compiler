@@ -17,10 +17,14 @@ uint32_t _maxAddress = _heapEnd; //TODO fix this properly, this is a hack
 namespace __sanitizer {
 
 //TODO make mmap pages smaller
-#define WASM_PAGESIZE (64*1024)
-#define WASM_MAX_PAGES (65536)
+//#define WASM_PAGESIZE (64*1024)
+//#define WASM_MAX_PAGES (65536)
 //#define MMAP_PAGESIZE 4096
 //#define MMAP_PAGECOUNT (WASM_PAGESIZE*WASM_MAX_PAGES)/MMAP_PAGESIZE
+constexpr static uptr WASM_PAGESIZE = 64 * 1024;
+constexpr static uptr WASM_MAX_PAGES = 65536;
+constexpr static uptr MMAP_PAGESIZE = 4096;
+constexpr static uptr MMAP_PAGECOUNT = (WASM_PAGESIZE*WASM_MAX_PAGES)/MMAP_PAGESIZE;
 
 struct Page {
 private:
@@ -170,6 +174,10 @@ void SetupMemoryMapping() {
   }
 
   ReservePages(0, used);// use _heapStart instead of __buitin_cheerp_grow_memory(0) for how many pages are already used
+}
+
+uptr GetMaxUserVirtualAddress() {
+  return _maxAddress;
 }
 
 void *MmapOrDie(uptr size, const char *mem_type, bool raw_report) {

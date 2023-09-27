@@ -20,6 +20,8 @@
 #  include "asan_internal.h"
 #  include "asan_mapping.h"
 
+#include <cstdio>
+
 namespace __asan {
 
 static void ProtectGap(uptr addr, uptr size) {
@@ -89,10 +91,18 @@ void InitializeShadowMemory() {
 
   if (full_shadow_is_available) {
     // mmap the low shadow plus at least one page at the left.
-    if (kLowShadowBeg)
+    printf("low shadow:\t%x-%x\ngap:\t\t%x-%x\nhigh shadow:\t%x-%x\n", shadow_start,
+           kLowShadowEnd, kShadowGapBeg, kShadowGapEnd, kHighShadowBeg,
+           kHighShadowEnd);
+    printf("a\n");
+    if (kLowShadowBeg) {
       ReserveShadowMemoryRange(shadow_start, kLowShadowEnd, "low shadow");
+      printf("b\n");
+    }
+    printf("c\n");
     // mmap the high shadow.
     ReserveShadowMemoryRange(kHighShadowBeg, kHighShadowEnd, "high shadow");
+    printf("d\n");
     // protect the gap.
     ProtectGap(kShadowGapBeg, kShadowGapEnd - kShadowGapBeg + 1);
     CHECK_EQ(kShadowGapEnd, kHighShadowBeg - 1);

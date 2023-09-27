@@ -319,7 +319,6 @@ static void asan_atexit() {
 }
 
 static void InitializeHighMemEnd() {
-#if !SANITIZER_CHEERPWASM
 #if !ASAN_FIXED_MAPPING
   kHighMemEnd = GetMaxUserVirtualAddress();
   // Increase kHighMemEnd to make sure it's properly
@@ -327,7 +326,6 @@ static void InitializeHighMemEnd() {
   kHighMemEnd |= (GetMmapGranularity() << ASAN_SHADOW_SCALE) - 1;
 #endif  // !ASAN_FIXED_MAPPING
   CHECK_EQ((kHighMemBeg % GetMmapGranularity()), 0);
-#endif // !SANITIZER_CHEERPWASM
 }
 
 void PrintAddressSpaceLayout() {
