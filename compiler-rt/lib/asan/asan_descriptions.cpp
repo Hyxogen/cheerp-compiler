@@ -171,7 +171,7 @@ bool GetHeapAddressInformation(uptr addr, uptr access_size,
 }
 
 static StackTrace GetStackTraceFromId(u32 id) {
-#if SANITIZER_CHEERPWASM // CHEERPASAN: TODO implement stack traces
+#if SANITIZER_CHEERPWASM && 0// CHEERPASAN: TODO implement stack traces
   return StackTrace{};
 #else
   CHECK(id);

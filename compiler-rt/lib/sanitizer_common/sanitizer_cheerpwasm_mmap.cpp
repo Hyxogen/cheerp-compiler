@@ -287,6 +287,17 @@ void *MmapAlignedOrDieOnFatalError(uptr size, uptr alignment,
   return (void*)res;
 }
 
+void *MmapNoReserveOrDie(uptr size, const char *mem_type) {
+  size = RoundUpTo(size, GetPageSizeCached());
+  uptr p = InternalMmap(0, size, PROT_READ | PROT_WRITE,
+                        MAP_PRIVATE | MAP_ANON | MAP_NORESERVE, -1);
+  int reserrno = errno;
+  if (UNLIKELY(p == -1))
+    ReportMmapFailureAndDie(size, mem_type, "allocate noreserve", reserrno);
+  IncreaseTotalMmap(size);
+  return (void *)p;
+}
+
 } //namespace __sanitizer
 
 #endif // SANITIZER_CHEERPWASM

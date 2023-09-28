@@ -88,6 +88,8 @@ CXX_FILES := \
   		sanitizer_common/sanitizer_termination.cpp \
   		sanitizer_common/sanitizer_symbolizer_cheerpwasm.cpp \
   		sanitizer_common/sanitizer_stacktrace_cheerpwasm.cpp \
+  		sanitizer_common/sanitizer_stackdepot.cpp \
+		sanitizer_common/sanitizer_stack_store.cpp \
   		sanitizer_common/sanitizer_win.cpp
 
 HEADER_DEPS	:= $(addprefix $(DEP_DIR)/,$(CXX_FILES:.cpp=.d))
@@ -106,7 +108,8 @@ test: $(TARGET)
 	#$(CC) $(LINK_FLAGS) nullptr_deref.c libasan.bc -fsanitize=address -g0 -cheerp-pretty-code -target cheerp-wasm
 	#$(CXX) $(LINK_FLAGS) heap-overflow.cpp libasan.bc -fsanitize=address -g0 -cheerp-pretty-code -target cheerp-wasm -cheerp-linear-output=asmjs
 	#$(CXX) $(LINK_FLAGS) heap-overflow.cpp libasan.bc -fsanitize=address -g0 -cheerp-pretty-code -target cheerp-wasm
-	$(CXX) $(LINK_FLAGS) global-underflow.cpp libasan.bc -fsanitize=address -g0 -cheerp-pretty-code -target cheerp-wasm
+	#$(CXX) $(LINK_FLAGS) global-underflow.cpp libasan.bc -fsanitize=address -g0 -cheerp-pretty-code -target cheerp-wasm
+	$(CXX) $(LINK_FLAGS) double-free.cpp libasan.bc -fsanitize=address -g0 -cheerp-pretty-code -target cheerp-wasm
 
 .PHONY: run
 run: test
