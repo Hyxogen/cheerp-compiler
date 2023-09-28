@@ -72,7 +72,8 @@ struct ErrorDoubleFree : ErrorBase {
   ErrorDoubleFree(u32 tid, BufferedStackTrace *stack, uptr addr)
       : ErrorBase(tid, 42, "double-free"),
         second_free_stack(stack) {
-    CHECK_GT(second_free_stack->size, 0);
+    // CHECK_GT(second_free_stack->size, 0); CHEERPASAN: TODO: I've disabled
+    // this for now since there isn't a stacktrace atm for cheerp libasan
     GetHeapAddressInformation(addr, 1, &addr_description);
   }
   void Print();
