@@ -7,6 +7,9 @@ LINK_FLAGS := -cheerp-linear-heap-size=2048 -cheerp-wasm-enable=growmem
 
 LINK_CMD := /home/daan/opt/cheerp/bin/llvm-link
 
+OBJ_DIR		:= build
+DEP_DIR		:= build
+
 CXX_FILES := \
 		asan/asan_allocator.cpp \
   		asan/asan_activation.cpp \
@@ -87,19 +90,15 @@ CXX_FILES := \
   		sanitizer_common/sanitizer_stacktrace_cheerpwasm.cpp \
   		sanitizer_common/sanitizer_win.cpp
 
-HEADER_DEPS	:= $(CXX_FILES:.cpp=.d)
-OBJ_FILES	:= $(CXX_FILES:.cpp=.bc)
-
-TEST_CFLAGS	:= -fsanitize=address
-TEST_C_FILES	:= \
-		   tests/nullptr_deref.c \
-		   tests/global-overflow.c
+HEADER_DEPS	:= $(addprefix $(DEP_DIR)/,$(CXX_FILES:.cpp=.d))
+OBJ_FILES	:= $(addprefix $(OBJ_DIR)/,$(CXX_FILES:.cpp=.bc))
 
 $(TARGET): $(OBJ_FILES)
 	$(LINK_CMD) -o $@ $(OBJ_FILES)
 
 -include $(HEADER_DEPS)
-%.bc: %.cpp Makefile
+$(OBJ_DIR)/%.bc: %.cpp Makefile
+	mkdir -p $(@D)
 	$(CXX) -o $@ $< $(CXXFLAGS) -c -MMD
 
 .PHONY: test
@@ -117,3 +116,4 @@ run: test
 .PHONY: clean
 clean:
 	rm -f $(OBJ_FILES) $(HEADER_DEPS) $(TEST_FILES)
+	rm -f $(TARGET)
