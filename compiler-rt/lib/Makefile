@@ -107,6 +107,7 @@ test: $(TARGET)
 	#$(CC) $(LINK_FLAGS) nullptr_deref.c libasan.bc -fsanitize=address -g0 -cheerp-pretty-code -target cheerp-wasm
 	#$(CXX) $(LINK_FLAGS) heap-overflow.cpp libasan.bc -fsanitize=address -g0 -cheerp-pretty-code -target cheerp-wasm -cheerp-linear-output=asmjs
 	#$(CXX) $(LINK_FLAGS) heap-overflow.cpp libasan.bc -fsanitize=address -g0 -cheerp-pretty-code -target cheerp-wasm
+	$(CXX) $(LINK_FLAGS) global-underflow.cpp libasan.bc -fsanitize=address -g0 -cheerp-pretty-code -target cheerp-wasm
 
 .PHONY: run
 run: test

@@ -2281,7 +2281,10 @@ bool ModuleAddressSanitizer::InstrumentGlobals(IRBuilder<> &IRB, Module &M,
     const uint64_t RightRedzoneSize = getRedzoneSizeForGlobal(SizeInBytes);
     Type *RightRedZoneTy = ArrayType::get(IRB.getInt8Ty(), RightRedzoneSize);
 
-    StructType *NewTy = StructType::get(Ty, RightRedZoneTy);
+    //StructType *NewTy = StructType::get(Ty, RightRedZoneTy);
+    StructType *NewTy = StructType::get(Ty->getContext(),
+                                        ArrayRef<Type *>({Ty, RightRedZoneTy}),
+                                        false, NULL, false, true); // CHEERPASAN: TODO only true for cheerp-wasm
     Constant *NewInitializer = ConstantStruct::get(
         NewTy, G->getInitializer(), Constant::getNullValue(RightRedZoneTy));
 
@@ -2352,6 +2355,7 @@ bool ModuleAddressSanitizer::InstrumentGlobals(IRBuilder<> &IRB, Module &M,
       ODRIndicatorSym->setVisibility(NewGlobal->getVisibility());
       ODRIndicatorSym->setDLLStorageClass(NewGlobal->getDLLStorageClass());
       ODRIndicatorSym->setAlignment(Align(1));
+      ODRIndicatorSym->setSection("asmjs"); // CHEERPASAN: TODO only for cheerp-wasm
       ODRIndicator = ODRIndicatorSym;
     }
 
