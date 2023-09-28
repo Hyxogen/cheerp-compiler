@@ -2248,9 +2248,10 @@ bool ModuleAddressSanitizer::InstrumentGlobals(IRBuilder<> &IRB, Module &M,
   //   size_t padding_for_windows_msvc_incremental_link;
   //   size_t odr_indicator;
   // We initialize an array of such structures and pass it to a run-time call.
-  StructType *GlobalStructTy =
-      StructType::get(IntptrTy, IntptrTy, IntptrTy, IntptrTy, IntptrTy,
-                      IntptrTy, IntptrTy, IntptrTy);
+  StructType *GlobalStructTy = StructType::get(
+      IntptrTy, IntptrTy, IntptrTy, IntptrTy, IntptrTy, IntptrTy, IntptrTy,
+      IntptrTy); // CHEERPASAN: TODO probably also need to give this type the
+                 // asmjs attribute
   SmallVector<GlobalVariable *, 16> NewGlobals(n);
   SmallVector<Constant *, 16> Initializers(n);
 
