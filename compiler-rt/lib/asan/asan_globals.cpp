@@ -26,8 +26,6 @@
 #include "sanitizer_common/sanitizer_stackdepot.h"
 #include "sanitizer_common/sanitizer_symbolizer.h"
 
-#include <cstdio>
-
 namespace __asan {
 
 typedef __asan_global Global;
@@ -361,9 +359,7 @@ void __asan_register_globals(uptr globals_ptr, uptr n) {
 #else
 void __asan_register_globals(__asan_global *globals, uptr n) {
 #endif
-  //printf("registering %u globals\n", n);
   if (!flags()->report_globals) return;
-  //printf("yes\n");
   GET_STACK_TRACE_MALLOC;
   u32 stack_id = StackDepotPut(stack);
   Lock lock(&mu_for_globals);

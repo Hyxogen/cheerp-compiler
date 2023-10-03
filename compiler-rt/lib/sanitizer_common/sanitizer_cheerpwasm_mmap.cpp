@@ -119,6 +119,7 @@ static void FreePages(uptr page, uptr len) {
   }
 }
 
+//TODO use internal_memset
 DECLARE_REAL(void*, memset, void*, int, size_t)
 
 uptr InternalMmap(uptr addr, uptr len, int prot, int flags, int fildes) {

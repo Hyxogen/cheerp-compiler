@@ -86,11 +86,27 @@ CXX_FILES := \
   		sanitizer_common/sanitizer_thread_registry.cpp \
   		sanitizer_common/sanitizer_type_traits.cpp \
   		sanitizer_common/sanitizer_termination.cpp \
-  		sanitizer_common/sanitizer_symbolizer_cheerpwasm.cpp \
   		sanitizer_common/sanitizer_stacktrace_cheerpwasm.cpp \
+  		sanitizer_common/sanitizer_win.cpp \
+		sanitizer_common/sanitizer_allocator_report.cpp \
+  		sanitizer_common/sanitizer_chained_origin_depot.cpp \
+  		sanitizer_common/sanitizer_stack_store.cpp \
   		sanitizer_common/sanitizer_stackdepot.cpp \
-		sanitizer_common/sanitizer_stack_store.cpp \
-  		sanitizer_common/sanitizer_win.cpp
+  		sanitizer_common/sanitizer_stacktrace.cpp \
+  		sanitizer_common/sanitizer_stacktrace_libcdep.cpp \
+  		sanitizer_common/sanitizer_stacktrace_printer.cpp \
+  		sanitizer_common/sanitizer_stacktrace_sparc.cpp \
+  		sanitizer_common/sanitizer_symbolizer.cpp \
+  		sanitizer_common/sanitizer_symbolizer_libbacktrace.cpp \
+  		sanitizer_common/sanitizer_symbolizer_libcdep.cpp \
+  		sanitizer_common/sanitizer_symbolizer_mac.cpp \
+  		sanitizer_common/sanitizer_symbolizer_markup.cpp \
+  		sanitizer_common/sanitizer_symbolizer_posix_libcdep.cpp \
+  		sanitizer_common/sanitizer_symbolizer_report.cpp \
+  		sanitizer_common/sanitizer_symbolizer_win.cpp \
+  		sanitizer_common/sanitizer_symbolizer_cheerpwasm.cpp \
+  		sanitizer_common/sanitizer_unwind_linux_libcdep.cpp \
+  		sanitizer_common/sanitizer_unwind_win.cpp
 
 HEADER_DEPS	:= $(addprefix $(DEP_DIR)/,$(CXX_FILES:.cpp=.d))
 OBJ_FILES	:= $(addprefix $(OBJ_DIR)/,$(CXX_FILES:.cpp=.bc))

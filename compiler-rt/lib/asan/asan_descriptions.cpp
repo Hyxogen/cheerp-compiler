@@ -171,14 +171,10 @@ bool GetHeapAddressInformation(uptr addr, uptr access_size,
 }
 
 static StackTrace GetStackTraceFromId(u32 id) {
-#if SANITIZER_CHEERPWASM && 0// CHEERPASAN: TODO implement stack traces
-  return StackTrace{};
-#else
   CHECK(id);
   StackTrace res = StackDepotGet(id);
   CHECK(res.trace);
   return res;
-#endif
 }
 
 bool DescribeAddressIfHeap(uptr addr, uptr access_size) {

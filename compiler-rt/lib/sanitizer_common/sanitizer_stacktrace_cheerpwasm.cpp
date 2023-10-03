@@ -3,72 +3,66 @@
 #include "sanitizer_stacktrace.h"
 #if SANITIZER_CHEERPWASM
 
-#include <client/cheerp/jsobject.h>
 #include <cuchar>
 #include <cstdio>
 
-namespace [[cheerp::genericjs]] client {
-  class String: public Object {
-  public:
-    int get_length() const;
-    int charCodeAt(int i) const;
-  };
-}
+#define LEAN_CXX_LIB
+#include <client/cheerp/types.h>
 
 namespace __sanitizer {
 
+static uptr _prev_trace_len = 0;
+static uptr _prev_trace[256];
 
-[[cheerp::genericjs]] uptr GetTrace(char16_t* buffer, uptr len) {
-  client::String* trace = nullptr;
-  __asm__("(new Error()).stack" : "=r"(trace) : );
-
-  uptr trace_len = static_cast<uptr>(trace->get_length());
-  uptr res_len = trace_len > len ? len : trace_len;
-
-  for (uptr i = 0; i < res_len; ++i) {
-    buffer[i] = static_cast<char16_t>(trace->charCodeAt(static_cast<int>(i)));
+[[cheerp::genericjs]] uptr ConvertFrameToPC(client::String* frame) {
+  if (client::TArray<client::String>* match = frame->match("\\bwasm-function\\[\\d+\\]:(0x[0-9a-f]+)")) {
+    uptr pc = 0;
+    __asm__("%1[1]" : "=r"(pc) : "r"(match));
+    return pc;
+  } else if (client::TArray<client::String>* match = frame->match(":(\\d+):\\d+(?:\\)|$)")) {
+    uptr pc = 0;
+    __asm__("%1[1]" : "=r"(pc) : "r"(match));
+    return 0x80000000 | pc;
   }
-
-  return res_len;
+  return 0;
 }
 
-uptr ConvertJSString(char *dest, uptr dlen, const char16_t* src, uptr slen) {
-  uptr res_len = slen < dlen ? slen : dlen;
+[[cheerp::genericjs]] uptr GetCallstack(uptr* dest, uptr dest_len) {
+  //client::String* trace = nullptr;
+  client::TArray<client::String>* callstack = nullptr;
+  __asm__("(new Error()).stack.toString().split('\\n')" : "=r"(callstack) : );
 
-  mbstate_t state{};
-  for (uptr i = 0; i < res_len; ++i) {
-    size_t rc = c16rtomb(dest, src[i], &state);
-    if (rc == (size_t) -1)
+  uptr j = 0;
+  for (uptr i = 0; j < dest_len && i < callstack->get_length(); ++i) {
+    client::String* frame = (*callstack)[i];
+
+    if (frame->startsWith("Error"))
+      continue;
+
+    uptr pc = ConvertFrameToPC(frame);
+    dest[j++] = pc;
+
+    if (pc == 0) {
       break;
-    dest += rc;
+    }
   }
-  return res_len;
+  return j;
 }
 
-void BufferedStackTrace::UnwindHere() {
-  char16_t buffer[4096];
-  uptr buffer_len = GetTrace(buffer, sizeof(buffer)/sizeof(buffer[0]));
-  size = ConvertJSString(_trace, sizeof(_trace), buffer, buffer_len);
-  trace = reinterpret_cast<uptr*>(&_trace[0]);
+void BufferedStackTrace::UnwindFast(uptr pc, uptr bp, uptr stack_top, uptr stack_bottom,
+                u32 max_depth) {
+  size = _prev_trace_len > kStackTraceMax ? kStackTraceMax : _prev_trace_len;
+  internal_memcpy(trace_buffer, _prev_trace, size * sizeof(_prev_trace[0]));
+  trace_buffer[0] = pc;
 }
 
-void BufferedStackTrace::Unwind(uptr pc, uptr bp, void *context, bool request_fast,
-            u32 max_depth) {
-  UnwindHere();
+uptr StackTrace::GetCurrentPc() {
+  _prev_trace_len = GetCallstack(_prev_trace, sizeof(_prev_trace)/sizeof(_prev_trace[0]));
+  if (_prev_trace_len) {
+    return _prev_trace[0];
+  }
+  return 0;
 }
-
-void BufferedStackTrace::Unwind(u32 max_depth, uptr pc, uptr bp, void *context,
-                                uptr stack_top, uptr stack_bottom,
-                                bool request_fast_unwind) {
-  UnwindHere();
-}
-
-void StackTrace::Print() const {
-  fwrite(reinterpret_cast<const char*>(trace), 1, size, stderr);
-}
-
-uptr StackTrace::GetCurrentPc() { return 0; }
-//u32 StackDepotPut(StackTrace stack) { return 0; } // CHEERPASAN: TODO this should not be stubbed like this, most likely we need the actual implementation in sanitizer_stackdepot.cpp
 
 } // namespace __sanitizer
 

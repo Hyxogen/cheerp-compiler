@@ -17,28 +17,6 @@
 
 namespace __asan {
 
-  /*
-void InitializeShadowMemory() {
-  // CHEERPASAN: TODO allocate shadow memory based on the upper limit used during
-  // compilation
-  // CHEERPASAN: TODO set highMemEnd midMemEnd etc. in __asan_init
-
-  size_t allocated_pages = __builtin_cheerp_grow_memory(0);
-  size_t needed_pages = (kLowShadowEnd + (WASM_PAGE_SIZE - 1)) / WASM_PAGE_SIZE;
-
-  if (allocated_pages < needed_pages) {
-    size_t ret = __builtin_cheerp_grow_memory(needed_pages - allocated_pages);
-    assert(ret != -1);
-  }
-
-  FastPoisonShadow(kLowShadowBeg, kLowShadowEnd - kLowShadowBeg, 0xff);
-  //memset((void *)kLowShadowBeg, 0xff, kLowShadowEnd - kLowShadowBeg);
-
-  void *low_beg = (void *)kLowShadowBeg;
-  void *null_shadow = (void *)MEM_TO_SHADOW(0);
-  char null_shadow_val = *(char *)null_shadow;
-}*/
-
 uptr FindDynamicShadowStart() {
   uptr shadow_size_bytes = MemToShadowSize(kHighMemEnd);
   return MapDynamicShadow(shadow_size_bytes, ASAN_SHADOW_SCALE,
@@ -65,13 +43,14 @@ void FlushUnneededASanShadowMemory(uptr p, uptr size) {}
 static void (*tsd_destructor)(void *tsd) = nullptr;
 
 struct tsd_key {
-  tsd_key() : key(nullptr) {}
+  // tsd_key() : key(nullptr) {} can't use this, since it will try to initialize
+  // itself in cxx_global_var_init after __asan_init exited
   ~tsd_key() {
     CHECK(tsd_destructor);
     if (key)
       (*tsd_destructor)(key);
   }
-  void *key;
+  void *key = nullptr;
 };
 
 static /*thread_local*/ struct tsd_key key;
