@@ -8,12 +8,14 @@ namespace __sanitizer {
 class CheerpSymbolizerTool : public SymbolizerTool {
  public:
   bool SymbolizePC(uptr addr, SymbolizedStack *frame) override {
+    frame->info.function_offset = addr;
     if (0x80000000 & addr) {
       frame->info.function = internal_strdup("<javascript function>");
-      frame->info.function_offset = 0x80000000 ^ addr;
+      frame->info.file = internal_strdup("main");
+      frame->info.line = 0x80000000 ^ addr;
+      frame->info.column = 0;
     } else {
       frame->info.function = internal_strdup("<wasm function>");
-      frame->info.function_offset = addr;
     }
     return true;
   }

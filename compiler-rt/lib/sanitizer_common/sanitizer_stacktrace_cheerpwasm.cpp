@@ -3,7 +3,6 @@
 #include "sanitizer_stacktrace.h"
 #if SANITIZER_CHEERPWASM
 
-#include <cuchar>
 #include <cstdio>
 
 #define LEAN_CXX_LIB
