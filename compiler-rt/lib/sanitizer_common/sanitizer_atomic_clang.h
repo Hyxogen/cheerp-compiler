@@ -15,11 +15,10 @@
 #define SANITIZER_ATOMIC_CLANG_H
 
 #if SANITIZER_CHEERPWASM
-# include "interception/interception.h"
+# include "sanitizer_libc.h"
 # include <cstdint>
 # include <cstring>
 
-DECLARE_REAL(void*, memcpy, void*, const void*, size_t)
 #endif
 
 #if defined(__i386__) || defined(__x86_64__)
@@ -108,11 +107,11 @@ inline bool atomic_compare_exchange_strong(volatile T *a, typename T::Type *cmp,
                                            memory_order mo) {
 #if SANITIZER_CHEERPWASM
   typename T::Type* aptr = const_cast<typename T::Type*>(&a->val_dont_use);
-  if (memcmp(aptr, cmp, sizeof a->val_dont_use) == 0) {
-    REAL(memcpy)(aptr, &xchg, sizeof a->val_dont_use);
+  if (internal_memcmp(aptr, cmp, sizeof a->val_dont_use) == 0) {
+    internal_memcpy(aptr, &xchg, sizeof a->val_dont_use);
     return true;
   } else {
-    REAL(memcpy)(cmp, aptr, sizeof a->val_dont_use);
+    internal_memcpy(cmp, aptr, sizeof a->val_dont_use);
     return false;
   }
 #else

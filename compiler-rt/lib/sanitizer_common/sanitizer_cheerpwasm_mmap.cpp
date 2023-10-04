@@ -119,8 +119,6 @@ static void FreePages(uptr page, uptr len) {
   }
 }
 
-//TODO use internal_memset
-DECLARE_REAL(void*, memset, void*, int, size_t)
 
 uptr InternalMmap(uptr addr, uptr len, int prot, int flags, int fildes) {
   CHECK_EQ(0, addr % MMAP_PAGESIZE);
@@ -149,7 +147,7 @@ uptr InternalMmap(uptr addr, uptr len, int prot, int flags, int fildes) {
 
   ReservePages(page, page_count);
   uptr res = page * MMAP_PAGESIZE;
-  REAL(memset)(reinterpret_cast<void*>(res), 0, len);
+  internal_memset(reinterpret_cast<void*>(res), 0, len);
   return res;
 }
 

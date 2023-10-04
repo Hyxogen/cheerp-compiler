@@ -26,7 +26,7 @@
 // There is no general interception at all on Fuchsia or Cheerp.
 // Only the functions in asan_interceptors_memintrinsics.cpp are
 // really defined to replace libc functions.
-#if !SANITIZER_FUCHSIA && !SANITIZER_CHEERPWASM
+#if !SANITIZER_FUCHSIA //&& !SANITIZER_CHEERPWASM
 
 #  if SANITIZER_POSIX
 #    include "sanitizer_common/sanitizer_posix.h"
@@ -304,10 +304,12 @@ INTERCEPTOR(int, swapcontext, struct ucontext_t *oucp,
 #define siglongjmp __siglongjmp14
 #endif
 
+#if !SANITIZER_CHEERPWASM //CHEERPASAN: TODO intercept if needed
 INTERCEPTOR(void, longjmp, void *env, int val) {
   __asan_handle_no_return();
   REAL(longjmp)(env, val);
 }
+#endif
 
 #if ASAN_INTERCEPT__LONGJMP
 INTERCEPTOR(void, _longjmp, void *env, int val) {
@@ -627,6 +629,7 @@ DECLARE_EXTERN_INTERCEPTOR_AND_WRAPPER(int, vfork)
 
 // ---------------------- InitializeAsanInterceptors ---------------- {{{1
 namespace __asan {
+#if !SANITIZER_CHEERPWASM
 void InitializeAsanInterceptors() {
   static bool was_called_once;
   CHECK(!was_called_once);
@@ -655,8 +658,10 @@ void InitializeAsanInterceptors() {
   ASAN_INTERCEPT_FUNC(strtoll);
 #endif
 
+#if !SANITIZER_CHEERPWASM //CHEERPASAN: TODO check
   // Intecept jump-related functions.
   ASAN_INTERCEPT_FUNC(longjmp);
+#endif
 
 #if ASAN_INTERCEPT_SWAPCONTEXT
   ASAN_INTERCEPT_FUNC(getcontext);
@@ -720,6 +725,7 @@ void InitializeAsanInterceptors() {
 
   VReport(1, "AddressSanitizer: libc interceptors initialized\n");
 }
+#endif // !SANITIZER_CHEERPWASM
 
 } // namespace __asan
 

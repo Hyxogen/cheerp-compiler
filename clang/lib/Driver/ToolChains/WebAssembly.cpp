@@ -23,6 +23,8 @@
 #include "llvm/Support/VirtualFileSystem.h"
 #include "llvm/Option/ArgList.h"
 
+#include <iostream>
+
 using namespace clang::driver;
 using namespace clang::driver::tools;
 using namespace clang::driver::toolchains;
@@ -582,10 +584,12 @@ void cheerp::Link::ConstructJob(Compilation &C, const JobAction &JA,
 
     // Add wasm helper if needed
     Arg *CheerpLinearOutput = Args.getLastArg(options::OPT_cheerp_linear_output_EQ);
+
+    Arg *Sanitizers = Args.getLastArg(options::OPT_fsanitize_EQ);
     llvm::Triple::EnvironmentType env = getToolChain().getTriple().getEnvironment();
     if(((CheerpLinearOutput && CheerpLinearOutput->getValue() == StringRef("wasm")) ||
        (!CheerpLinearOutput && env == llvm::Triple::WebAssembly)) &&
-	hasUnalignedMemory)
+	hasUnalignedMemory && (!Sanitizers || !Sanitizers->containsValue("address")))
     {
       CmdArgs.push_back(Args.MakeArgString(getToolChain().GetFilePath("libwasm.bc")));
     }

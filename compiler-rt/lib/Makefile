@@ -43,6 +43,7 @@ CXX_FILES := \
   		asan/asan_win.cpp \
   		asan/asan_cheerpwasm.cpp \
 		interception/interception_linux.cpp \
+		interception/interception_cheerpwasm.cpp \
   		interception/interception_mac.cpp \
   		interception/interception_win.cpp \
   		interception/interception_type_test.cpp \
@@ -125,7 +126,8 @@ test: $(TARGET)
 	#$(CXX) $(LINK_FLAGS) heap-overflow.cpp libasan.bc -fsanitize=address -g0 -cheerp-pretty-code -target cheerp-wasm -cheerp-linear-output=asmjs
 	#$(CXX) $(LINK_FLAGS) heap-overflow.cpp libasan.bc -fsanitize=address -g0 -cheerp-pretty-code -target cheerp-wasm
 	#$(CXX) $(LINK_FLAGS) global-underflow.cpp libasan.bc -fsanitize=address -g0 -cheerp-pretty-code -target cheerp-wasm
-	$(CXX) $(LINK_FLAGS) double-free.cpp libasan.bc -fsanitize=address -g0 -cheerp-pretty-code -target cheerp-wasm
+	#$(CXX) $(LINK_FLAGS) double-free.cpp libasan.bc -fsanitize=address -g0 -cheerp-pretty-code -target cheerp-wasm
+	$(CXX) $(LINK_FLAGS) -DTEST_MEMCPY_SIZE_OVERFLOW memset_test.cpp libasan.bc -fsanitize=address -g0 -cheerp-pretty-code -target cheerp-wasm
 
 .PHONY: run
 run: test

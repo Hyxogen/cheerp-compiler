@@ -163,9 +163,12 @@ const interpose_substitution substitution_##func_name[] \
 # define REAL(x) __unsanitized_##x
 # define DECLARE_REAL(ret_type, func, ...)
 #elif SANITIZER_CHEERPWASM
+
 # define REAL(x) __cheerp_##x
 # define DECLARE_REAL(ret_type, func, ...) \
-  extern "C" ret_type REAL(func)(__VA_ARGS__);
+    extern "C" ret_type REAL(func)(__VA_ARGS__);
+# define ASSIGN_REAL(dst, src)
+
 #elif !SANITIZER_APPLE
 # define PTR_TO_REAL(x) real_##x
 # define REAL(x) __interception::PTR_TO_REAL(x)
@@ -184,7 +187,7 @@ const interpose_substitution substitution_##func_name[] \
 # define ASSIGN_REAL(x, y)
 #endif  // SANITIZER_APPLE
 
-#if !SANITIZER_FUCHSIA
+#if !SANITIZER_FUCHSIA /*&& !SANITIZER_CHEERPWASM*/
 #  define DECLARE_REAL_AND_INTERCEPTOR(ret_type, func, ...) \
     DECLARE_REAL(ret_type, func, __VA_ARGS__)               \
     extern "C" ret_type WRAP(func)(__VA_ARGS__);
@@ -223,7 +226,6 @@ const interpose_substitution substitution_##func_name[] \
   extern "C" INTERCEPTOR_ATTRIBUTE ret_type func(__VA_ARGS__)
 
 #elif !SANITIZER_APPLE
-
 #define INTERCEPTOR(ret_type, func, ...) \
   DEFINE_REAL(ret_type, func, __VA_ARGS__) \
   DECLARE_WRAPPER(ret_type, func, __VA_ARGS__) \
@@ -281,7 +283,7 @@ typedef unsigned long uptr;
 #define INCLUDED_FROM_INTERCEPTION_LIB
 
 #if SANITIZER_LINUX || SANITIZER_FREEBSD || SANITIZER_NETBSD || \
-    SANITIZER_SOLARIS
+    SANITIZER_SOLARIS || SANITIZER_CHEERPWASM
 
 # include "interception_linux.h"
 # define INTERCEPT_FUNCTION(func) INTERCEPT_FUNCTION_LINUX_OR_FREEBSD(func)
