@@ -16,7 +16,7 @@ static
 void NullDeref(int *ptr) {
   // CHECK: ERROR: AddressSanitizer: {{SEGV|access-violation|unknown-crash}} on {{unknown address|address}}
   // CHECK:   {{0x0*000.. .*pc 0x.*}}
-  ptr[10]++;  // BOOM
+  ptr[2]++;  // BOOM
   // atos on Mac cannot extract the symbol name correctly. Also, on FreeBSD 9.2
   // the demangling function rejects local names with 'L' in front of them.
   // DONTCHECK: {{    #0 0x.* in .*NullDeref.*null_deref.cpp}}
