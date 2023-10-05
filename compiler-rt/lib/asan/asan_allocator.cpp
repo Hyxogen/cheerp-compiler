@@ -244,6 +244,7 @@ typedef Quarantine<QuarantineCallback, AsanChunk> AsanQuarantine;
 typedef AsanQuarantine::Cache QuarantineCache;
 
 void AsanMapUnmapCallback::OnMap(uptr p, uptr size) const {
+  //Printf("just mapped %x, %u bytes [%x, %x]\n", p, size, p, p + size);
   PoisonShadow(p, size, kAsanHeapLeftRedzoneMagic);
   // Statistics.
   AsanStats &thread_stats = GetCurrentThreadStats();
@@ -251,6 +252,10 @@ void AsanMapUnmapCallback::OnMap(uptr p, uptr size) const {
   thread_stats.mmaped += size;
 }
 void AsanMapUnmapCallback::OnUnmap(uptr p, uptr size) const {
+  // Printf("just unmapped %x, %u bytes [%x, %x]\n", p, size, p, p + size);
+  //  CHEERPASAN: TODO as unmaping doesn't really mean the same thing on
+  //  cheerp-wasm, we should probably not unpoison the shadow, but actually
+  //  poison it
   PoisonShadow(p, size, 0);
   // We are about to unmap a chunk of user memory.
   // Mark the corresponding shadow memory as not needed.
