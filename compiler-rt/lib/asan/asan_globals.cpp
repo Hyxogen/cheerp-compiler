@@ -390,18 +390,6 @@ void __asan_register_globals(__asan_global *globals, uptr n) {
             globals[i].odr_indicator == 0);
       continue;
     }
-#if SANITIZER_CHEERPWASM
-    //  CHEERPASAN: Okay, this really doesn't seem right. As far as I can tell.
-    //  On linux it seems to not poison anything at the start, which I fine I
-    //  guess as stuff is protected by paging. It only poisons on demand. Tbh
-    //  when I think about it know that doesn't even seem that weird, memsetting
-    //  like 20TB is silly and will not only take probably forever, but even
-    //  more likely will crash your program. But on cheerp, this won't work. We
-    //  want that nullptr dereferences trigger asan, thus we must poison the
-    //  stuff
-    //  CHEERPASAN: TODO check
-    FastPoisonShadow(globals[i].beg, globals[i].size, 0);
-#endif // SANITIZER_CHEERPWASM
     RegisterGlobal(&globals[i]);
   }
 
@@ -426,9 +414,6 @@ void __asan_unregister_globals(__asan_global *globals, uptr n) {
       // See comment in __asan_register_globals.
       continue;
     }
-#if SANITIZER_CHEERPWASM
-    FastPoisonShadow(globals[i].beg, globals[i].size, 0xff);// CHEERPASAN: TODO See __asan_register_globals
-#endif
     UnregisterGlobal(&globals[i]);
   }
 
