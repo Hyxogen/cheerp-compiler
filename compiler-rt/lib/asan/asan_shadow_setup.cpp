@@ -100,9 +100,8 @@ void InitializeShadowMemory() {
     // protect the gap.
     ProtectGap(kShadowGapBeg, kShadowGapEnd - kShadowGapBeg + 1);
 #if SANITIZER_CHEERPWASM
-    // Poison the lowest 32 bytes, as these have special meaning in cheerp
-    // CHEERPASAN: TODO check if these lowest are not supposed to be dereferenced
-    FastPoisonShadow(0, sizeof(uint32_t) * 8, 0xfe);
+    // Poison the lowest 8 bytes to detect nullptr dereferences
+    FastPoisonShadow(0, 8, 0xfe);
 #endif
     CHECK_EQ(kShadowGapEnd, kHighShadowBeg - 1);
   } else if (kMidMemBeg &&
