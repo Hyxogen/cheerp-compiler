@@ -53,6 +53,7 @@ public:
 
 static Page pages[MMAP_PAGECOUNT];
 static uptr max_page_count = 0;
+static uptr mapped_pages = 0;
 
 static uptr PageCount() {
   return sizeof(pages) / sizeof(pages[0]);
@@ -95,6 +96,17 @@ static bool IsFree(uptr page, uptr page_count) {
 
 static void ReservePages(uptr page, uptr page_count) {
   CHECK_LT(page, PageCount());
+
+  uptr last_page = page + page_count;
+  if (last_page > mapped_pages) {
+    uptr needed_pages = last_page - mapped_pages;
+
+    uptr wasm_pages = RoundUpTo(needed_pages * MMAP_PAGESIZE, WASM_PAGESIZE) / WASM_PAGESIZE;
+    if (__builtin_cheerp_grow_memory(wasm_pages) == -1) {
+      abort();
+    }
+    mapped_pages = last_page;
+  }
 
   uptr end = page + page_count;
   for (uptr idx = page; idx < end; ++idx) {
@@ -158,17 +170,13 @@ void SetupMemoryMapping() {
     pages[idx].MakeFree();
   }
 
-  max_page_count = reinterpret_cast<uptr>(_maxAddress) / WASM_PAGESIZE;
-  int used = __builtin_cheerp_grow_memory(0);
-  if (used == -1) {
-    used = max_page_count;// assume that all memory is already reserved and hope for the best
-  }
+  max_page_count = reinterpret_cast<uptr>(_maxAddress) / MMAP_PAGESIZE;
 
-  if (used < max_page_count) {
-    unsigned int ret = __builtin_cheerp_grow_memory(max_page_count - used);
-    if (ret == -1) {
-      abort();//If this is failing, you're not running with enough memory
-    }
+  mapped_pages = __builtin_cheerp_grow_memory(0);
+  if (mapped_pages == -1) {
+    mapped_pages = max_page_count; // and hope for the best
+  } else {
+    mapped_pages = (mapped_pages * WASM_PAGESIZE) / MMAP_PAGESIZE;
   }
 
   uptr used_pages = RoundUpTo(reinterpret_cast<uptr>(_heapStart), MMAP_PAGESIZE) / MMAP_PAGESIZE;
