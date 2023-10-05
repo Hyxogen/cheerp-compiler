@@ -17,14 +17,10 @@ __attribute__((cheerp_asmjs)) char* volatile _maxAddress = (char*)0xdeadbeef;
 
 namespace __sanitizer {
 
-//TODO make mmap pages smaller
-//#define WASM_PAGESIZE (64*1024)
-//#define WASM_MAX_PAGES (65536)
-//#define MMAP_PAGESIZE 4096
-//#define MMAP_PAGECOUNT (WASM_PAGESIZE*WASM_MAX_PAGES)/MMAP_PAGESIZE
 constexpr static uptr WASM_PAGESIZE = 64 * 1024;
 constexpr static uptr WASM_MAX_PAGES = 65536;
-constexpr static uptr MMAP_PAGESIZE = 4096;
+//constexpr static uptr MMAP_PAGESIZE = 4096;
+constexpr static uptr MMAP_PAGESIZE = WASM_PAGESIZE;
 constexpr static uptr MMAP_PAGECOUNT = ((uptr) -1)/MMAP_PAGESIZE;
 
 struct Page {
@@ -176,11 +172,7 @@ void SetupMemoryMapping() {
   }
 
   uptr i = (reinterpret_cast<uptr>(_heapStart) + (MMAP_PAGESIZE -1)) / MMAP_PAGESIZE;
-  //uptr i = ((used * WASM_PAGESIZE) + (MMAP_PAGESIZE - 1))  / MMAP_PAGESIZE;
-  /*printf(
-      "unrounded %zu, already using %u pages, heapStart: %p, internal: %zu\n",
-      used, i, (void*) _heapStart, sizeof(pages));*/
-  ReservePages(0, i);// use _heapStart instead of __buitin_cheerp_grow_memory(0) for how many pages are already used
+  ReservePages(0, i);
 }
 
 uptr GetMaxUserVirtualAddress() {
