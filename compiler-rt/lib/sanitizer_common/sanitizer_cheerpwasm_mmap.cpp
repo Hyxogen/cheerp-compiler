@@ -154,14 +154,14 @@ void InternalMunmap(uptr addr, uptr len) {
 
 //TODO add a check if trying to mmap without having it initialized here
 void SetupMemoryMapping() {
+  for (uptr idx = 0; idx < PageCount(); ++idx) {
+    pages[idx].MakeFree();
+  }
+
   max_page_count = reinterpret_cast<uptr>(_maxAddress) / WASM_PAGESIZE;
   int used = __builtin_cheerp_grow_memory(0);
   if (used == -1) {
     used = max_page_count;// assume that all memory is already reserved and hope for the best
-  }
-
-  for (uptr idx = 0; idx < PageCount(); ++idx) {
-    pages[idx].MakeFree();
   }
 
   if (used < max_page_count) {
@@ -171,8 +171,8 @@ void SetupMemoryMapping() {
     }
   }
 
-  uptr i = (reinterpret_cast<uptr>(_heapStart) + (MMAP_PAGESIZE -1)) / MMAP_PAGESIZE;
-  ReservePages(0, i);
+  uptr used_pages = RoundUpTo(reinterpret_cast<uptr>(_heapStart), MMAP_PAGESIZE) / MMAP_PAGESIZE;
+  ReservePages(0, used_pages);
 }
 
 uptr GetMaxUserVirtualAddress() {
