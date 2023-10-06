@@ -1,7 +1,5 @@
-// RUN: %clang_asan -O2 %s -o %t
-// We need replace_str=0, intercept_strlen=0 and replace_intrin=0 to avoid
-// reporting errors in strlen() and memcpy() called by printf().
-// RUN: not %run %t 2>&1 | FileCheck --check-prefix=CHECK-ON %s
+// RUN: %clang_asan -O2 %s -o %t && not %run %t 2>&1 | FileCheck --check-prefix=CHECK-ON %s
+// RUN: %clang_asan -cheerp-linear-output=asmjs -O2 %s -o %t && not %run %t 2>&1 | FileCheck --check-prefix=CHECK-ON %s
 
 #include <stdio.h>
 #include <stdlib.h>
