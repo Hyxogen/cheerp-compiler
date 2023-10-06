@@ -207,6 +207,7 @@ bool AllocaLowering::runOnFunction(Function& F, DominatorTree& DT, cheerp::Globa
 
 		NumAllocasTransformedToGEPs++;
 	}
+
 	// Lower dynamically sized allocas
 	for (const auto& a: dynAllocas)
 	{
@@ -290,7 +291,6 @@ bool AllocaLowering::runOnFunction(Function& F, DominatorTree& DT, cheerp::Globa
 		IRBuilder<> AfterBuilder(ci->getNextNode());
 		AfterBuilder.CreateCall(setStack, stackPtr);
 	}
-
 	return true;
 }
 using namespace llvm;
