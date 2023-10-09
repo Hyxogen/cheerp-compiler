@@ -72,3 +72,5 @@ pythonenv*
 /lldb/docs/python_api/
 *.bc
 *.d
+/*.wasm
+/*.out
