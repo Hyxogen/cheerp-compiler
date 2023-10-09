@@ -134,6 +134,8 @@ DECLARE_REAL(uptr, strnlen, const char *s, uptr maxlen)
 DECLARE_REAL(char*, strstr, const char *s1, const char *s2)
 
 #if SANITIZER_CHEERPWASM
+#include <stdarg.h>
+#include <stdio.h>
 DECLARE_REAL(void*, memmove, void* dest, const void* src, uptr n)
 DECLARE_REAL(char*, strcat, char* dst, const char* src)
 DECLARE_REAL(char*, strncat, char* dst, const char* src, uptr sz)
@@ -143,6 +145,17 @@ DECLARE_REAL(long, strtol, const char *nptr, char **endptr, int base)
 DECLARE_REAL(int, atoi, const char* nptr)
 DECLARE_REAL(long, atol, const char* nptr)
 DECLARE_REAL(char*, strdup, const char* s)
+
+DECLARE_REAL(int, printf, const char *format, ...)
+DECLARE_REAL(int, sprintf, char *str, const char *format, ...)
+DECLARE_REAL(int, snprintf, char *str, size_t size, const char *format, ...)
+DECLARE_REAL(int, vprintf, const char *format, va_list ap)
+DECLARE_REAL(int, vsprintf, char *str, const char *format, va_list ap)
+DECLARE_REAL(int, vsnprintf, char *str, size_t size, const char *format, va_list ap)
+DECLARE_REAL(int, asprintf, char **strp, const char *format, ...)
+DECLARE_REAL(int, vasprintf, char **strp, const char *format, va_list ap)
+DECLARE_REAL(int, fprintf, FILE *stream, const char *format, ...)
+DECLARE_REAL(int, vfprintf, FILE *stream, const char *format, va_list ap)
 #endif // SANITIZER_CHEERPWASM
 
 #  if !SANITIZER_APPLE

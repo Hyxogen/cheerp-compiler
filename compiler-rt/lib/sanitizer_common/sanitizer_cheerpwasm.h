@@ -5,6 +5,7 @@
 
 #if SANITIZER_CHEERPWASM
 
+#include "sanitizer_platform_limits_cheerpwasm.h"
 #include "sanitizer_internal_defs.h"
 
 namespace __sanitizer {
