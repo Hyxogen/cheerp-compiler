@@ -1,0 +1,23 @@
+name: Test
+
+on:
+  push:
+    branches: [ "master", "feat-libasan" ]
+
+jobs:
+  test:
+    name: test
+    steps:
+      - name: Install dependencies
+      - run: sudo apt update && sudo apt upgrade -y
+      - run: sudo apt install -y cmake python3 python3-distutils ninja-build mold
+      - uses: actions/checkout@v3
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        max-size: 500M
+        key: sccache
+        variant: sccache
+      - name: Build
+        run: cmake -DCMAKE_INSTALL_PREFIX=/opt/cheerp -S llvm -B build -C llvm/CheerpCmakeConf.cmake -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS=clang -G Ninja -DLLVM_USE_LINKER=mold -DCMAKE_CXX_FLAGS_RELEASE=-O3 -DCMAKE_CXX_COMPILER=/usr/bin/g++ -DCMAKE_C_COMPILER=/usr/bin/gcc -DLLVM_ENABLE_ASSERTIONS=OFF -DLLVM_CCACHE_BUILD=On
+        run: ninja -C build
+        run: ninja -C build install
