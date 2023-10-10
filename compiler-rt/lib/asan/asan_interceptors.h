@@ -136,6 +136,7 @@ DECLARE_REAL(char*, strstr, const char *s1, const char *s2)
 #if SANITIZER_CHEERPWASM
 #include <stdarg.h>
 #include <stdio.h>
+
 DECLARE_REAL(void*, memmove, void* dest, const void* src, uptr n)
 DECLARE_REAL(char*, strcat, char* dst, const char* src)
 DECLARE_REAL(char*, strncat, char* dst, const char* src, uptr sz)
@@ -161,6 +162,9 @@ DECLARE_REAL(char*, strcasestr, const char *haystack, const char *needle)
 
 DECLARE_REAL(int, strcmp, const char *s1, const char *s2)
 DECLARE_REAL(int, strncmp, const char *s1, const char *s2, size_t n)
+
+DECLARE_REAL(size_t, mbstowcs, wchar_t *dest, const char *src, size_t len);
+DECLARE_REAL(size_t, mbsrtowcs, wchar_t *dest, const char **src, size_t len, void *ps);
 #endif // SANITIZER_CHEERPWASM
 
 #  if !SANITIZER_APPLE
