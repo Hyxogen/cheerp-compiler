@@ -88,6 +88,8 @@
 #include <string>
 #include <tuple>
 
+#include <iostream>
+
 using namespace llvm;
 
 #define DEBUG_TYPE "asan"
@@ -1748,6 +1750,12 @@ bool ModuleAddressSanitizer::shouldInstrumentGlobal(GlobalVariable *G) const {
   Type *Ty = G->getValueType();
   LLVM_DEBUG(dbgs() << "GLOBAL: " << *G << "\n");
 
+  if (TargetTriple.isCheerpWasm()) {
+    if (G->getSection() != StringRef("asmjs")) {
+      return false;
+    }
+  }
+
   if (G->hasSanitizerMetadata() && G->getSanitizerMetadata().NoAddress)
     return false;
   if (!Ty->isSized()) return false;
@@ -2656,6 +2664,12 @@ bool AddressSanitizer::instrumentFunction(Function &F,
   if (F.getLinkage() == GlobalValue::AvailableExternallyLinkage) return false;
   if (!ClDebugFunc.empty() && ClDebugFunc == F.getName()) return false;
   if (F.getName().startswith("__asan_")) return false;
+
+  if (TargetTriple.isCheerpWasm()) {
+    if (!F.hasSection() || F.getSection() != StringRef("asmjs")) {
+      return false;
+    }
+  }
 
   bool FunctionModified = false;
 
