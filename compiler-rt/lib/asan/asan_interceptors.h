@@ -158,6 +158,9 @@ DECLARE_REAL(int, fprintf, FILE *stream, const char *format, ...)
 DECLARE_REAL(int, vfprintf, FILE *stream, const char *format, va_list ap)
 
 DECLARE_REAL(char*, strcasestr, const char *haystack, const char *needle)
+
+DECLARE_REAL(int, strcmp, const char *s1, const char *s2)
+DECLARE_REAL(int, strncmp, const char *s1, const char *s2, size_t n)
 #endif // SANITIZER_CHEERPWASM
 
 #  if !SANITIZER_APPLE
