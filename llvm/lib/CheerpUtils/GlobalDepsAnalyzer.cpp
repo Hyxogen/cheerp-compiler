@@ -90,7 +90,8 @@ void GlobalDepsAnalyzer::simplifyCalls(llvm::Module & module) const
 
 					//Replace call(bitcast) with bitcast(call)
 					//Might fail and leave the CI calling to a bitcast if the prerequisite are not met (eg. the number of paramethers differ)
-					replaceCallOfBitCastWithBitCastOfCall(ci, /*mayFail*/ true);
+					// CHEERPASAN: TODO check if ok to set performPtrIntConversions to true
+					replaceCallOfBitCastWithBitCastOfCall(ci, /*mayFail*/ true, true);
 
 					Function* calledFunc = ci.getCalledFunction();
 
@@ -943,7 +944,8 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 							devirtualizedCall = ConstantExpr::getBitCast(devirtualizedCall, calledValue->getType());
 						ci->setCalledOperand(devirtualizedCall);
 
-						replaceCallOfBitCastWithBitCastOfCall(*ci);
+						// CHEERPASAN: TODO check if ok to set performPtrIntConversions to true
+						replaceCallOfBitCastWithBitCastOfCall(*ci, false, true);
 
 						devirtualizedCalls.push_back({ci, toBeCalledFunc});
 					}
