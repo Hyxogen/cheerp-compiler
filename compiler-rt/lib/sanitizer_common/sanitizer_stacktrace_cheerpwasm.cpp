@@ -15,19 +15,23 @@ static uptr _prev_trace[256];
 
 [[cheerp::genericjs]] uptr ConvertFrameToPC(client::String* frame) {
   if (client::TArray<client::String>* match = frame->match("\\bwasm-function\\[\\d+\\]:(0x[0-9a-f]+)")) {
-    uptr pc = 0;
-    __asm__("%1[1]" : "=r"(pc) : "r"(match));
-    return pc;
-  } else if (client::TArray<client::String>* match = frame->match(":(\\d+):\\d+(?:\\)|$)")) {
-    uptr pc = 0;
-    __asm__("%1[1]" : "=r"(pc) : "r"(match));
-    return 0x80000000 | pc;
+    if (match->get_length() >= 2) {
+      uptr pc = 0;
+      __asm__("%1[1]" : "=r"(pc) : "r"(match));
+      return pc;
+    }
+  }
+  if (client::TArray<client::String>* match = frame->match(":(\\d+):\\d+(?:\\)|$)")) {
+    if (match->get_length() >= 2) {
+      uptr pc = 0;
+      __asm__("%1[1]" : "=r"(pc) : "r"(match));
+      return 0x80000000 | pc;
+    }
   }
   return 0;
 }
 
 [[cheerp::genericjs]] uptr GetCallstack(uptr* dest, uptr dest_len) {
-  //client::String* trace = nullptr;
   client::TArray<client::String>* callstack = nullptr;
   __asm__("(new Error()).stack.toString().split('\\n')" : "=r"(callstack) : );
 
