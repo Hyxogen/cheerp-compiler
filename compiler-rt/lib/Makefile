@@ -47,6 +47,8 @@ CXX_FILES := \
   		interception/interception_mac.cpp \
   		interception/interception_win.cpp \
   		interception/interception_type_test.cpp \
+		lsan/lsan_common.cpp \
+		lsan/lsan_common_cheerpwasm.cpp \
 		sanitizer_common/sanitizer_allocator.cpp \
   		sanitizer_common/sanitizer_common.cpp \
   		sanitizer_common/sanitizer_deadlock_detector1.cpp \
@@ -70,6 +72,7 @@ CXX_FILES := \
   		sanitizer_common/sanitizer_platform_limits_netbsd.cpp \
   		sanitizer_common/sanitizer_platform_limits_posix.cpp \
   		sanitizer_common/sanitizer_platform_limits_solaris.cpp \
+  		sanitizer_common/sanitizer_platform_limits_cheerpwasm.cpp \
   		sanitizer_common/sanitizer_posix.cpp \
   		sanitizer_common/sanitizer_printf.cpp \
   		sanitizer_common/sanitizer_procmaps_common.cpp \
@@ -122,12 +125,8 @@ $(OBJ_DIR)/%.bc: %.cpp Makefile
 
 .PHONY: test
 test: $(TARGET)
-	#$(CC) $(LINK_FLAGS) nullptr_deref.c libasan.bc -fsanitize=address -g0 -cheerp-pretty-code -target cheerp-wasm
-	#$(CXX) $(LINK_FLAGS) heap-overflow.cpp libasan.bc -fsanitize=address -g0 -cheerp-pretty-code -target cheerp-wasm -cheerp-linear-output=asmjs
-	#$(CXX) $(LINK_FLAGS) heap-overflow.cpp libasan.bc -fsanitize=address -g0 -cheerp-pretty-code -target cheerp-wasm
-	#$(CXX) $(LINK_FLAGS) global-underflow.cpp libasan.bc -fsanitize=address -g0 -cheerp-pretty-code -target cheerp-wasm
-	#$(CXX) $(LINK_FLAGS) double-free.cpp libasan.bc -fsanitize=address -g0 -cheerp-pretty-code -target cheerp-wasm
-	$(CXX) $(LINK_FLAGS) -DTEST_MEMCPY_SIZE_OVERFLOW memset_test.cpp libasan.bc -fsanitize=address -g0 -cheerp-pretty-code -target cheerp-wasm
+	#$(CC) $(LINK_FLAGS) strcasestr_strict.c libasan.bc -fsanitize=address -g0 -cheerp-pretty-code -target cheerp-wasm -Itest
+	$(CXX) $(LINK_FLAGS) alloca_big_alignment.cpp libasan.bc -fsanitize=address -g0 -cheerp-pretty-code -target cheerp-wasm -Itest
 
 .PHONY: run
 run: test
