@@ -103,7 +103,7 @@ static void ReservePages(uptr page, uptr page_count) {
 
     uptr wasm_pages = RoundUpTo(needed_pages * MMAP_PAGESIZE, WASM_PAGESIZE) / WASM_PAGESIZE;
     if (__builtin_cheerp_grow_memory(wasm_pages) == -1) {
-      abort();
+      abort(); // If this triggered, you probably did not give enough memory to your program
     }
     mapped_pages = last_page;
   }
