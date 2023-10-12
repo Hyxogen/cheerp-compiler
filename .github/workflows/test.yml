@@ -47,8 +47,8 @@ jobs:
           CFLAGS: "-Wno-int-conversion -DUSE_DL_PREFIX"
         run: |
           mkdir -p "$GITHUB_WORKSPACE/$GENERICJS_DIR" "$GITHUB_WORKSPACE/$ASMJS_DIR" 
-          (cd "$GITHUB_WORKSPACE/$GENERICJS_DIR" && CC="$GENERICJS_CC" ../configure --target=cheerp --disable-shared --prefix="$CHEERP_PREFIX" --with-malloc=dlmalloc)
-          (cd "$GITHUB_WORKSPACE/$ASMJS_DIR" && CC="$ASMJS_CC" ../configure --target=cheerp-wasm --disable-shared --prefix="$CHEERP_PREFIX" --with-malloc=dlmalloc)
+          (cd "$GITHUB_WORKSPACE/$GENERICJS_DIR" && CC="$CHEERP_DEST/$GENERICJS_CC" ../configure --target=cheerp --disable-shared --prefix="$CHEERP_PREFIX" --with-malloc=dlmalloc)
+          (cd "$GITHUB_WORKSPACE/$ASMJS_DIR" && CC="$CHEERP_DEST/$ASMJS_CC" ../configure --target=cheerp-wasm --disable-shared --prefix="$CHEERP_PREFIX" --with-malloc=dlmalloc)
           make -C "$GITHUB_WORKSPACE/$GENERICJS_DIR" -j
           make -C "$GITHUB_WORKSPACE/$GENERICJS_DIR" install
           make -C "$GITHUB_WORKSPACE/$ASMJS_DIR" -j
