@@ -39,16 +39,13 @@ jobs:
         env:
           GENERICJS_DIR: build_genericjs
           ASMJS_DIR: build_asmjs
-          RANLIB: "/bin/llvm-ar s"
-          AR: "/bin/llvm-ar"
           GENERICJS_CC: "/bin/clang -target cheerp"
           ASMJS_CC: "/bin/clang -target cheerp-wasm"
-          LD: "/bin/llvm-link"
           CFLAGS: "-Wno-int-conversion -DUSE_DL_PREFIX"
         run: |
-          mkdir -p "$GITHUB_WORKSPACE/$GENERICJS_DIR" "$GITHUB_WORKSPACE/$ASMJS_DIR" 
-          (cd "$GITHUB_WORKSPACE/$GENERICJS_DIR" && CC="$CHEERP_DEST/$GENERICJS_CC" ../configure --target=cheerp --disable-shared --prefix="$CHEERP_PREFIX" --with-malloc=dlmalloc)
-          (cd "$GITHUB_WORKSPACE/$ASMJS_DIR" && CC="$CHEERP_DEST/$ASMJS_CC" ../configure --target=cheerp-wasm --disable-shared --prefix="$CHEERP_PREFIX" --with-malloc=dlmalloc)
+          mkdir -p "$GITHUB_WORKSPACE/$GENERICJS_DIR" "$GITHUB_WORKSPACE/$ASMJS_DIR"
+          (cd "$GITHUB_WORKSPACE/$GENERICJS_DIR" && CC="$CHEERP_DEST/$GENERICJS_CC" RANLIB="$CHEERP_DEST/bin/llvm-ar s" AR="$CHEERP_DEST/bin/llvm-ar" LD="$CHEERP_DEST/bin/llvm-link" ../configure --target=cheerp --disable-shared --prefix="$CHEERP_DEST" --with-malloc=dlmalloc)
+          (cd "$GITHUB_WORKSPACE/$ASMJS_DIR" && CC="$CHEERP_DEST/$ASMJS_CC" RANLIB="$CHEERP_DEST/bin/llvm-ar s" AR="$CHEERP_DEST/bin/llvm-ar" LD="$CHEERP_DEST/bin/llvm-link"  ../configure --target=cheerp-wasm --disable-shared --prefix="$CHEERP_DEST" --with-malloc=dlmalloc)
           make -C "$GITHUB_WORKSPACE/$GENERICJS_DIR" -j
           make -C "$GITHUB_WORKSPACE/$GENERICJS_DIR" install
           make -C "$GITHUB_WORKSPACE/$ASMJS_DIR" -j
