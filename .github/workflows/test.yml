@@ -4,6 +4,9 @@ on:
   push:
     branches: [ "master", "feat-libasan" ]
 
+env:
+  CHEERP_DEST: /opt/cheerp
+
 jobs:
   test:
     name: test
@@ -13,14 +16,66 @@ jobs:
         run: sudo apt update && sudo apt upgrade -y && sudo apt install -y cmake python3 python3-distutils ninja-build mold
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          ref: 'feat-libasan'
+          path: 'cheerp-compiler'
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
           max-size: 500M
           key: ccache
           variant: ccache
-      - name: Build
+      - name: Build and install cheerp
         run: |
-          cmake -DCMAKE_INSTALL_PREFIX=/opt/cheerp -S llvm -B build -C llvm/CheerpCmakeConf.cmake -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS=clang -G Ninja -DLLVM_USE_LINKER=mold -DCMAKE_CXX_FLAGS_RELEASE=-O3 -DCMAKE_CXX_COMPILER=/usr/bin/g++ -DCMAKE_C_COMPILER=/usr/bin/gcc -DLLVM_ENABLE_ASSERTIONS=OFF -DLLVM_CCACHE_BUILD=On
-          ninja -C build
-          ninja -C build install
+          (cd "$GITHUB_WORKSPACE/cheerp-compiler" && cmake -DCMAKE_INSTALL_PREFIX="$CHEERP_DEST" -S llvm -B build -C llvm/CheerpCmakeConf.cmake -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS=clang -G Ninja -DLLVM_USE_LINKER=mold -DCMAKE_CXX_FLAGS_RELEASE=-O3 -DCMAKE_CXX_COMPILER=/usr/bin/g++ -DCMAKE_C_COMPILER=/usr/bin/gcc -DLLVM_ENABLE_ASSERTIONS=OFF -DLLVM_CCACHE_BUILD=On)
+          ninja -C "$GITHUB_WORKSPACE/cheerp-compiler/build"
+          ninja -C "$GITHUB_WORKSPACE/cheerp-compiler/build" install
+      - name: Checkout cheerp-musl
+        uses: actions/checkout@v3
+        with:
+          repository: 'Hyxogen/cheerp-musl'
+          ref: 'feat-weak-functions'
+      - name: Build and install musl
+        env:
+          GENERICJS_DIR: build_genericjs
+          ASMJS_DIR: build_asmjs
+          RANLIB: "/bin/llvm-ar s"
+          AR: "/bin/llvm-ar"
+          GENERICJS_CC: "/bin/clang -target cheerp"
+          ASMJS_CC: "/bin/clang -target cheerp-wasm"
+          LD: "/bin/llvm-link"
+          CFLAGS: "-Wno-int-conversion -DUSE_DL_PREFIX"
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/$GENERICJS_DIR" "$GITHUB_WORKSPACE/$ASMJS_DIR" 
+          (cd "$GITHUB_WORKSPACE/$GENERICJS_DIR" && CC="$GENERICJS_CC" ../configure --target=cheerp --disable-shared --prefix="$CHEERP_PREFIX" --with-malloc=dlmalloc)
+          (cd "$GITHUB_WORKSPACE/$ASMJS_DIR" && CC="$ASMJS_CC" ../configure --target=cheerp-wasm --disable-shared --prefix="$CHEERP_PREFIX" --with-malloc=dlmalloc)
+          make -C "$GITHUB_WORKSPACE/$GENERICJS_DIR" -j
+          make -C "$GITHUB_WORKSPACE/$GENERICJS_DIR" install
+          make -C "$GITHUB_WORKSPACE/$ASMJS_DIR" -j
+          make -C "$GITHUB_WORKSPACE/$ASMJS_DIR" install
+      - name: Build and install runtimes
+        run: |
+          (cd "$GITHUB_WORKSPACE/cheerp-compiler" && cmake -DCMAKE_INSTALL_PREFIX="$CHEERP_DEST" -S runtimes -B build_runtimes_genericjs -GNinja -C runtimes/CheerpCmakeConf.cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="$CHEERP_DEST/share/cmake/Modules/CheerpToolchain.cmake")
+          ninja -C "$GITHUB_WORKSPACE/cheerp-compiler/build_runtimes_genericjs"
+          (cd "$GITHUB_WORKSPACE/cheerp-compiler" && cmake -DCMAKE_INSTALL_PREFIX="$CHEERP_DEST" -S runtimes -B build_runtimes_wasm -GNinja -C runtimes/CheerpCmakeConf.cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="$CHEERP_DEST/share/cmake/Modules/CheerpWasmToolchain.cmake")
+          ninja -C "$GITHUB_WORKSPACE/cheerp-compiler/build_runtimes_wasm"
+          ninja -C "$GITHUB_WORKSPACE/cheerp-compiler/build_runtimes_genericjs" install
+          ninja -C "$GITHUB_WORKSPACE/cheerp-compiler/build_runtimes_wasm" install
+      - name: Checkout cheerp-libs
+        uses: actions/checkout@v3
+        with:
+          repository: 'leaningtech/cheerp-libs'
+      - name: Build and install libraries
+        env:
+          GENERICJS_DIR: build_genericjs
+          ASMJS_DIR: build_asmjs
+        run: |
+          make -C "$GITHUB_WORKSPACE/cheerp-libs/webgles" install INSTALL_PREFIX="$CHEERP_DEST" CHEERP_PREFIX="$CHEERP_DEST"
+          make -C "$GITHUB_WORKSPACE/cheerp-libs/wasm" install INSTALL_PREFIX="$CHEERP_DEST" CHEERP_PREFIX="$CHEERP_DEST"
+          make -C "$GITHUB_WORKSPACE/cheerp-libs/stdlibs" install INSTALL_PREFIX="$CHEERP_DEST" CHEERP_PREFIX="$CHEERP_DEST"
+          (cd "$GITHUB_WORKSPACE/cheerp-libs/system" && cmake -B "$GENERICJS_DIR" -DCMAKE_INSTALL_PREFIX="$CHEERP_DEST" -DCMAKE_TOOLCHAIN_FILE="$CHEERP_DEST/share/cmake/Modules/CheerpToolchain.cmake" .)
+          cmake --build "$GITHUB_WORKSPACE/cheerp-libs/system/$GENERICJS_DIR" 
+          cmake --install "$GITHUB_WORKSPACE/cheerp-libs/system/$GENERICJS_DIR" 
+          (cd "$GITHUB_WORKSPACE/cheerp-libs/system" && cmake -B "$ASMJS_DIR" -DCMAKE_INSTALL_PREFIX="$CHEERP_DEST" -DCMAKE_TOOLCHAIN_FILE="$CHEERP_DEST/share/cmake/Modules/CheerpWasmToolchain.cmake" .)
+          cmake --build "$GITHUB_WORKSPACE/cheerp-libs/system/$ASMJS_DIR" 
+          cmake --install "$GITHUB_WORKSPACE/cheerp-libs/system/$ASMJS_DIR" 
