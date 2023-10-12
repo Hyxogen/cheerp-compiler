@@ -2866,8 +2866,12 @@ void FunctionStackPoisoner::copyToShadowInline(ArrayRef<uint8_t> ShadowMask,
   if (Begin >= End)
     return;
 
+  /*
   const size_t LargestStoreSizeInBytes =
-      std::min<size_t>(sizeof(uint64_t), ASan.LongSize / 8);
+      std::min<size_t>(sizeof(uint64_t), ASan.LongSize / 8);*/
+
+  // AsmJS requires natural alignment, so we must do it byte by byte
+  const size_t LargestStoreSizeInBytes = 1; // CHEERPASAN: TODO only for asmjs (not for wasm)
 
   const bool IsLittleEndian = F.getParent()->getDataLayout().isLittleEndian();
 
