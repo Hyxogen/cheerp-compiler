@@ -35,6 +35,7 @@ jobs:
         with:
           repository: 'Hyxogen/cheerp-musl'
           ref: 'feat-weak-functions'
+          path: 'cheerp-musl'
       - name: Build and install musl
         env:
           GENERICJS_DIR: build_genericjs
@@ -43,13 +44,13 @@ jobs:
           ASMJS_CC: "/bin/clang -target cheerp-wasm"
           CFLAGS: "-Wno-int-conversion -DUSE_DL_PREFIX"
         run: |
-          mkdir -p "$GITHUB_WORKSPACE/$GENERICJS_DIR" "$GITHUB_WORKSPACE/$ASMJS_DIR"
-          (cd "$GITHUB_WORKSPACE/$GENERICJS_DIR" && CC="$CHEERP_DEST/$GENERICJS_CC" RANLIB="$CHEERP_DEST/bin/llvm-ar s" AR="$CHEERP_DEST/bin/llvm-ar" LD="$CHEERP_DEST/bin/llvm-link" ../configure --target=cheerp --disable-shared --prefix="$CHEERP_DEST" --with-malloc=dlmalloc)
-          (cd "$GITHUB_WORKSPACE/$ASMJS_DIR" && CC="$CHEERP_DEST/$ASMJS_CC" RANLIB="$CHEERP_DEST/bin/llvm-ar s" AR="$CHEERP_DEST/bin/llvm-ar" LD="$CHEERP_DEST/bin/llvm-link"  ../configure --target=cheerp-wasm --disable-shared --prefix="$CHEERP_DEST" --with-malloc=dlmalloc)
-          make -C "$GITHUB_WORKSPACE/$GENERICJS_DIR" -j
-          make -C "$GITHUB_WORKSPACE/$GENERICJS_DIR" install
-          make -C "$GITHUB_WORKSPACE/$ASMJS_DIR" -j
-          make -C "$GITHUB_WORKSPACE/$ASMJS_DIR" install
+          mkdir -p "$GITHUB_WORKSPACE/cheerp-musl/$GENERICJS_DIR" "$GITHUB_WORKSPACE/cheerp-musl/$ASMJS_DIR"
+          (cd "$GITHUB_WORKSPACE/cheerp-musl/$GENERICJS_DIR" && CC="$CHEERP_DEST/$GENERICJS_CC" RANLIB="$CHEERP_DEST/bin/llvm-ar s" AR="$CHEERP_DEST/bin/llvm-ar" LD="$CHEERP_DEST/bin/llvm-link" ../configure --target=cheerp --disable-shared --prefix="$CHEERP_DEST" --with-malloc=dlmalloc)
+          (cd "$GITHUB_WORKSPACE/cheerp-musl/$ASMJS_DIR" && CC="$CHEERP_DEST/$ASMJS_CC" RANLIB="$CHEERP_DEST/bin/llvm-ar s" AR="$CHEERP_DEST/bin/llvm-ar" LD="$CHEERP_DEST/bin/llvm-link"  ../configure --target=cheerp-wasm --disable-shared --prefix="$CHEERP_DEST" --with-malloc=dlmalloc)
+          make -C "$GITHUB_WORKSPACE/cheerp-musl/$GENERICJS_DIR" -j
+          make -C "$GITHUB_WORKSPACE/cheerp-musl/$GENERICJS_DIR" install
+          make -C "$GITHUB_WORKSPACE/cheerp-musl/$ASMJS_DIR" -j
+          make -C "$GITHUB_WORKSPACE/cheerp-musl/$ASMJS_DIR" install
       - name: Build and install runtimes
         run: |
           (cd "$GITHUB_WORKSPACE/cheerp-compiler" && cmake -DCMAKE_INSTALL_PREFIX="$CHEERP_DEST" -S runtimes -B build_runtimes_genericjs -GNinja -C runtimes/CheerpCmakeConf.cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="$CHEERP_DEST/share/cmake/Modules/CheerpToolchain.cmake")
@@ -62,6 +63,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: 'leaningtech/cheerp-libs'
+          path: 'cheerp-libs'
       - name: Build and install libraries
         env:
           GENERICJS_DIR: build_genericjs
