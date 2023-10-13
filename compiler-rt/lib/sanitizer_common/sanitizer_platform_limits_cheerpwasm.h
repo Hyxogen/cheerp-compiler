@@ -7,7 +7,7 @@
 
 typedef FILE __sanitizer_FILE;
 extern unsigned mbstate_t_sz;
-#define SANITIZER_HAS_STRUCT_FILE 0
+//#define SANITIZER_HAS_STRUCT_FILE 0
 
 #endif // SANITIZER_CHEERPWASM
 

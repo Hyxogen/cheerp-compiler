@@ -135,7 +135,6 @@ DECLARE_REAL(char*, strstr, const char *s1, const char *s2)
 
 #if SANITIZER_CHEERPWASM
 #include <stdarg.h>
-#include <stdio.h>
 
 DECLARE_REAL(void*, memmove, void* dest, const void* src, uptr n)
 DECLARE_REAL(char*, strcat, char* dst, const char* src)
@@ -157,6 +156,8 @@ DECLARE_REAL(int, asprintf, char **strp, const char *format, ...)
 DECLARE_REAL(int, vasprintf, char **strp, const char *format, va_list ap)
 DECLARE_REAL(int, fprintf, FILE *stream, const char *format, ...)
 DECLARE_REAL(int, vfprintf, FILE *stream, const char *format, va_list ap)
+
+DECLARE_REAL(size_t, fwrite, const void *ptr, size_t size, size_t nmemb, FILE *stream)
 
 DECLARE_REAL(char*, strcasestr, const char *haystack, const char *needle)
 
