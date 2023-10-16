@@ -30,6 +30,16 @@ void __asan_poison_memory_region(void const volatile *addr, size_t size);
 /// \param addr Address to describe.
 void __asan_describe_address(size_t addr);
 
+/// Checks if a region is poisoned.
+///
+/// If at least one byte in <c>[beg, beg+size)</c> is poisoned, returns the
+/// address of the first such byte. Otherwise returns 0.
+///
+/// \param beg Start of memory region.
+/// \param size Start of memory region.
+/// \returns Address of first poisoned byte.
+void *__asan_region_is_poisoned(void *beg, size_t size);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
