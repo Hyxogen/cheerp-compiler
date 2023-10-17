@@ -40,6 +40,35 @@ void __asan_describe_address(size_t addr);
 /// \returns Address of first poisoned byte.
 void *__asan_region_is_poisoned(void *beg, size_t size);
 
+/// Gets information about a pointer (useful for calling from the debugger).
+///
+/// Returns the category of the given pointer as a constant string.
+/// Possible return values are <c>global</c>, <c>stack</c>, <c>stack-fake</c>,
+/// <c>heap</c>, <c>heap-invalid</c>, <c>shadow-low</c>, <c>shadow-gap</c>,
+/// <c>shadow-high</c>, and <c>unknown</c>.
+///
+/// If the return value is <c>global</c> or <c>stack</c>, tries to also return
+/// the variable name, address, and size. If the return value is <c>heap</c>,
+/// tries to return the chunk address and size. <c><i>name</i></c> should point
+/// to an allocated buffer of size <c><i>name_size</i></c>.
+///
+/// \param addr Address to locate.
+/// \param name Buffer to store the variable's name.
+/// \param name_size Size in bytes of the variable's name buffer.
+/// \param[out] region_address Address of the region.
+/// \param[out] region_size Size of the region in bytes.
+///
+/// \returns Returns the category of the given pointer as a constant string.
+const char *__asan_locate_address(void *addr, char *name, size_t name_size,
+                                  void **region_address, size_t *region_size);
+
+/// Gets the current shadow memory mapping (useful for calling from the
+/// debugger).
+///
+/// \param[out] shadow_scale Shadow scale value.
+/// \param[out] shadow_offset Offset value.
+void __asan_get_shadow_mapping(size_t *shadow_scale, size_t *shadow_offset);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
