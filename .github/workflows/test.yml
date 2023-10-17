@@ -101,7 +101,9 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: compiler
-          path: /opt
+          path: /opt/cheerp
+      - name: List directories
+        run: ls -lRa /opt
       - name: Checkout cheerp-utils
         uses: actions/checkout@v3
         with:
