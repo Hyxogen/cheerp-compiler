@@ -16,6 +16,8 @@
 #include "asan_report.h"
 #include "asan_stack.h"
 #include "sanitizer_common/sanitizer_stackdepot.h"
+extern char* volatile _stackBottom;
+extern char* volatile _stackTop;
 
 namespace __asan {
 
@@ -196,6 +198,8 @@ bool GetStackAddressInformation(uptr addr, uptr access_size,
   AsanThread *t = FindThreadByStackAddress(addr);
 #else
   AsanThread *t = GetCurrentThread();
+  if (addr < reinterpret_cast<uptr>(_stackTop) || addr > reinterpret_cast<uptr>(_stackBottom))
+    return false;
 #endif
   if (!t) return false;
 
