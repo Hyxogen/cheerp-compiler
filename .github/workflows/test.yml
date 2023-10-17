@@ -87,3 +87,25 @@ jobs:
           (cd "$GITHUB_WORKSPACE/cheerp-libs/system" && cmake -B "$ASMJS_DIR" -DCMAKE_INSTALL_PREFIX="$CHEERP_DEST" -DCMAKE_TOOLCHAIN_FILE="$CHEERP_DEST/share/cmake/Modules/CheerpWasmToolchain.cmake" .)
           cmake --build "$GITHUB_WORKSPACE/cheerp-libs/system/$ASMJS_DIR" 
           cmake --install "$GITHUB_WORKSPACE/cheerp-libs/system/$ASMJS_DIR" 
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: compiler
+          path: /opt/cheerp
+  cheerp-test:
+    name: Run cheerp-utils tests
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download compiler
+        uses: actions/download-artifact@v3
+        with:
+          name: compiler
+      - name: Checkout cheerp-utils
+        uses: actions/checkout@v3
+        with:
+          repository: 'leaningtech/cheerp-utils'
+      - name: Run tests
+        working-directory: ./tests
+        run: ./run_tests.py --all --determinism=3 --determinism-probability=0.2 "$CHEERP_DEST/bin/clang++" node
+          
