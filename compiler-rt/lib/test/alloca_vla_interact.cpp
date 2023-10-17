@@ -1,5 +1,5 @@
 // RUN: %clangxx_asan -cheerp-no-lto -O0 -mllvm -asan-instrument-dynamic-allocas %s -o %t && %run %t 2>&1
-//
+// TODO check if this test should also work for asmjs
 
 // This testcase checks correct interaction between VLAs and allocas.
 
