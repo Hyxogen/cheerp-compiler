@@ -30,6 +30,18 @@ void __asan_poison_memory_region(void const volatile *addr, size_t size);
 /// \param addr Address to describe.
 void __asan_describe_address(size_t addr);
 
+/// Checks if an address is poisoned.
+///
+/// Returns 1 if <c><i>addr</i></c> is poisoned (that is, 1-byte read/write
+/// access to this address would result in an error report from ASan).
+/// Otherwise returns 0.
+///
+/// \param addr Address to check.
+///
+/// \retval 1 Address is poisoned.
+/// \retval 0 Address is not poisoned.
+int __asan_address_is_poisoned(void const volatile *addr);
+
 /// Checks if a region is poisoned.
 ///
 /// If at least one byte in <c>[beg, beg+size)</c> is poisoned, returns the
