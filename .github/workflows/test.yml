@@ -30,6 +30,15 @@ jobs:
           (cd "$GITHUB_WORKSPACE/cheerp-compiler" && cmake -DCMAKE_INSTALL_PREFIX="$CHEERP_DEST" -S llvm -B build -C llvm/CheerpCmakeConf.cmake -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS=clang -G Ninja -DLLVM_USE_LINKER=mold -DCMAKE_CXX_FLAGS_RELEASE=-O3 -DCMAKE_CXX_COMPILER=/usr/bin/g++ -DCMAKE_C_COMPILER=/usr/bin/gcc -DLLVM_ENABLE_ASSERTIONS=OFF -DLLVM_CCACHE_BUILD=On)
           ninja -C "$GITHUB_WORKSPACE/cheerp-compiler/build"
           ninja -C "$GITHUB_WORKSPACE/cheerp-compiler/build" install
+      - name: Checkout cheerp-utils
+        uses: actions/checkout@v3
+        with:
+          repository: 'leaningtech/cheerp-utils'
+          path: 'cheerp-utils'
+      - name: Install cheerp-utils
+        run: |
+          (cd "$GITHUB_WORKSPACE/cheerp-utils" && cmake -B build -DCMAKE_INSTALL_PREFIX="$CHEERP_DEST") 
+          make -C "$GITHUB_WORKSPACE/cheerp-utils/build" install -j
       - name: Checkout cheerp-musl
         uses: actions/checkout@v3
         with:
