@@ -117,18 +117,24 @@ CXX_FILES := \
 HEADER_DEPS	:= $(addprefix $(DEP_DIR)/,$(CXX_FILES:.cpp=.d))
 OBJ_FILES	:= $(addprefix $(OBJ_DIR)/,$(CXX_FILES:.cpp=.bc))
 
+
 $(TARGET): $(OBJ_FILES)
 	$(LINK_CMD) -o $@ $(OBJ_FILES)
+
+.PHONY: install
+install: $(TARGET)
+	install -Dm644 $(TARGET) -t $(join $(CHEERP_DEST),/lib/asmjs)
 
 -include $(HEADER_DEPS)
 $(OBJ_DIR)/%.bc: %.cpp Makefile
 	mkdir -p $(@D)
 	$(CXX) -o $@ $< $(CXXFLAGS) -c -MMD
 
+
 .PHONY: test
 test: $(TARGET)
 	#$(CC) $(LINK_FLAGS) strcasestr_strict.c libasan.bc -fsanitize=address -g0 -cheerp-pretty-code -target cheerp-wasm -Itest
-	$(CXX) $(LINK_FLAGS) leaks.cpp libasan.bc -fsanitize=address -g0 -cheerp-pretty-code -target cheerp-wasm -Itest
+	$(CC) $(LINK_FLAGS) test.c libasan.bc -fsanitize=address -g0 -cheerp-pretty-code -target cheerp-wasm -Itest
 
 .PHONY: run
 run: test

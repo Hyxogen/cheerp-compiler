@@ -586,6 +586,10 @@ void cheerp::Link::ConstructJob(Compilation &C, const JobAction &JA,
     Arg *CheerpLinearOutput = Args.getLastArg(options::OPT_cheerp_linear_output_EQ);
 
     Arg *Sanitizers = Args.getLastArg(options::OPT_fsanitize_EQ);
+    if (Sanitizers && Sanitizers->containsValue("address")) {
+      CmdArgs.push_back(Args.MakeArgString(getToolChain().GetFilePath("libasan.bc")));
+    }
+
     llvm::Triple::EnvironmentType env = getToolChain().getTriple().getEnvironment();
     if(((CheerpLinearOutput && CheerpLinearOutput->getValue() == StringRef("wasm")) ||
        (!CheerpLinearOutput && env == llvm::Triple::WebAssembly)) &&
@@ -837,6 +841,7 @@ void cheerp::CheerpCompiler::ConstructJob(Compilation &C, const JobAction &JA,
     CmdArgs.push_back("-cheerp-preserve-free");
 
     if (Args.getLastArg(options::OPT_fsanitize_EQ)->containsValue("address")) {
+      CmdArgs.push_back("-cheerp-linear-heap-size=2000");
       // AddressSanitizer for Cheerp will poison the range [0x0, stack_top) to
       // find nullptr derefs. We offset the stack_top location here to find more
       // nullptr derefs.
