@@ -127,6 +127,8 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
+      - name: Install asan runtime
+        uses: Hyxogen/cheerp-actions/cheerp-test@master
       - name: Test
         uses: Hyxogen/cheerp-actions/cheerp-test@master
         with:
@@ -136,6 +138,8 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
+      - name: Install asan runtime
+        uses: Hyxogen/cheerp-actions/cheerp-test@master
       - name: Test
         uses: Hyxogen/cheerp-actions/cheerp-test@master
         with:
