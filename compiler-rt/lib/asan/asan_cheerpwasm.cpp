@@ -6,6 +6,7 @@
 #include "asan_thread.h"
 
 #if SANITIZER_CHEERPWASM
+#include "lsan/lsan_common.h"
 #include <cheerpintrin.h>
 #include <cassert>
 #include <cstdlib>
@@ -80,6 +81,17 @@ void PlatformTSDDtor(void *tsd) {
   // Make sure that signal handler can not see a stale current thread pointer.
   atomic_signal_fence(memory_order_seq_cst);
   AsanThread::TSDDtor(tsd);
+}
+
+void InstallAtExitCheckLeaks() {
+  if (CAN_SANITIZE_LEAKS) {
+    if (common_flags()->detect_leaks && common_flags()->leak_check_at_exit) {
+      if (flags()->halt_on_error)
+        Atexit(__lsan::DoLeakCheck);
+      else
+        Atexit(__lsan::DoRecoverableLeakCheckVoid);
+    }
+  }
 }
 
 } // namespace __asan

@@ -174,7 +174,7 @@ jobs:
           ref: 'feat-libasan'
       - name: Build runtime
         working-directory: ./compiler-rt/lib
-        run: make
+        run: make -j CHEERP_DEST="$CHEERP_DEST"
       - name: Run tests
         working-directory: ./compiler-rt/lib
         run: |

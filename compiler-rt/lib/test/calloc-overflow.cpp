@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 int main() {
-  void *p = calloc(-1, 1000);
+  void *volatile p = calloc(-1, 1000);
   // CHECK: {{ERROR: AddressSanitizer: calloc parameters overflow: count \* size \(.* \* 1000\) cannot be represented in type size_t}}
   // DONTCHECK: {{#0 0x.* in .*calloc}}
   // DONTCHECK: {{#1 0x.* in main .*calloc-overflow.cpp:}}[[@LINE-3]]

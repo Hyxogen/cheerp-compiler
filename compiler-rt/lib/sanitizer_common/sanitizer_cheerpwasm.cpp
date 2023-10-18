@@ -39,6 +39,9 @@ void ListOfModules::init() {
   modules_.push_back(js_module);
 }
 
+// CHEERPASAN: TODO move to something like sanitizer_cheerpwasm.cpp (like sanitizer_posix_libcdep.cpp)
+int Atexit(void (*function)(void)) { return atexit(function); }
+
 void ListOfModules::fallbackInit() { clear(); }
 
 uptr ReadBinaryName(/*out*/char *buf, uptr buf_len) {

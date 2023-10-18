@@ -1,7 +1,8 @@
 TARGET := libasan.bc
 
-CC	:= /home/daan/opt/cheerp/bin/clang
-CXX	:= /home/daan/opt/cheerp/bin/clang++
+CHEERP_DEST := /home/daan/opt/cheerp
+CC	:= $(join $(CHEERP_DEST),/bin/clang)
+CXX	:= $(join $(CHEERP_DEST),/bin/clang++)
 CXXFLAGS := -O0 -g0 -target cheerp-wasm -I. -DSANITIZER_CHEERPWASM=1
 LINK_FLAGS := -cheerp-linear-heap-size=2048 -cheerp-wasm-enable=growmem
 
@@ -85,6 +86,7 @@ CXX_FILES := \
   		sanitizer_common/sanitizer_stoptheworld_fuchsia.cpp \
   		sanitizer_common/sanitizer_stoptheworld_mac.cpp \
   		sanitizer_common/sanitizer_stoptheworld_win.cpp \
+  		sanitizer_common/sanitizer_stoptheworld_cheerpwasm.cpp \
   		sanitizer_common/sanitizer_suppressions.cpp \
   		sanitizer_common/sanitizer_tls_get_addr.cpp \
   		sanitizer_common/sanitizer_thread_registry.cpp \
@@ -126,7 +128,7 @@ $(OBJ_DIR)/%.bc: %.cpp Makefile
 .PHONY: test
 test: $(TARGET)
 	#$(CC) $(LINK_FLAGS) strcasestr_strict.c libasan.bc -fsanitize=address -g0 -cheerp-pretty-code -target cheerp-wasm -Itest
-	$(CXX) $(LINK_FLAGS) alloca_big_alignment.cpp libasan.bc -fsanitize=address -g0 -cheerp-pretty-code -target cheerp-wasm -Itest
+	$(CXX) $(LINK_FLAGS) leaks.cpp libasan.bc -fsanitize=address -g0 -cheerp-pretty-code -target cheerp-wasm -Itest
 
 .PHONY: run
 run: test
