@@ -100,61 +100,46 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - name: Download compiler
-        uses: actions/download-artifact@v3
+      - name: Test
+        uses: Hyxogen/cheer-actions/cheerp-test@master
         with:
-          name: compiler
-      - name: Untar artifacts
-        run: tar -xvf cheerp-compiler.tar.gz -C /
-      - name: List directories
-        run: ls -lra /opt
-      - name: Checkout cheerp-utils
-        uses: actions/checkout@v3
-        with:
-          repository: 'leaningtech/cheerp-utils'
-      - name: Run tests
-        working-directory: ./tests
-        run: ./run_tests.py --genericjs --determinism=3 --determinism-probability=0.2 "$CHEERP_DEST/bin/clang++" node
+          flags: "--genericjs --determinism=3 --determinism-probability=0.2"
   cheerp-asmjs-test:
     name: Run cheerp-utils asmjs tests
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - name: Download compiler
-        uses: actions/download-artifact@v3
+      - name: Test
+        uses: Hyxogen/cheer-actions/cheerp-test@master
         with:
-          name: compiler
-      - name: Untar artifacts
-        run: tar -xvf cheerp-compiler.tar.gz -C /
-      - name: List directories
-        run: ls -lra /opt
-      - name: Checkout cheerp-utils
-        uses: actions/checkout@v3
-        with:
-          repository: 'leaningtech/cheerp-utils'
-      - name: Run tests
-        working-directory: ./tests
-        run: ./run_tests.py --asmjs --determinism=3 --determinism-probability=0.2 "$CHEERP_DEST/bin/clang++" node
+          flags: "--asmjs --determinism=3 --determinism-probability=0.2"
   cheerp-wasm-test:
     name: Run cheerp-utils wasm tests
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - name: Download compiler
-        uses: actions/download-artifact@v3
+      - name: Test
+        uses: Hyxogen/cheer-actions/cheerp-test@master
         with:
-          name: compiler
-      - name: Untar artifacts
-        run: tar -xvf cheerp-compiler.tar.gz -C /
-      - name: List directories
-        run: ls -lra /opt
-      - name: Checkout cheerp-utils
-        uses: actions/checkout@v3
+          flags: "--wasm --determinism=3 --determinism-probability=0.2"
+  cheerp-asmjs-test-asan:
+    name: Run cheerp-utils asmjs tests w/ AddressSanitizer
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test
+        uses: Hyxogen/cheer-actions/cheerp-test@master
         with:
-          repository: 'leaningtech/cheerp-utils'
-      - name: Run tests
-        working-directory: ./tests
-        run: ./run_tests.py --wasm --determinism=3 --determinism-probability=0.2 "$CHEERP_DEST/bin/clang++" node
+          flags: "--asmjs --asan --determinism=3 --determinism-probability=0.2"
+  cheerp-wasm-test-asan:
+    name: Run cheerp-utils wasm tests w/ AddressSanitizer
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test
+        uses: Hyxogen/cheer-actions/cheerp-test@master
+        with:
+          flags: "--wasm --asan --determinism=3 --determinism-probability=0.2"
   asan-test:
     name: Run asan tests
     needs: test
