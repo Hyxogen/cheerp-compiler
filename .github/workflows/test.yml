@@ -95,8 +95,8 @@ jobs:
           name: compiler
           path: ./cheerp-compiler.tar.gz
           retention-days: 1
-  cheerp-test:
-    name: Run cheerp-utils tests
+  cheerp-genericjs-test:
+    name: Run cheerp-utils genericjs tests
     needs: test
     runs-on: ubuntu-latest
     steps:
@@ -114,11 +114,51 @@ jobs:
           repository: 'leaningtech/cheerp-utils'
       - name: Run tests
         working-directory: ./tests
-        run: ./run_tests.py --all --determinism=3 --determinism-probability=0.2 "$CHEERP_DEST/bin/clang++" node
+        run: ./run_tests.py --genericjs --determinism=3 --determinism-probability=0.2 "$CHEERP_DEST/bin/clang++" node
+  cheerp-asmjs-test:
+    name: Run cheerp-utils asmjs tests
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download compiler
+        uses: actions/download-artifact@v3
+        with:
+          name: compiler
+      - name: Untar artifacts
+        run: tar -xvf cheerp-compiler.tar.gz -C /
+      - name: List directories
+        run: ls -lra /opt
+      - name: Checkout cheerp-utils
+        uses: actions/checkout@v3
+        with:
+          repository: 'leaningtech/cheerp-utils'
+      - name: Run tests
+        working-directory: ./tests
+        run: ./run_tests.py --asmjs --determinism=3 --determinism-probability=0.2 "$CHEERP_DEST/bin/clang++" node
+  cheerp-asmjs-test:
+    name: Run cheerp-utils wasm tests
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download compiler
+        uses: actions/download-artifact@v3
+        with:
+          name: compiler
+      - name: Untar artifacts
+        run: tar -xvf cheerp-compiler.tar.gz -C /
+      - name: List directories
+        run: ls -lra /opt
+      - name: Checkout cheerp-utils
+        uses: actions/checkout@v3
+        with:
+          repository: 'leaningtech/cheerp-utils'
+      - name: Run tests
+        working-directory: ./tests
+        run: ./run_tests.py --wasm --determinism=3 --determinism-probability=0.2 "$CHEERP_DEST/bin/clang++" node
   asan-test:
     name: Run asan tests
     needs: test
-    runs-on: ubunut-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Download compiler
         uses: actions/download-artifact@v3
