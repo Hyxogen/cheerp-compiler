@@ -88,7 +88,7 @@ jobs:
           cmake --build "$GITHUB_WORKSPACE/cheerp-libs/system/$ASMJS_DIR" 
           cmake --install "$GITHUB_WORKSPACE/cheerp-libs/system/$ASMJS_DIR" 
       - name: Tar artifacts
-        run: tar -zcvf cheerp-compiler.tar.gz /opt/cheerp
+        run: tar -zcvf cheerp-compiler.tar.gz /
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -107,7 +107,7 @@ jobs:
       - name: Untar artifacts
         run: tar -xvf cheerp-compiler.tar.gz -C /opt
       - name: List directories
-        run: ls -lRa /opt
+        run: ls -lra /opt
       - name: Checkout cheerp-utils
         uses: actions/checkout@v3
         with:
@@ -124,6 +124,10 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: compiler
+      - name: Untar artifacts
+        run: tar -xvf cheerp-compiler.tar.gz -C /opt
+      - name: List directories
+        run: ls -lra /opt
       - name: Checkout cheerp-compiler
         uses: actions/checkout@v3
         with:
