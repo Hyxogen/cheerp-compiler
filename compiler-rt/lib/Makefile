@@ -6,7 +6,7 @@ CXX	:= $(join $(CHEERP_DEST),/bin/clang++)
 CXXFLAGS := -O0 -g0 -target cheerp-wasm -I. -DSANITIZER_CHEERPWASM=1
 LINK_FLAGS := -cheerp-linear-heap-size=2048 -cheerp-wasm-enable=growmem
 
-LINK_CMD := /home/daan/opt/cheerp/bin/llvm-link
+LINK_CMD := $(join $(CHEERP_DEST),/bin/llvm-link)
 
 OBJ_DIR		:= build
 DEP_DIR		:= build
