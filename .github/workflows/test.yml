@@ -135,7 +135,7 @@ jobs:
       - name: Run tests
         working-directory: ./tests
         run: ./run_tests.py --asmjs --determinism=3 --determinism-probability=0.2 "$CHEERP_DEST/bin/clang++" node
-  cheerp-asmjs-test:
+  cheerp-wasm-test:
     name: Run cheerp-utils wasm tests
     needs: test
     runs-on: ubuntu-latest
