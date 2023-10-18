@@ -105,7 +105,7 @@ jobs:
         with:
           name: compiler
       - name: Untar artifacts
-        run: tar -xvf cheerp-compiler.tar.gz -C /opt
+        run: tar -xvf cheerp-compiler.tar.gz -C /
       - name: List directories
         run: ls -lra /opt
       - name: Checkout cheerp-utils
@@ -125,7 +125,7 @@ jobs:
         with:
           name: compiler
       - name: Untar artifacts
-        run: tar -xvf cheerp-compiler.tar.gz -C /opt
+        run: tar -xvf cheerp-compiler.tar.gz -C /
       - name: List directories
         run: ls -lra /opt
       - name: Checkout cheerp-compiler
