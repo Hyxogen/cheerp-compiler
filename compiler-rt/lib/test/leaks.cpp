@@ -3,6 +3,10 @@
 // RUN: %clangxx_asan -DLEAK_AMOUNT=1 -O0 %s -o %t && not %run %t 0 2>&1 | FileCheck %s
 // RUN: %clangxx_asan -DLEAK_AMOUNT=1000 -O0 %s -o %t && not %run %t 0 2>&1 | FileCheck %s
 // RUN: %clangxx_asan -DLEAK_AMOUNT=1000000 -O0 %s -o %t && not %run %t 0 2>&1 | FileCheck %s
+// RUN: %clangxx_asan -cheerp-linear-output=asmjs -DLEAK_AMOUNT=0 -O0 %s -o %t && not %run %t 0 2>&1 | FileCheck %s
+// RUN: %clangxx_asan -cheerp-linear-output=asmjs -DLEAK_AMOUNT=1 -O0 %s -o %t && not %run %t 0 2>&1 | FileCheck %s
+// RUN: %clangxx_asan -cheerp-linear-output=asmjs -DLEAK_AMOUNT=1000 -O0 %s -o %t && not %run %t 0 2>&1 | FileCheck %s
+// RUN: %clangxx_asan -cheerp-linear-output=asmjs -DLEAK_AMOUNT=1000000 -O0 %s -o %t && not %run %t 0 2>&1 | FileCheck %s
 // CHEERPASAN: TODO make test with 10000000 work
 
 #include <cstdlib>
