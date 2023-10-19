@@ -22,6 +22,7 @@
 
 #if SANITIZER_CHEERPWASM
 #  include "asan_poisoning.h"
+extern char* volatile _stackTop;
 #endif
 
 namespace __asan {
@@ -101,7 +102,7 @@ void InitializeShadowMemory() {
     ProtectGap(kShadowGapBeg, kShadowGapEnd - kShadowGapBeg + 1);
 #if SANITIZER_CHEERPWASM
     // Poison the lowest 8 bytes to detect nullptr dereferences
-    FastPoisonShadow(0, 8, 0xfe);
+    FastPoisonShadow(0, reinterpret_cast<uptr>(_stackTop), 0xfe);
 #endif
     CHECK_EQ(kShadowGapEnd, kHighShadowBeg - 1);
   } else if (kMidMemBeg &&
