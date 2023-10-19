@@ -100,7 +100,9 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - name: Test
+      - name: Install cheerp-compiler
+        uses: Hyxogen/cheerp-actions/install-compiler@master
+      - name: Run tests
         uses: Hyxogen/cheerp-actions/cheerp-test@master
         with:
           flags: "--genericjs --determinism=3 --determinism-probability=0.2"
@@ -109,7 +111,9 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - name: Test
+      - name: Install cheerp-compiler
+        uses: Hyxogen/cheerp-actions/install-compiler@master
+      - name: Run tests
         uses: Hyxogen/cheerp-actions/cheerp-test@master
         with:
           flags: "--asmjs --determinism=3 --determinism-probability=0.2"
@@ -118,7 +122,9 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - name: Test
+      - name: Install cheerp-compiler
+        uses: Hyxogen/cheerp-actions/install-compiler@master
+      - name: Run tests
         uses: Hyxogen/cheerp-actions/cheerp-test@master
         with:
           flags: "--wasm --determinism=3 --determinism-probability=0.2"
@@ -127,9 +133,11 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
+      - name: Install cheerp-compiler
+        uses: Hyxogen/cheerp-actions/install-compiler@master
       - name: Install asan runtime
         uses: Hyxogen/cheerp-actions/install-libasan@master
-      - name: Test
+      - name: Run tests
         uses: Hyxogen/cheerp-actions/cheerp-test@master
         with:
           flags: "--asmjs --asan --determinism=3 --determinism-probability=0.2"
@@ -138,9 +146,11 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
+      - name: Install cheerp-compiler
+        uses: Hyxogen/cheerp-actions/install-compiler@master
       - name: Install asan runtime
         uses: Hyxogen/cheerp-actions/install-libasan@master
-      - name: Test
+      - name: Run tests
         uses: Hyxogen/cheerp-actions/cheerp-test@master
         with:
           flags: "--wasm --asan --determinism=3 --determinism-probability=0.2"
@@ -149,14 +159,8 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - name: Download compiler
-        uses: actions/download-artifact@v3
-        with:
-          name: compiler
-      - name: Untar artifacts
-        run: tar -xvf cheerp-compiler.tar.gz -C /
-      - name: List directories
-        run: ls -lra /opt
+      - name: Install cheerp-compiler
+        uses: Hyxogen/cheerp-actions/install-compiler@master
       - name: Checkout cheerp-compiler
         uses: actions/checkout@v3
         with:
