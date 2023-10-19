@@ -3,13 +3,27 @@ TARGET := libasan.bc
 CHEERP_DEST := /home/daan/opt/cheerp
 CC	:= $(join $(CHEERP_DEST),/bin/clang)
 CXX	:= $(join $(CHEERP_DEST),/bin/clang++)
-CXXFLAGS := -O0 -g0 -target cheerp-wasm -I. -DSANITIZER_CHEERPWASM=1
+CXXFLAGS := -g0 -target cheerp-wasm -I. -DSANITIZER_CHEERPWASM=1
 LINK_FLAGS := -cheerp-linear-heap-size=2048 -cheerp-wasm-enable=growmem
 
 LINK_CMD := $(join $(CHEERP_DEST),/bin/llvm-link)
 
 OBJ_DIR		:= build
 DEP_DIR		:= build
+
+ifndef config
+	config := debug
+endif
+
+ifeq ($(config), debug)
+	CXXFLAGS += -O0
+else ifeq ($(config),release)
+	CXXFLAGS += -O2
+else ifeq ($(config), distr)
+	CXXFLAGS += -O3
+else
+$(error "unknown config $(config)")
+endif
 
 CXX_FILES := \
 		asan/asan_allocator.cpp \
