@@ -134,7 +134,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        config: [debug, release, dist]
+        config: [debug, release, distr]
         mode: [--asmjs, --wasm]
     steps:
       - name: Install cheerp-compiler
