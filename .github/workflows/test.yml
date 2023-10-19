@@ -129,6 +129,9 @@ jobs:
         with:
           flags: "--wasm --determinism=3 --determinism-probability=0.2"
   cheerp-test-asan:
+    name: Run cheerp-utils \w AddressSanitizer
+    needs: test
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         config: [debug, release, dist]
