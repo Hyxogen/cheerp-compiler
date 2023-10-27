@@ -2,7 +2,7 @@ name: Test
 
 on:
   push:
-    branches: [ "master", "feat-libasan" ]
+    branches: [ "master", "feat-libasan", "feat-libasan-next" ]
 
 env:
   CHEERP_DEST: /opt/cheerp
@@ -17,13 +17,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          ref: 'feat-libasan'
           path: 'cheerp-compiler'
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
           max-size: 500M
-          key: ccache
+          key: ccache-${{ github.ref_name }}
           variant: ccache
       - name: Build and install cheerp
         run: |
@@ -156,8 +155,6 @@ jobs:
         uses: Hyxogen/cheerp-actions/install-compiler@master
       - name: Checkout cheerp-compiler
         uses: actions/checkout@v3
-        with:
-          ref: 'feat-libasan'
       - name: Build runtime
         working-directory: ./compiler-rt/lib
         run: make install -j CHEERP_DEST="$CHEERP_DEST"
