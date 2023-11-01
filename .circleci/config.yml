@@ -31,7 +31,8 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/project/packages
-      - run: Install and setup ccache
+      - run:
+        name: Install and setup ccache
         command: |
           sudo apt update && sudo apt install -y ccache
           sudo mkdir /ccache
