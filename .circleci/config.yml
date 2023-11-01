@@ -1202,7 +1202,15 @@ workflows:
           requires:
             - define-version-no
             - build-cheerp-compiler
-      - test:
+      - test-wasm:
+          requires:
+            - build-cheerp-compiler
+            - build-libraries
+      - test-asmjs:
+          requires:
+            - build-cheerp-compiler
+            - build-libraries
+      - test-genericjs:
           requires:
             - build-cheerp-compiler
             - build-libraries
