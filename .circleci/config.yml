@@ -78,9 +78,14 @@ jobs:
     resource_class: large
     environment:
       - NINJA_STATUS: "[%u/%r/%f] "
+      - CCACHE_DISABLE: 1
     steps:
       - attach_workspace:
           at: ~/project/packages
+      - run:
+          name: Install and setup ccache
+          command: |
+            apt update && apt install -y ccache
       - run: mkdir ~/project/cheerp-compiler
       - run:
           name: Extract archive
