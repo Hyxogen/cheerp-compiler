@@ -3,7 +3,11 @@
 deb_version := $(shell dpkg-parsechangelog | sed -n 's/^Version: //p')
 ifndef CIRCLECI
 	FLAGS_RELEASE="-DNDEBUG -O2"
-	USE_CCACHE=Off
+	ifeq (${CIRCLE_BRANCH}, master)
+		USE_CCACHE=Off
+	else
+		USE_CCACHE=On
+	endif
 else
 	FLAGS_RELEASE="-O2"
 	USE_CCACHE=On
