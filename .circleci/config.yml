@@ -1217,7 +1217,9 @@ workflows:
       - RPM-cheerp-compiler:
           requires:
             - define-version-no
-            - test
+            - test-wasm
+            - test-asmjs
+            - test-genericjs
             - llvm-check
           filters:
             branches:
@@ -1228,7 +1230,9 @@ workflows:
       - PPA:
           requires:
             - define-version-no
-            - test
+            - test-wasm
+            - test-asmjs
+            - test-genericjs
             - llvm-check
           filters:
             branches:
