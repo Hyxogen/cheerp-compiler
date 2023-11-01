@@ -59,10 +59,10 @@ jobs:
           directory: cheerp-compiler
           package-name: llvm-clang
       - save_cache:
-        name: Save ccache
-        key: cheerp-compiler
-        paths:
-          - /ccache
+          name: Save ccache
+          key: cheerp-compiler
+          paths:
+            - /ccache
       - run:
           name: Save build
           working_directory: ~/project/cheerp-compiler
