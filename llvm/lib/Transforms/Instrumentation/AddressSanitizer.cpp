@@ -2309,7 +2309,7 @@ bool ModuleAddressSanitizer::InstrumentGlobals(IRBuilder<> &IRB, Module &M,
     //StructType *NewTy = StructType::get(Ty, RightRedZoneTy);
     StructType *NewTy = StructType::get(Ty->getContext(),
                                         ArrayRef<Type *>({Ty, RightRedZoneTy}),
-                                        false, NULL, false, true); // CHEERPASAN: TODO only true for cheerp-wasm
+                                        false, NULL, false, TargetTriple.isCheerpWasm());
     Constant *NewInitializer = ConstantStruct::get(
         NewTy, G->getInitializer(), Constant::getNullValue(RightRedZoneTy));
 
