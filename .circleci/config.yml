@@ -32,10 +32,10 @@ jobs:
       - attach_workspace:
           at: ~/project/packages
       - run:
-        name: Install and setup ccache
-        command: |
-          sudo apt update && sudo apt install -y ccache
-          sudo mkdir /ccache
+          name: Install and setup ccache
+          command: |
+            sudo apt update && sudo apt install -y ccache
+            sudo mkdir /ccache
       - restore_cache:
           name: Restore ccache
           keys:
