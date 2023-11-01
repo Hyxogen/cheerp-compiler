@@ -34,7 +34,7 @@ jobs:
       - run:
           name: Install and setup ccache
           command: |
-            apt update && sudo apt install -y ccache
+            apt update && apt install -y ccache
             mkdir /ccache
       - restore_cache:
           name: Restore ccache
