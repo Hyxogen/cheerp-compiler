@@ -156,27 +156,13 @@ jobs:
             - cheerp-musl_*.deb
             - cheerp-libcxx-libcxxabi_*.deb
             - cheerp-libs_*.deb
-  test-wasm:
+  test:
     docker:
       - image: leaningtech/cheerp_ci_base:20.04
     resource_class: large
     steps:
       - run-cheerp-tests:
-          target: wasm
-  test-asmjs:
-    docker:
-      - image: leaningtech/cheerp_ci_base:20.04
-    resource_class: large
-    steps:
-      - run-cheerp-tests:
-          target: asmjs
-  test-genericjs:
-    docker:
-      - image: leaningtech/cheerp_ci_base:20.04
-    resource_class: large
-    steps:
-      - run-cheerp-tests:
-          target: genericjs
+          target: << parameters.target >>
   RPM-cheerp-compiler:
     docker:
       - image: leaningtech/cheerp_rpm_base:8
@@ -1202,24 +1188,17 @@ workflows:
           requires:
             - define-version-no
             - build-cheerp-compiler
-      - test-wasm:
-          requires:
-            - build-cheerp-compiler
-            - build-libraries
-      - test-asmjs:
-          requires:
-            - build-cheerp-compiler
-            - build-libraries
-      - test-genericjs:
+      - test:
+          matrix:
+            parameters:
+              target: ["genericjs", "asmjs", "wasm"]
           requires:
             - build-cheerp-compiler
             - build-libraries
       - RPM-cheerp-compiler:
           requires:
             - define-version-no
-            - test-wasm
-            - test-asmjs
-            - test-genericjs
+            - test
             - llvm-check
           filters:
             branches:
@@ -1230,9 +1209,7 @@ workflows:
       - PPA:
           requires:
             - define-version-no
-            - test-wasm
-            - test-asmjs
-            - test-genericjs
+            - test
             - llvm-check
           filters:
             branches:
