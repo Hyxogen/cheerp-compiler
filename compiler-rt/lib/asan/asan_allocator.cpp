@@ -244,7 +244,6 @@ typedef Quarantine<QuarantineCallback, AsanChunk> AsanQuarantine;
 typedef AsanQuarantine::Cache QuarantineCache;
 
 void AsanMapUnmapCallback::OnMap(uptr p, uptr size) const {
-  //Printf("just mapped %x, %u bytes [%x, %x]\n", p, size, p, p + size);
   PoisonShadow(p, size, kAsanHeapLeftRedzoneMagic);
   // Statistics.
   AsanStats &thread_stats = GetCurrentThreadStats();
@@ -252,11 +251,14 @@ void AsanMapUnmapCallback::OnMap(uptr p, uptr size) const {
   thread_stats.mmaped += size;
 }
 void AsanMapUnmapCallback::OnUnmap(uptr p, uptr size) const {
-  // Printf("just unmapped %x, %u bytes [%x, %x]\n", p, size, p, p + size);
-  //  CHEERPASAN: TODO as unmaping doesn't really mean the same thing on
-  //  cheerp-wasm, we should probably not unpoison the shadow, but actually
-  //  poison it
+#if SANITIZER_CHEERPWASM
+  // CHEERP: as wasm is a linear memory model, trying to access unmapped
+  // pages doesn't actually result in segfault or something like that, so we
+  // should just poison unmapped pages so asan can detect their accesses
+  PoisonShadow(p, size, 0xfe);
+#else
   PoisonShadow(p, size, 0);
+#endif
   // We are about to unmap a chunk of user memory.
   // Mark the corresponding shadow memory as not needed.
   FlushUnneededASanShadowMemory(p, size);
