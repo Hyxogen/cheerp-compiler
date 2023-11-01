@@ -63,8 +63,7 @@ const char *GetEnv(const char *name) {
 }
 
 uptr GetPageSize() {
-  //CHEERPASAN: TODO set this to the same as mmap granularity?
-  return 64*1024;// CHEERPASAN: TODO make define
+  return GetMmapGranularity();
 }
 
 tid_t GetTid() {
