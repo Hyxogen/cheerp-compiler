@@ -27,9 +27,18 @@ jobs:
     environment:
       - NINJA_STATUS: "[%u/%r/%f] "
       - THREADS: "6"
+      - CCACHE_DIR: "/ccache"
     steps:
       - attach_workspace:
           at: ~/project/packages
+      - run: Install and setup ccache
+        command: |
+          sudo apt update && sudo apt install -y ccache
+          sudo mkdir /ccache
+      - restore_cache:
+          name: Restore ccache
+          keys:
+            - cheerp-compiler
       - run:
           name: Clone Cheerp
           command: |
@@ -48,6 +57,11 @@ jobs:
       - build-internal:
           directory: cheerp-compiler
           package-name: llvm-clang
+      - save_cache:
+        name: Save ccache
+        key: cheerp-compiler
+        paths:
+          - /ccache
       - run:
           name: Save build
           working_directory: ~/project/cheerp-compiler
