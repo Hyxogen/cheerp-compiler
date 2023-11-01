@@ -2204,7 +2204,10 @@ void ModuleAddressSanitizer::InstrumentGlobalsWithMetadataArray(
   auto AllGlobals = new GlobalVariable(
       M, ArrayOfGlobalStructTy, false, GlobalVariable::InternalLinkage,
       ConstantArray::get(ArrayOfGlobalStructTy, MetadataInitializers), "__asan_all_globals");
-  AllGlobals->setSection("asmjs"); // CHEERPASAN: TODO only for cheerpwasm
+
+  if (TargetTriple.isCheerpWasm())
+    AllGlobals->setSection("asmjs");
+
   if (Mapping.Scale > 3)
     AllGlobals->setAlignment(Align(1ULL << Mapping.Scale));
 
@@ -2278,6 +2281,8 @@ bool ModuleAddressSanitizer::InstrumentGlobals(IRBuilder<> &IRB, Module &M,
   // module ID in runtime.
   GlobalVariable *ModuleName = createPrivateGlobalForString(
       M, M.getModuleIdentifier(), /*AllowMerging*/ false, kAsanGenPrefix);
+  if (TargetTriple.isCheerpWasm())
+    ModuleName->setSection("asmjs");
 
   for (size_t i = 0; i < n; i++) {
     GlobalVariable *G = GlobalsToChange[i];
@@ -2293,6 +2298,8 @@ bool ModuleAddressSanitizer::InstrumentGlobals(IRBuilder<> &IRB, Module &M,
     GlobalVariable *Name =
         createPrivateGlobalForString(M, llvm::demangle(NameForGlobal),
                                      /*AllowMerging*/ true, kAsanGenPrefix);
+    if (TargetTriple.isCheerpWasm())
+	    Name->setSection("asmjs");
 
     Type *Ty = G->getValueType();
     const uint64_t SizeInBytes = DL.getTypeAllocSize(Ty);
@@ -2373,7 +2380,8 @@ bool ModuleAddressSanitizer::InstrumentGlobals(IRBuilder<> &IRB, Module &M,
       ODRIndicatorSym->setVisibility(NewGlobal->getVisibility());
       ODRIndicatorSym->setDLLStorageClass(NewGlobal->getDLLStorageClass());
       ODRIndicatorSym->setAlignment(Align(1));
-      ODRIndicatorSym->setSection("asmjs"); // CHEERPASAN: TODO only for cheerp-wasm
+      if (TargetTriple.isCheerpWasm())
+        ODRIndicatorSym->setSection("asmjs");
       ODRIndicator = ODRIndicatorSym;
     }
 
@@ -2575,7 +2583,9 @@ void AddressSanitizer::initializeCallbacks(Module &M) {
   if (Mapping.InGlobal) {
     AsanShadowGlobal = M.getOrInsertGlobal("__asan_shadow",
                                            ArrayType::get(IRB.getInt8Ty(), 0));
-    cast<GlobalVariable>(AsanShadowGlobal)->setSection("asmjs"); // CHEERPASAN: TODO only for cheerpwasm
+    if (TargetTriple.isCheerpWasm()) {
+      cast<GlobalVariable>(AsanShadowGlobal)->setSection("asmjs");
+    }
   }
 
   AMDGPUAddressShared = M.getOrInsertFunction(
@@ -3307,6 +3317,8 @@ void FunctionStackPoisoner::processStaticAllocas() {
   GlobalVariable *StackDescriptionGlobal =
       createPrivateGlobalForString(*F.getParent(), DescriptionString,
                                    /*AllowMerging*/ true, kAsanGenPrefix);
+  if (ASan.TargetTriple.isCheerpWasm())
+    StackDescriptionGlobal->setSection("asmjs");
   Value *Description = IRB.CreatePointerCast(StackDescriptionGlobal, IntptrTy);
   IRB.CreateStore(Description, BasePlus1);
   // Write the PC to redzone[2].
