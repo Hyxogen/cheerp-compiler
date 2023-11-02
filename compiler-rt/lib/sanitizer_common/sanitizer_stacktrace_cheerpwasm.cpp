@@ -38,7 +38,7 @@ static uptr _name_len = 0;
 }
 
 [[cheerp::genericjs]] static void CachePC(uptr pc, client::String* frame) {
-  if (_symbols == nullptr) {
+  if (UNLIKELY(_symbols == nullptr)) {
     __asm__("{}" : "=r"(_symbols));
   }
   __asm__("%0[%1]=%2" : : "r"(_symbols), "r"(pc), "r"(frame));
