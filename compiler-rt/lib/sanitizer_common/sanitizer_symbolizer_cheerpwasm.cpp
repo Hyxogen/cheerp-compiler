@@ -3,9 +3,23 @@
 #if SANITIZER_CHEERPWASM
 #include "sanitizer_symbolizer_internal.h"
 
+#include <string>
+
+namespace llvm {
+//std::string demangle(const std::string& Name);
+__attribute__((weak)) std::string demangle(const std::string& Name) {
+	return Name;
+}
+} // namespace llvm
+
 namespace __sanitizer {
 
 const char* GetFunctionNameAtPc(uptr pc);
+
+static char *Demangle(const char *MangledName) {
+  std::string Result = llvm::demangle(std::string(MangledName));
+  return internal_strdup(Result.c_str());
+}
 
 class CheerpSymbolizerTool : public SymbolizerTool {
  public:
@@ -16,7 +30,7 @@ class CheerpSymbolizerTool : public SymbolizerTool {
       frame->info.line = 0x80000000 ^ addr;
       frame->info.column = 0;
     } else {
-      frame->info.function = internal_strdup(GetFunctionNameAtPc(addr));
+      frame->info.function = __sanitizer::Demangle(GetFunctionNameAtPc(addr));
     }
     return true;
   }

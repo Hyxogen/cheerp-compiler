@@ -158,6 +158,7 @@ DECLARE_REAL(int, fprintf, FILE *stream, const char *format, ...)
 DECLARE_REAL(int, vfprintf, FILE *stream, const char *format, va_list ap)
 
 DECLARE_REAL(size_t, fwrite, const void *ptr, size_t size, size_t nmemb, FILE *stream)
+DECLARE_REAL(int, fputs, const char * s, FILE *stream);
 
 DECLARE_REAL(char*, strcasestr, const char *haystack, const char *needle)
 

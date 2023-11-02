@@ -1332,7 +1332,7 @@ INTERCEPTOR(char *, fgets, char *s, SIZE_T size, void *file) {
 #endif
 
 #if SANITIZER_INTERCEPT_FPUTS
-INTERCEPTOR_WITH_SUFFIX(int, fputs, char *s, void *file) {
+INTERCEPTOR_WITH_SUFFIX(int, fputs, const char *s, __sanitizer_FILE *file) {
   // libc file streams can call user-supplied functions, see fopencookie.
   void *ctx;
   COMMON_INTERCEPTOR_ENTER(ctx, fputs, s, file);
