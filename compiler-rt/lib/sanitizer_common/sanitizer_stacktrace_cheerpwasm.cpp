@@ -6,8 +6,21 @@
 #  include <cstdio>
 #  include <cuchar>
 
+// We have to define LEAN_CXX_LIB as client lib defines it own new operator
+// which conflicts with the one that asan declares
 #  define LEAN_CXX_LIB
 #  include <client/cheerp/types.h>
+
+// The sanitizer are able to output stacktraces to give more context of where
+// something happened. One might expect that this would be implemented by
+// calling the stack unwinder and explicitly tell it how many functions to skip.
+// However, the sanitizer_common library doesn't work like that. It uses
+// GET_CALLER_PC_BP_SP and GET_CURRENT_PC_BP_SP. Then is passes the PC, BP and
+// SP values along until some other function uses those values to actually
+// unwind the stack. On standard machines, the stack can be unwound by treating
+// BP as a linked list. But on cheerp, BP does not exist. Therefore we must be
+// able to unwind from a PC value that may no longer be on the execution stack,
+// and thus are forced to cache the entire call stack.
 
 namespace __sanitizer {
 
