@@ -30,7 +30,7 @@ static [[cheerp::genericjs]] client::Object* _symbols = nullptr;
 static char _name_cache[256];
 static uptr _name_len = 0;
 
-[[cheerp::genericjs]] static uptr ConvertFrameToPC(client::String* frame) {
+[[cheerp::genericjs]] static uptr ConvertFrameToPc(client::String* frame) {
   if (client::TArray<client::String>* match =
           frame->match("\\bwasm-function\\[\\d+\\]:(0x[0-9a-f]+)")) {
     if (match->get_length() >= 2) {
@@ -50,7 +50,7 @@ static uptr _name_len = 0;
   return 0;
 }
 
-[[cheerp::genericjs]] static void CachePC(uptr pc, client::String* frame) {
+[[cheerp::genericjs]] static void CachePc(uptr pc, client::String* frame) {
   if (UNLIKELY(_symbols == nullptr)) {
     __asm__("{}" : "=r"(_symbols));
   }
@@ -68,8 +68,8 @@ static uptr _name_len = 0;
     if (frame->startsWith("Error"))
       continue;
 
-    uptr pc = ConvertFrameToPC(frame);
-    CachePC(pc, frame);
+    uptr pc = ConvertFrameToPc(frame);
+    CachePc(pc, frame);
     dest[j++] = pc;
 
     if (pc == 0) {
@@ -79,7 +79,7 @@ static uptr _name_len = 0;
   return j;
 }
 
-[[cheerp::genericjs]] static client::String* GetFunctionAtPC(uptr pc) {
+[[cheerp::genericjs]] static client::String* GetFunctionAtPc(uptr pc) {
   if (_symbols == nullptr)
     return nullptr;
 
@@ -101,9 +101,10 @@ static uptr _name_len = 0;
   return i;
 }
 
-[[cheerp::genericjs]] static uptr GetFunctionNameAtPC16(uptr pc, char16_t* dest,
-                                                        uptr len) {
-  client::String* frame = GetFunctionAtPC(pc);
+[[cheerp::genericjs]] static uptr GetUtf16FunctionNameAtPc(uptr pc,
+                                                           char16_t* dest,
+                                                           uptr len) {
+  client::String* frame = GetFunctionAtPc(pc);
 
   if (frame) {
     if (client::TArray<client::String>* match =
@@ -128,7 +129,6 @@ static uptr CodepointToUtf8(char* dest, char32_t codepoint) {
     dest = buffer;
 
   if (codepoint > MAX_CODEPOINT) {
-    // Invalid codepoint
     codepoint = REPLACEMENT_CHARACTER;
   }
 
@@ -186,14 +186,13 @@ static uptr Utf16ToUtf8(char* dest, uptr dlen, const char16_t* src, uptr slen) {
   return j ? j - 1 : 0;
 }
 
-const char* GetFunctionNameAtPC(uptr pc) {
+const char* GetFunctionNameAtPc(uptr pc) {
   char16_t buffer[256];
   uptr buffer_len =
-      GetFunctionNameAtPC16(pc, buffer, sizeof(buffer) / sizeof(buffer[0]));
+      GetUtf16FunctionNameAtPc(pc, buffer, sizeof(buffer) / sizeof(buffer[0]));
   _name_len = Utf16ToUtf8(_name_cache,
                           (sizeof(_name_cache) / sizeof(_name_cache[0])) - 1,
                           buffer, buffer_len);
-  _name_cache[_name_len] = 0;
   return _name_cache;
 }
 

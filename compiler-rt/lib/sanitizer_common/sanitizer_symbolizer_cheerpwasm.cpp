@@ -5,18 +5,18 @@
 
 namespace __sanitizer {
 
-const char* GetFunctionNameAtPC(uptr pc);
+const char* GetFunctionNameAtPc(uptr pc);
 
 class CheerpSymbolizerTool : public SymbolizerTool {
  public:
   bool SymbolizePC(uptr addr, SymbolizedStack *frame) override {
     if (0x80000000 & addr) {
-      frame->info.function = internal_strdup(GetFunctionNameAtPC(addr));
+      frame->info.function = internal_strdup(GetFunctionNameAtPc(addr));
       frame->info.file = internal_strdup("main");
       frame->info.line = 0x80000000 ^ addr;
       frame->info.column = 0;
     } else {
-      frame->info.function = internal_strdup(GetFunctionNameAtPC(addr));
+      frame->info.function = internal_strdup(GetFunctionNameAtPc(addr));
     }
     return true;
   }
