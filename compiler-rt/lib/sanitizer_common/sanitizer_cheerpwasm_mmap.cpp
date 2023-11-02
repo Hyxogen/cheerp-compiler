@@ -54,6 +54,7 @@ public:
 static Page _pages[MMAP_PAGECOUNT];
 static uptr _max_page_count = 0;
 static uptr _mapped_pages = 0;
+static bool _initialized = false;
 
 static uptr PageCount() {
   return sizeof(_pages) / sizeof(_pages[0]);
@@ -130,6 +131,7 @@ static void FreePages(uptr page, uptr len) {
 
 uptr InternalMmap(uptr addr, uptr len, int prot, int flags, int fildes) {
   CHECK_EQ(0, addr % MMAP_PAGESIZE);
+  CHECK_EQ(true, _initialized);
 
   if (len % MMAP_PAGESIZE) {
     len += MMAP_PAGESIZE - (len % MMAP_PAGESIZE);
@@ -181,6 +183,7 @@ void SetupMemoryMapping() {
 
   uptr used_pages = RoundUpTo(reinterpret_cast<uptr>(_heapStart), MMAP_PAGESIZE) / MMAP_PAGESIZE;
   ReservePages(0, used_pages);
+  _initialized = true;
 }
 
 uptr GetMaxUserVirtualAddress() {
