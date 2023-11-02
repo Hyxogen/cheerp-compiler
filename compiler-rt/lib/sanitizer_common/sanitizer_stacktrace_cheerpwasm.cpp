@@ -57,7 +57,7 @@ static uptr _name_len = 0;
   __asm__("%0[%1]=%2" : : "r"(_symbols), "r"(pc), "r"(frame));
 }
 
-[[cheerp::genericjs]] [[clang::noinline]] static uptr GetCallstack(uptr* dest, uptr dest_len, uptr skip) {
+[[cheerp::genericjs]] static uptr GetCallstack(uptr* dest, uptr dest_len) {
   client::TArray<client::String>* callstack = nullptr;
   __asm__("(new Error()).stack.toString().split('\\n')" : "=r"(callstack));
 
@@ -67,10 +67,6 @@ static uptr _name_len = 0;
 
     if (frame->startsWith("Error"))
       continue;
-    if (skip) {
-      --skip;
-      continue;
-    }
 
     uptr pc = ConvertFrameToPc(frame);
     CachePc(pc, frame);
@@ -206,21 +202,13 @@ void BufferedStackTrace::UnwindFast(uptr pc, uptr bp, uptr stack_top,
   trace_buffer[0] = pc;
 }
 
-[[clang::always_inline]] uptr GetReturnAddress(uptr idx) {
+uptr StackTrace::GetCurrentPc() {
   _prev_trace_len =
-      GetCallstack(_prev_trace, sizeof(_prev_trace) / sizeof(_prev_trace[0]), idx);
+      GetCallstack(_prev_trace, sizeof(_prev_trace) / sizeof(_prev_trace[0]));
 
-  if (idx < _prev_trace_len)
-	  return _prev_trace[0];
+  if (_prev_trace_len)
+    return _prev_trace[0];
   return 0;
-}
-
-[[clang::always_inline]] uptr StackTrace::GetCurrentPc() {
-  return GetReturnAddress(0);
-}
-
-extern "C" [[clang::always_inline]] uptr get_return_address(uptr idx) {
-  return GetReturnAddress(idx + 1);
 }
 
 }  // namespace __sanitizer
