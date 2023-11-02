@@ -51,9 +51,9 @@ static uptr _name_len = 0;
 }
 
 [[cheerp::genericjs]] static void CachePc(uptr pc, client::String* frame) {
-  if (UNLIKELY(_symbols == nullptr)) {
+  if (UNLIKELY(_symbols == nullptr))
     __asm__("{}" : "=r"(_symbols));
-  }
+
   __asm__("%0[%1]=%2" : : "r"(_symbols), "r"(pc), "r"(frame));
 }
 
@@ -72,9 +72,8 @@ static uptr _name_len = 0;
     CachePc(pc, frame);
     dest[j++] = pc;
 
-    if (pc == 0) {
+    if (pc == 0)
       break;
-    }
   }
   return j;
 }
@@ -128,9 +127,8 @@ static uptr CodepointToUtf8(char* dest, char32_t codepoint) {
   if (!dest)
     dest = buffer;
 
-  if (codepoint > MAX_CODEPOINT) {
+  if (codepoint > MAX_CODEPOINT)
     codepoint = REPLACEMENT_CHARACTER;
-  }
 
   if (codepoint <= 0x7F) {
     *dest = static_cast<char>(codepoint);
@@ -206,9 +204,9 @@ void BufferedStackTrace::UnwindFast(uptr pc, uptr bp, uptr stack_top,
 uptr StackTrace::GetCurrentPc() {
   _prev_trace_len =
       GetCallstack(_prev_trace, sizeof(_prev_trace) / sizeof(_prev_trace[0]));
-  if (_prev_trace_len) {
+
+  if (_prev_trace_len)
     return _prev_trace[0];
-  }
   return 0;
 }
 
