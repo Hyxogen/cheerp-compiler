@@ -95,8 +95,9 @@ static uptr _name_len = 0;
   return 0;
 }
 
-[[cheerp::genericjs]] static uptr ReadJSString(client::String* str,
-                                               char16_t* dest, uptr len) {
+[[cheerp::genericjs]] static uptr ClientStringToUtf16(client::String* str,
+                                                      char16_t* dest,
+                                                      uptr len) {
   uptr i = 0;
   for (; i < len && i < str->get_length(); ++i) {
     dest[i] = str->charCodeAt(i);
@@ -112,10 +113,10 @@ static uptr _name_len = 0;
   if (frame) {
     if (client::TArray<client::String>* match =
             frame->match("^\\s+at (.*) \\(.*\\)$")) {
-      return ReadJSString((*match)[1], dest, len);
+      return ClientStringToUtf16((*match)[1], dest, len);
     } else if (client::TArray<client::String>* match =
                    frame->match("^(.+?)@")) {
-      return ReadJSString((*match)[1], dest, len);
+      return ClientStringToUtf16((*match)[1], dest, len);
     }
   }
   return 0;
