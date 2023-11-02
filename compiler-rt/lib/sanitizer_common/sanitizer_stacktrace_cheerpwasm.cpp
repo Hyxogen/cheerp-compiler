@@ -3,11 +3,11 @@
 #include "sanitizer_stacktrace.h"
 #if SANITIZER_CHEERPWASM
 
-#include <cstdio>
-#include <cuchar>
+#  include <cstdio>
+#  include <cuchar>
 
-#define LEAN_CXX_LIB
-#include <client/cheerp/types.h>
+#  define LEAN_CXX_LIB
+#  include <client/cheerp/types.h>
 
 namespace __sanitizer {
 
@@ -18,14 +18,16 @@ static char _name_cache[256];
 static uptr _name_len = 0;
 
 [[cheerp::genericjs]] static uptr ConvertFrameToPC(client::String* frame) {
-  if (client::TArray<client::String>* match = frame->match("\\bwasm-function\\[\\d+\\]:(0x[0-9a-f]+)")) {
+  if (client::TArray<client::String>* match =
+          frame->match("\\bwasm-function\\[\\d+\\]:(0x[0-9a-f]+)")) {
     if (match->get_length() >= 2) {
       uptr pc = 0;
       __asm__("%1[1]" : "=r"(pc) : "r"(match));
       return pc;
     }
   }
-  if (client::TArray<client::String>* match = frame->match(":(\\d+):\\d+(?:\\)|$)")) {
+  if (client::TArray<client::String>* match =
+          frame->match(":(\\d+):\\d+(?:\\)|$)")) {
     if (match->get_length() >= 2) {
       uptr pc = 0;
       __asm__("%1[1]" : "=r"(pc) : "r"(match));
@@ -75,9 +77,10 @@ static uptr _name_len = 0;
   if (res)
     return result;
   return 0;
-} 
+}
 
-[[cheerp::genericjs]] static uptr ReadJSString(client::String* str, char16_t* dest, uptr len) {
+[[cheerp::genericjs]] static uptr ReadJSString(client::String* str,
+                                               char16_t* dest, uptr len) {
   uptr i = 0;
   for (; i < len && i < str->get_length(); ++i) {
     dest[i] = str->charCodeAt(i);
@@ -85,22 +88,25 @@ static uptr _name_len = 0;
   return i;
 }
 
-[[cheerp::genericjs]] static uptr GetFunctionNameAtPC16(uptr pc, char16_t* dest, uptr len) {
+[[cheerp::genericjs]] static uptr GetFunctionNameAtPC16(uptr pc, char16_t* dest,
+                                                        uptr len) {
   client::String* frame = GetFunctionAtPC(pc);
 
   if (frame) {
-    if (client::TArray<client::String>* match = frame->match("^\\s+at (.*) \\(.*\\)$")) {
+    if (client::TArray<client::String>* match =
+            frame->match("^\\s+at (.*) \\(.*\\)$")) {
       return ReadJSString((*match)[1], dest, len);
-    } else if (client::TArray<client::String>* match = frame->match("^(.+?)@")) {
+    } else if (client::TArray<client::String>* match =
+                   frame->match("^(.+?)@")) {
       return ReadJSString((*match)[1], dest, len);
     }
   }
   return 0;
 }
 
-#define REPLACEMENT_CHARACTER 0xFFFD
-#define MAX_CODEPOINT 0x10FFFF
-#define INVALID_CODEPOINT -1
+#  define REPLACEMENT_CHARACTER 0xFFFD
+#  define MAX_CODEPOINT 0x10FFFF
+#  define INVALID_CODEPOINT -1
 
 static uptr CodepointToUtf8(char* dest, char32_t codepoint) {
   char buffer[4];
@@ -169,7 +175,8 @@ static uptr Utf16ToUtf8(char* dest, uptr dlen, const char16_t* src, uptr slen) {
 
 const char* GetFunctionNameAtPC(uptr pc) {
   char16_t buffer[256];
-  uptr buffer_len = GetFunctionNameAtPC16(pc, buffer, sizeof(buffer) / sizeof(buffer[0]));
+  uptr buffer_len =
+      GetFunctionNameAtPC16(pc, buffer, sizeof(buffer) / sizeof(buffer[0]));
   _name_len = Utf16ToUtf8(_name_cache,
                           (sizeof(_name_cache) / sizeof(_name_cache[0])) - 1,
                           buffer, buffer_len);
@@ -177,21 +184,22 @@ const char* GetFunctionNameAtPC(uptr pc) {
   return _name_cache;
 }
 
-void BufferedStackTrace::UnwindFast(uptr pc, uptr bp, uptr stack_top, uptr stack_bottom,
-                u32 max_depth) {
+void BufferedStackTrace::UnwindFast(uptr pc, uptr bp, uptr stack_top,
+                                    uptr stack_bottom, u32 max_depth) {
   size = _prev_trace_len > kStackTraceMax ? kStackTraceMax : _prev_trace_len;
   internal_memcpy(trace_buffer, _prev_trace, size * sizeof(_prev_trace[0]));
   trace_buffer[0] = pc;
 }
 
 uptr StackTrace::GetCurrentPc() {
-  _prev_trace_len = GetCallstack(_prev_trace, sizeof(_prev_trace)/sizeof(_prev_trace[0]));
+  _prev_trace_len =
+      GetCallstack(_prev_trace, sizeof(_prev_trace) / sizeof(_prev_trace[0]));
   if (_prev_trace_len) {
     return _prev_trace[0];
   }
   return 0;
 }
 
-} // namespace __sanitizer
+}  // namespace __sanitizer
 
-#endif // SANITIZER_CHEERPWASM
+#endif  // SANITIZER_CHEERPWASM
