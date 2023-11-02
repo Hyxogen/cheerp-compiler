@@ -44,7 +44,7 @@ static uptr _name_len = 0;
 
 [[cheerp::genericjs]] static uptr GetCallstack(uptr* dest, uptr dest_len) {
   client::TArray<client::String>* callstack = nullptr;
-  __asm__("(new Error()).stack.toString().split('\\n')" : "=r"(callstack) : );
+  __asm__("(new Error()).stack.toString().split('\\n')" : "=r"(callstack));
 
   uptr j = 0;
   for (uptr i = 0; j < dest_len && i < callstack->get_length(); ++i) {
