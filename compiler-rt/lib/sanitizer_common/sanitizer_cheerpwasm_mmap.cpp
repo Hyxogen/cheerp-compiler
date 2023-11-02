@@ -18,7 +18,6 @@ __attribute__((cheerp_asmjs)) char* volatile _maxAddress = (char*)0xdeadbeef;
 namespace __sanitizer {
 
 constexpr static uptr WASM_PAGESIZE = 64 * 1024;
-//constexpr static uptr MMAP_PAGESIZE = 4096;
 constexpr static uptr MAX_VIRTUAL_ADDRESS = 2147483647;
 constexpr static uptr MMAP_PAGESIZE = WASM_PAGESIZE;
 constexpr static uptr MMAP_PAGECOUNT = MAX_VIRTUAL_ADDRESS/MMAP_PAGESIZE;
@@ -47,16 +46,17 @@ public:
   }
 
   void FreeStarting(uint16_t n) {
+    CHECK_GE(n, _start);
     _start = n;
   }
 };
 
-static Page pages[MMAP_PAGECOUNT];
-static uptr max_page_count = 0;
-static uptr mapped_pages = 0;
+static Page _pages[MMAP_PAGECOUNT];
+static uptr _max_page_count = 0;
+static uptr _mapped_pages = 0;
 
 static uptr PageCount() {
-  return sizeof(pages) / sizeof(pages[0]);
+  return sizeof(_pages) / sizeof(_pages[0]);
 }
 
 static uptr FindPages(uptr start, uptr page_count) {
@@ -66,7 +66,7 @@ static uptr FindPages(uptr start, uptr page_count) {
   uptr best_len = 0;
 
   for (uptr idx = start; idx < PageCount(); ++idx) {
-    Page& page = pages[idx];
+    Page& page = _pages[idx];
 
     if (page.IsFree()) {
       if (!best_len)
@@ -88,7 +88,7 @@ static uptr FindPages(uptr start, uptr page_count) {
 static bool IsFree(uptr page, uptr page_count) {
   uptr end = page + page_count;
   for (uptr idx = page;  idx < end; ++idx) {
-    if (pages[idx].IsUsed())
+    if (_pages[idx].IsUsed())
       return false;
   }
   return true;
@@ -98,19 +98,19 @@ static void ReservePages(uptr page, uptr page_count) {
   CHECK_LT(page, PageCount());
 
   uptr last_page = page + page_count;
-  if (last_page > mapped_pages) {
-    uptr needed_pages = last_page - mapped_pages;
+  if (last_page > _mapped_pages) {
+    uptr needed_pages = last_page - _mapped_pages;
 
     uptr wasm_pages = RoundUpTo(needed_pages * MMAP_PAGESIZE, WASM_PAGESIZE) / WASM_PAGESIZE;
     if (__builtin_cheerp_grow_memory(wasm_pages) == -1) {
       abort(); // If this triggered, you probably did not give enough memory to your program
     }
-    mapped_pages = last_page;
+    _mapped_pages = last_page;
   }
 
   uptr end = page + page_count;
   for (uptr idx = page; idx < end; ++idx) {
-    pages[idx].MakeUsed();
+    _pages[idx].MakeUsed();
   }
 }
 
@@ -119,11 +119,11 @@ static void FreePages(uptr page, uptr len) {
 
   uptr end = page + (len / MMAP_PAGESIZE);
   for (uptr idx = page; idx < end; ++ idx) {
-    pages[idx].MakeFree();
+    _pages[idx].MakeFree();
   }
 
   if (len % MMAP_PAGESIZE) {
-    pages[end].FreeStarting(static_cast<uint16_t>(len % MMAP_PAGESIZE));
+    _pages[end].FreeStarting(static_cast<uint16_t>(len % MMAP_PAGESIZE));
   }
 }
 
@@ -167,16 +167,16 @@ void InternalMunmap(uptr addr, uptr len) {
 //TODO add a check if trying to mmap without having it initialized here
 void SetupMemoryMapping() {
   for (uptr idx = 0; idx < PageCount(); ++idx) {
-    pages[idx].MakeFree();
+    _pages[idx].MakeFree();
   }
 
-  max_page_count = reinterpret_cast<uptr>(_maxAddress) / MMAP_PAGESIZE;
+  _max_page_count = reinterpret_cast<uptr>(_maxAddress) / MMAP_PAGESIZE;
 
-  mapped_pages = __builtin_cheerp_grow_memory(0);
-  if (mapped_pages == -1) {
-    mapped_pages = max_page_count; // and hope for the best
+  _mapped_pages = __builtin_cheerp_grow_memory(0);
+  if (_mapped_pages == -1) {
+    _mapped_pages = _max_page_count; // and hope for the best
   } else {
-    mapped_pages = (mapped_pages * WASM_PAGESIZE) / MMAP_PAGESIZE;
+    _mapped_pages = (_mapped_pages * WASM_PAGESIZE) / MMAP_PAGESIZE;
   }
 
   uptr used_pages = RoundUpTo(reinterpret_cast<uptr>(_heapStart), MMAP_PAGESIZE) / MMAP_PAGESIZE;
