@@ -18,10 +18,10 @@ __attribute__((cheerp_asmjs)) char* volatile _maxAddress = (char*)0xdeadbeef;
 namespace __sanitizer {
 
 constexpr static uptr WASM_PAGESIZE = 64 * 1024;
-constexpr static uptr WASM_MAX_PAGES = 65536;
 //constexpr static uptr MMAP_PAGESIZE = 4096;
+constexpr static uptr MAX_VIRTUAL_ADDRESS = 2147483647;
 constexpr static uptr MMAP_PAGESIZE = WASM_PAGESIZE;
-constexpr static uptr MMAP_PAGECOUNT = ((uptr) -1)/MMAP_PAGESIZE;
+constexpr static uptr MMAP_PAGECOUNT = MAX_VIRTUAL_ADDRESS/MMAP_PAGESIZE;
 
 struct Page {
 private:
@@ -184,7 +184,7 @@ void SetupMemoryMapping() {
 }
 
 uptr GetMaxUserVirtualAddress() {
-  return ~(uptr) 0;
+  return MAX_VIRTUAL_ADDRESS;
 }
 
 void *MmapOrDie(uptr size, const char *mem_type, bool raw_report) {
