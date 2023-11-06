@@ -34,7 +34,7 @@ bool PlatformUnpoisonStacks() { return false; }
 
 void *AsanDoesNotSupportStaticLinkage() {
   // On Linux, this is some magic that fails linking with -static.
-  // On Emscripten, we have to do static linking, so we stub this out.
+  // On Cheerp, we have to do static linking, so we stub this out.
   return nullptr;
 }
 
@@ -96,6 +96,6 @@ void InstallAtExitCheckLeaks() {
 
 } // namespace __asan
 
-#endif // SANITIZER_EMSCRIPTEN
+#endif // SANITIZER_CHEERPWASM
 
 

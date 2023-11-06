@@ -20,7 +20,7 @@ void ListOfModules::init() {
   LoadedModule main_module;
   main_module.set("main", 0);
 
-  // Emscripten represents program counters as offsets into WebAssembly
+  // Cheerp represents program counters as offsets into WebAssembly
   // modules. For JavaScript code, the "program counter" is the line number
   // of the JavaScript code with the high bit set.
   // Therefore, PC values 0x80000000 and beyond represents JavaScript code.
