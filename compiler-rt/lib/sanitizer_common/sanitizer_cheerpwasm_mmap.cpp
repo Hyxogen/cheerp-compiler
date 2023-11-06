@@ -24,10 +24,10 @@ constexpr static uptr MMAP_PAGECOUNT = MAX_VIRTUAL_ADDRESS/MMAP_PAGESIZE;
 
 struct Page {
 private:
-  constexpr static uint16_t FREE_PAGE = -1;
-  constexpr static uint16_t FULLY_USED_PAGE = 0;
+  constexpr static uint8_t FREE_PAGE = -1;
+  constexpr static uint8_t FULLY_USED_PAGE = 0;
 public:
-  uint16_t _start = FREE_PAGE;
+  uint8_t _start = FREE_PAGE;
 
   bool IsUsed() const {
     return _start != FREE_PAGE;
@@ -43,11 +43,6 @@ public:
 
   void MakeFree() {
     _start = FREE_PAGE;
-  }
-
-  void FreeStarting(uint16_t n) {
-    CHECK_GE(n, _start);
-    _start = n;
   }
 };
 
@@ -118,13 +113,9 @@ static void ReservePages(uptr page, uptr page_count) {
 static void FreePages(uptr page, uptr len) {
   CHECK_LT(page, PageCount());
 
-  uptr end = page + (len / MMAP_PAGESIZE);
+  uptr end = page + ((len + MMAP_PAGESIZE - 1) / MMAP_PAGESIZE);
   for (uptr idx = page; idx < end; ++ idx) {
     _pages[idx].MakeFree();
-  }
-
-  if (len % MMAP_PAGESIZE) {
-    _pages[end].FreeStarting(static_cast<uint16_t>(len % MMAP_PAGESIZE));
   }
 }
 
