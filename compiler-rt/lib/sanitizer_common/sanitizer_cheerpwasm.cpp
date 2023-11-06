@@ -57,9 +57,7 @@ uptr ReadLongProcessName(/*out*/ char *buf, uptr buf_len) {
 }
 
 const char *GetEnv(const char *name) {
-  (void) name;
-  // CHEERPASAN: TODO implement
-  return nullptr;  // Not found.
+  return getenv(name);
 }
 
 uptr GetPageSize() {
