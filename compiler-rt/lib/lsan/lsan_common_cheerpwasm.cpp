@@ -87,7 +87,7 @@ static void ProcessThreadsCallback(ThreadContextBase *tctx, void *arg) {
     // we can for the current thread.
     if (tctx->tid == GetCurrentThread()) {
       //uptr sp = (uptr) __builtin_frame_address(0);
-      uptr sp = (uptr) alloca(16); // CHEERPASAN: TODO implement  __builtin_frame_address(0)
+      uptr sp = (uptr) alloca(0); // CHEERPASAN: TODO implement  __builtin_frame_address(0)
       if (sp < stack_begin || sp >= stack_end) {
         // SP is outside the recorded stack range (e.g. the thread is running a
         // signal handler on alternate stack, or swapcontext was used).
