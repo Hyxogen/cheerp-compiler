@@ -101,7 +101,7 @@ void InitializeShadowMemory() {
     // protect the gap.
     ProtectGap(kShadowGapBeg, kShadowGapEnd - kShadowGapBeg + 1);
 #if SANITIZER_CHEERPWASM
-    // Poison the lowest 8 bytes to detect nullptr dereferences
+    // CHEERP: Poison everything from 0x0 up to stack top to detect null derefences
     FastPoisonShadow(0, reinterpret_cast<uptr>(_stackTop), 0xfe);
 #endif
     CHECK_EQ(kShadowGapEnd, kHighShadowBeg - 1);
