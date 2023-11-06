@@ -88,12 +88,10 @@ void GlobalDepsAnalyzer::simplifyCalls(llvm::Module & module) const
 				if (isa<CallInst>(I)) {
 					CallInst& ci = cast<CallInst>(I);
 
+					bool isAsmJS = F.getSection() == StringRef("asmjs");
 					//Replace call(bitcast) with bitcast(call)
 					//Might fail and leave the CI calling to a bitcast if the prerequisite are not met (eg. the number of paramethers differ)
-					// CHEERPASAN: TODO check if ok to set performPtrIntConversions to true
-					// CHEERPASAN: Probably only perform ptrtoint conversions on asmjs
-					// CHEERPASAN: TODO check commit history for other uses of replaceCallOfBitCastWithBitCastOfCall
-					replaceCallOfBitCastWithBitCastOfCall(ci, /*mayFail*/ true, true);
+					replaceCallOfBitCastWithBitCastOfCall(ci, /*mayFail*/ true, isAsmJS);
 
 					Function* calledFunc = ci.getCalledFunction();
 
