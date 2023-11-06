@@ -58,7 +58,6 @@ CXX_FILES := \
   		asan/asan_win.cpp \
   		asan/asan_cheerpwasm.cpp \
 		interception/interception_linux.cpp \
-		interception/interception_cheerpwasm.cpp \
   		interception/interception_mac.cpp \
   		interception/interception_win.cpp \
   		interception/interception_type_test.cpp \
