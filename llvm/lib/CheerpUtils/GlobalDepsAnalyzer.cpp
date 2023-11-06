@@ -944,8 +944,6 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 							devirtualizedCall = ConstantExpr::getBitCast(devirtualizedCall, calledValue->getType());
 						ci->setCalledOperand(devirtualizedCall);
 
-						// CHEERPASAN: TODO check if ok to set performPtrIntConversions to true
-						// CHEERPASAN: probably only set ptrtoint conversions to true on asmjs
 						replaceCallOfBitCastWithBitCastOfCall(*ci, false, true);
 
 						devirtualizedCalls.push_back({ci, toBeCalledFunc});
