@@ -31,8 +31,6 @@
 #include "sanitizer_common/sanitizer_quarantine.h"
 #include "sanitizer_common/sanitizer_stackdepot.h"
 
-#include <cstdio>
-
 namespace __asan {
 
 // Valid redzone sizes are 16, 32, 64, ... 2048, so we encode them in 3 bits.

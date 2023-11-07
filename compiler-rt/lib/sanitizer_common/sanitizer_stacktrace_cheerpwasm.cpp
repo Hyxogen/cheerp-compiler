@@ -3,7 +3,6 @@
 #include "sanitizer_stacktrace.h"
 #if SANITIZER_CHEERPWASM
 
-#  include <cstdio>
 #  include <cuchar>
 
 // We have to define LEAN_CXX_LIB as client lib defines it own new operator

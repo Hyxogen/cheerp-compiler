@@ -11,8 +11,6 @@
 #include <cassert>
 #include <cstdlib>
 
-#include <cstdio>
-
 #define WASM_PAGE_SIZE (64*1024)
 #define __ATTRP_C11_THREAD ((void*)(uptr)-1)
 

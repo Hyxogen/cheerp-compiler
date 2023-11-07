@@ -5,8 +5,6 @@
 #include "sanitizer_common.h"
 #include "sanitizer_file.h"
 #include "sanitizer_cheerpwasm_mmap.h"
-
-#include <cstdio>
 #include <cstdlib>
 
 __attribute__((cheerp_asmjs)) char* volatile _stackBottom = (char*)0xdeadbeef;

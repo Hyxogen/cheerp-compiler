@@ -7,8 +7,6 @@
 #include "sanitizer_common.h"
 #include <sys/mman.h>
 
-#include <cstdio>
-
 extern "C" {
 extern char* volatile _heapStart;
 extern char* volatile _heapEnd;
