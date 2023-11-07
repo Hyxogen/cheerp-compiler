@@ -963,7 +963,6 @@ void MaybeStartBackgroudThread();
 // Use this inside a loop that looks like memset/memcpy/etc to prevent the
 // compiler from recognising it and turning it into an actual call to
 // memset/memcpy/etc.
-
 static inline void SanitizerBreakOptimization(void *arg) {
 #if defined(_MSC_VER) && !defined(__clang__)
   _ReadWriteBarrier();
