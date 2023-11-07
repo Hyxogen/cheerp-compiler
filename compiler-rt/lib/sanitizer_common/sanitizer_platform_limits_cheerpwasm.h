@@ -1,6 +1,8 @@
 #ifndef SANITIZER_PLATFORM_LIMITS_CHEERPWASM_H
 #define SANITIZER_PLATFORM_LIMITS_CHEERPWASM_H
 
+#include "sanitizer_platform.h"
+
 #if SANITIZER_CHEERPWASM
 
 #include <stdio.h>
