@@ -315,9 +315,8 @@ void ScanRangeForPointers(uptr begin, uptr end, Frontier *frontier,
     if (chunk == begin)
       continue;
     LsanMetadata m(chunk);
-    if (m.tag() == kReachable || m.tag() == kIgnored) {
+    if (m.tag() == kReachable || m.tag() == kIgnored)
       continue;
-    }
 
     // Do this check relatively late so we can log only the interesting cases.
     if (!flags()->use_poisoned && WordIsPoisoned(pp)) {
@@ -665,9 +664,8 @@ static void CollectLeaksCb(uptr chunk, void *arg) {
   LsanMetadata m(chunk);
   if (!m.allocated())
     return;
-  if (m.tag() == kDirectlyLeaked || m.tag() == kIndirectlyLeaked) {
+  if (m.tag() == kDirectlyLeaked || m.tag() == kIndirectlyLeaked)
     leaks->push_back({chunk, m.stack_trace_id(), m.requested_size(), m.tag()});
-  }
 }
 
 void LeakSuppressionContext::PrintMatchedSuppressions() {
