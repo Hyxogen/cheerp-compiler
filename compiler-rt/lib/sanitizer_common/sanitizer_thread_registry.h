@@ -101,7 +101,6 @@ class SANITIZER_MUTEX ThreadRegistry {
 
   // Should be guarded by ThreadRegistryLock.
   ThreadContextBase *GetThreadLocked(u32 tid) {
-    CHECK_EQ(tid, 0);
     return threads_.empty() ? nullptr : threads_[tid];
   }
 
