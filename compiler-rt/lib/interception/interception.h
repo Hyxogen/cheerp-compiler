@@ -187,7 +187,7 @@ const interpose_substitution substitution_##func_name[] \
 # define ASSIGN_REAL(x, y)
 #endif  // SANITIZER_APPLE
 
-#if !SANITIZER_FUCHSIA /*&& !SANITIZER_CHEERPWASM*/
+#if !SANITIZER_FUCHSIA
 #  define DECLARE_REAL_AND_INTERCEPTOR(ret_type, func, ...) \
     DECLARE_REAL(ret_type, func, __VA_ARGS__)               \
     extern "C" ret_type WRAP(func)(__VA_ARGS__);
