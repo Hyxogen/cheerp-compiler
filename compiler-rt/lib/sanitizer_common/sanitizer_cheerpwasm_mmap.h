@@ -1,6 +1,8 @@
 #ifndef SANITIZER_CHEERPWASM_MMAP_H
 #define SANITIZER_CHEERPWASM_MMAP_H
 
+#include "sanitizer_platform.h"
+
 #if SANITIZER_CHEERPWASM
 #include "sanitizer_internal_defs.h"
 

@@ -3,7 +3,7 @@ TARGET := libasan.bc
 CHEERP_DEST := /home/daan/opt/cheerp
 CC	:= $(join $(CHEERP_DEST),/bin/clang)
 CXX	:= $(join $(CHEERP_DEST),/bin/clang++)
-CXXFLAGS := -g0 -target cheerp-wasm -I. -DSANITIZER_CHEERPWASM=1
+CXXFLAGS := -g0 -target cheerp-wasm -I. #-DSANITIZER_CHEERPWASM=1
 LINK_FLAGS := -cheerp-linear-heap-size=2048 -cheerp-wasm-enable=growmem
 
 LINK_CMD := $(join $(CHEERP_DEST),/bin/llvm-link)

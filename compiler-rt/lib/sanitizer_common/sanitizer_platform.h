@@ -129,6 +129,12 @@
 #  define SANITIZER_FUCHSIA 0
 #endif
 
+#if defined(__ASMJS__)
+#  define SANITIZER_CHEERPWASM 1
+#else
+#  define SANITIZER_CHEERPWASM 0
+#endif
+
 // Assume linux that is not glibc or android is musl libc.
 #if SANITIZER_LINUX && !SANITIZER_GLIBC && !SANITIZER_ANDROID
 #  define SANITIZER_MUSL 1
