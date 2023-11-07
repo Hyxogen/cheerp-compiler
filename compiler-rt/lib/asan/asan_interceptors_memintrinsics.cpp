@@ -30,7 +30,7 @@ void *__asan_memmove(void *to, const void *from, uptr size) {
   ASAN_MEMMOVE_IMPL(nullptr, to, from, size);
 }
 
-#if SANITIZER_FUCHSIA /*|| SANITIZER_CHEERPWASM*/
+#if SANITIZER_FUCHSIA
 
 // Fuchsia doesn't use sanitizer_common_interceptors.inc, but
 // the only things there it wants are these three.  Just define them
