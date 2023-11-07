@@ -155,7 +155,6 @@ void InternalMunmap(uptr addr, uptr len) {
   FreePages(addr / MMAP_PAGESIZE, len);
 }
 
-//TODO add a check if trying to mmap without having it initialized here
 void SetupMemoryMapping() {
   for (uptr idx = 0; idx < PageCount(); ++idx) {
     _pages[idx].MakeFree();
