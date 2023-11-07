@@ -2353,8 +2353,7 @@ bool CheerpWasmWriter::compileInlineInstruction(WasmBuffer& code, const Instruct
 					{
 						// The stack pointer is the same as the address of the most recent alloca, so 0 offset
 						compileUnsignedInteger(code, ConstantInt::get(ci.getType(), 0));
-						//encodeInst(WasmS32Opcode::I32_CONST, 0, code);
-						return false; // CHEERPASAN: TODO check if this really should return false
+						return false;
 					}
 					case Intrinsic::vastart:
 					{
