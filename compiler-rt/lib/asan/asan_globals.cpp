@@ -337,7 +337,7 @@ void __asan_register_elf_globals(uptr *flag, void *start, void *stop) {
   CHECK_EQ(0, ((uptr)stop - (uptr)start) % sizeof(__asan_global));
   __asan_global *globals_start = (__asan_global*)start;
   __asan_global *globals_stop = (__asan_global*)stop;
-  __asan_register_globals(reinterpret_cast<uptr>(globals_start), globals_stop - globals_start);
+  __asan_register_globals(globals_start, globals_stop - globals_start);
   *flag = 1;
 }
 
@@ -347,7 +347,7 @@ void __asan_unregister_elf_globals(uptr *flag, void *start, void *stop) {
   CHECK_EQ(0, ((uptr)stop - (uptr)start) % sizeof(__asan_global));
   __asan_global *globals_start = (__asan_global*)start;
   __asan_global *globals_stop = (__asan_global*)stop;
-  __asan_unregister_globals(reinterpret_cast<uptr>(globals_start), globals_stop - globals_start);
+  __asan_unregister_globals(globals_start, globals_stop - globals_start);
   *flag = 0;
 }
 #endif
