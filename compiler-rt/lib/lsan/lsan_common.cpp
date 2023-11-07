@@ -25,6 +25,8 @@
 #include "sanitizer_common/sanitizer_thread_registry.h"
 #include "sanitizer_common/sanitizer_tls_get_addr.h"
 
+#include <alloca.h>
+
 #if CAN_SANITIZE_LEAKS
 
 #  if SANITIZER_APPLE
@@ -775,7 +777,7 @@ static bool CheckForLeaks() {
     param.caller_tid = GetTid();
 
 #if SANITIZER_CHEERPWASM
-    param.caller_sp = 0;
+    param.caller_sp = reinterpret_cast<uptr>(alloca(0));
 #else
     param.caller_sp = reinterpret_cast<uptr>(__builtin_frame_address(0));
 #endif
