@@ -92,9 +92,8 @@ void InitializeShadowMemory() {
 
   if (full_shadow_is_available) {
     // mmap the low shadow plus at least one page at the left.
-    if (kLowShadowBeg) {
+    if (kLowShadowBeg)
       ReserveShadowMemoryRange(shadow_start, kLowShadowEnd, "low shadow");
-    }
     // mmap the high shadow.
     ReserveShadowMemoryRange(kHighShadowBeg, kHighShadowEnd, "high shadow");
     // protect the gap.
