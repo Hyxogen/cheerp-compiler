@@ -2315,8 +2315,7 @@ bool CheerpWasmWriter::compileInlineInstruction(WasmBuffer& code, const Instruct
 			const Function * calledFunc = ci.getCalledFunction();
 			const Value * calledValue = ci.getCalledOperand();
 			const FunctionType* fTy = ci.getFunctionType();
-			if (ci.isInlineAsm()) return true;
-
+			assert(!ci.isInlineAsm());
 			// NOTE: If 'useTailCall' the code _must_ use return_call or insert a return
 			//       Returns are not otherwise added in such cases
 			const bool useTailCall = isTailCall(ci);

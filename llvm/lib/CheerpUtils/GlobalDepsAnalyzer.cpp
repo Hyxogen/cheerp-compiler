@@ -920,7 +920,7 @@ bool GlobalDepsAnalyzer::runOnModule( llvm::Module & module )
 				for (Instruction& I : bb)
 				{
 					CallBase* ci = dyn_cast<CallBase>(&I);
-					if (!ci || ci->isInlineAsm())
+					if (!ci)
 						continue;
 					Value* calledValue = ci->getCalledOperand();
 					if (isa<Function>(calledValue))
