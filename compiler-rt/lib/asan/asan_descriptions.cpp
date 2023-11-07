@@ -194,13 +194,9 @@ bool DescribeAddressIfHeap(uptr addr, uptr access_size) {
 // Stack descriptions
 bool GetStackAddressInformation(uptr addr, uptr access_size,
                                 StackAddressDescription *descr) {
-#if !SANITIZER_CHEERPWASM
-  AsanThread *t = FindThreadByStackAddress(addr);
-#else
   AsanThread *t = GetCurrentThread();
   if (addr < reinterpret_cast<uptr>(_stackTop) || addr > reinterpret_cast<uptr>(_stackBottom))
     return false;
-#endif
   if (!t) return false;
 
   descr->addr = addr;
