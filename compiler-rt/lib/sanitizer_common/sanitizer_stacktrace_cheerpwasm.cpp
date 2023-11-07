@@ -21,6 +21,10 @@
 // able to unwind from a PC value that may no longer be on the execution stack,
 // and thus are forced to cache the entire call stack.
 
+#  define REPLACEMENT_CHARACTER 0xFFFD
+#  define MAX_CODEPOINT 0x10FFFF
+#  define INVALID_CODEPOINT -1
+
 namespace __sanitizer {
 
 static uptr _prev_trace_len = 0;
@@ -116,10 +120,6 @@ static uptr _name_len = 0;
   }
   return 0;
 }
-
-#  define REPLACEMENT_CHARACTER 0xFFFD
-#  define MAX_CODEPOINT 0x10FFFF
-#  define INVALID_CODEPOINT -1
 
 static uptr CodepointToUtf8(char* dest, char32_t codepoint) {
   char buffer[4];
