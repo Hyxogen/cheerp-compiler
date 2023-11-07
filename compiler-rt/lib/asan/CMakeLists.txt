@@ -32,7 +32,7 @@ set(ASAN_SOURCES
   asan_win.cpp
   )
 
-if (NOT WIN32 AND NOT APPLE)
+if (NOT WIN32 AND NOT APPLE AND NOT OS_NAME MATCHES "Cheerp")
   list(APPEND ASAN_SOURCES
     asan_interceptors_vfork.S
     )
@@ -46,7 +46,7 @@ set(ASAN_STATIC_SOURCES
   asan_rtl_static.cpp
   )
 
-if (NOT WIN32 AND NOT APPLE)
+if (NOT WIN32 AND NOT APPLE AND NOT OS_NAME MATCHES "Cheerp")
   list(APPEND ASAN_STATIC_SOURCES
     asan_rtl_x86_64.S
   )
