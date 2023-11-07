@@ -3,7 +3,7 @@
 #include "sanitizer_stacktrace.h"
 #if SANITIZER_CHEERPWASM
 
-#  include <cuchar>
+#  include <uchar.h>
 
 // We have to define LEAN_CXX_LIB as client lib defines it own new operator
 // which conflicts with the one that asan declares

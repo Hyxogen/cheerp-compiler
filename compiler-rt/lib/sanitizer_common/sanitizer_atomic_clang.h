@@ -16,8 +16,8 @@
 
 #if SANITIZER_CHEERPWASM
 # include "sanitizer_libc.h"
-# include <cstdint>
-# include <cstring>
+# include <stdint.h>
+# include <string.h>
 
 #endif
 

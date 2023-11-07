@@ -9,7 +9,7 @@
 #include "sanitizer_common/sanitizer_stackdepot.h"
 #include "sanitizer_common/sanitizer_thread_registry.h"
 
-#include <cstdlib>
+#include <stdlib.h>
 
 #define LOG_THREADS(...)                           \
   do {                                             \

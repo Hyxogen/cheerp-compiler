@@ -1,11 +1,12 @@
 #include "sanitizer_cheerpwasm_mmap.h"
 
 #if SANITIZER_CHEERPWASM
-#include <cheerpintrin.h>
-#include <cstdint>
-#include <cerrno>
-#include "sanitizer_common.h"
-#include <sys/mman.h>
+#  include <cheerpintrin.h>
+#  include <errno.h>
+#  include <stdint.h>
+#  include <sys/mman.h>
+
+#  include "sanitizer_common.h"
 
 extern "C" {
 extern char* volatile _heapStart;
