@@ -304,7 +304,7 @@ INTERCEPTOR(int, swapcontext, struct ucontext_t *oucp,
 #define siglongjmp __siglongjmp14
 #endif
 
-#if !SANITIZER_CHEERPWASM //CHEERPASAN: TODO intercept if needed
+#if !SANITIZER_CHEERPWASM
 INTERCEPTOR(void, longjmp, void *env, int val) {
   __asan_handle_no_return();
   REAL(longjmp)(env, val);
@@ -658,7 +658,7 @@ void InitializeAsanInterceptors() {
   ASAN_INTERCEPT_FUNC(strtoll);
 #endif
 
-#if !SANITIZER_CHEERPWASM //CHEERPASAN: TODO check
+#if !SANITIZER_CHEERPWASM
   // Intecept jump-related functions.
   ASAN_INTERCEPT_FUNC(longjmp);
 #endif

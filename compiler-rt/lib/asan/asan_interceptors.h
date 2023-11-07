@@ -66,7 +66,7 @@ void InitializePlatformInterceptors();
 # define ASAN_INTERCEPT_SWAPCONTEXT 0
 #endif
 
-#if !SANITIZER_WINDOWS && !SANITIZER_CHEERPWASM //CHEERPASAN: TODO Check
+#if !SANITIZER_WINDOWS && !SANITIZER_CHEERPWASM
 # define ASAN_INTERCEPT_SIGLONGJMP 1
 #else
 # define ASAN_INTERCEPT_SIGLONGJMP 0
@@ -79,7 +79,7 @@ void InitializePlatformInterceptors();
 #endif
 
 #if ASAN_HAS_EXCEPTIONS && !SANITIZER_WINDOWS && !SANITIZER_SOLARIS && \
-    !SANITIZER_NETBSD && !SANITIZER_CHEERPWASM //CHEERPASAN: TODO check which should be enabled
+    !SANITIZER_NETBSD && !SANITIZER_CHEERPWASM //CHEERPASAN: TODO probably should be implemented at some point
 # define ASAN_INTERCEPT___CXA_THROW 1
 # define ASAN_INTERCEPT___CXA_RETHROW_PRIMARY_EXCEPTION 1
 # if defined(_GLIBCXX_SJLJ_EXCEPTIONS) || (SANITIZER_IOS && defined(__arm__))
@@ -94,7 +94,7 @@ void InitializePlatformInterceptors();
 # define ASAN_INTERCEPT__UNWIND_SJLJ_RAISEEXCEPTION 0
 #endif
 
-#if !SANITIZER_WINDOWS && !SANITIZER_CHEERPWASM //CHEERPASAN: TODO check
+#if !SANITIZER_WINDOWS && !SANITIZER_CHEERPWASM //CHEERPASAN: TODO probably should be implemented at some point
 # define ASAN_INTERCEPT___CXA_ATEXIT 1
 #else
 # define ASAN_INTERCEPT___CXA_ATEXIT 0
@@ -140,7 +140,6 @@ DECLARE_REAL(void*, memmove, void* dest, const void* src, uptr n)
 DECLARE_REAL(char*, strcat, char* dst, const char* src)
 DECLARE_REAL(char*, strncat, char* dst, const char* src, uptr sz)
 DECLARE_REAL(char*, strcpy, char* dst, const char* src)
-//CHEERPASAN: TODO
 DECLARE_REAL(long, strtol, const char *nptr, char **endptr, int base)
 DECLARE_REAL(int, atoi, const char* nptr)
 DECLARE_REAL(long, atol, const char* nptr)
