@@ -8,12 +8,6 @@
 #include "sanitizer_platform_limits_cheerpwasm.h"
 #include "sanitizer_internal_defs.h"
 
-namespace __sanitizer {
-
-uptr internal_write(fd_t fd, const void *buf, uptr count);
-
-} // namespace __sanitizer
-
 #endif // SANITIZER_CHEERPWASM
 
 #endif // SANITIZER_CHEERPWASM_H
