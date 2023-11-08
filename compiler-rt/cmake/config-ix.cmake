@@ -208,6 +208,7 @@ if(COMPILER_RT_HAS_GNU_VERSION_SCRIPT_COMPAT)
   string(APPEND VERS_OPTION " ${VERS_COMPAT_OPTION}")
 endif()
 llvm_check_compiler_linker_flag(C "${VERS_OPTION}" COMPILER_RT_HAS_VERSION_SCRIPT)
+set(COMPILER_RT_HAS_VERSION_SCRIPT 0)
 
 if(ANDROID)
   llvm_check_compiler_linker_flag(C "-Wl,-z,global" COMPILER_RT_HAS_Z_GLOBAL)
