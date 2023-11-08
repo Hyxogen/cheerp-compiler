@@ -208,7 +208,12 @@ if(COMPILER_RT_HAS_GNU_VERSION_SCRIPT_COMPAT)
   string(APPEND VERS_OPTION " ${VERS_COMPAT_OPTION}")
 endif()
 llvm_check_compiler_linker_flag(C "${VERS_OPTION}" COMPILER_RT_HAS_VERSION_SCRIPT)
-set(COMPILER_RT_HAS_VERSION_SCRIPT 0)
+
+if(${COMPILER_RT_DEFAULT_TARGET_TRIPLE} MATCHES "cheerp-leaningtech-webbrowser-wasm")
+  # This is a hack. VERSION_SCRIPT determiner whether it builds the dynamic libasan,
+  # which is not something we're interested in on cheerp, since everything is staticly linked
+  set(COMPILER_RT_HAS_VERSION_SCRIPT 0)
+endif()
 
 if(ANDROID)
   llvm_check_compiler_linker_flag(C "-Wl,-z,global" COMPILER_RT_HAS_Z_GLOBAL)
@@ -641,8 +646,6 @@ if(APPLE)
 
 else()
   # Architectures supported by compiler-rt libraries.
-  message(STATUS "YOU KNOW WHAT? ILL DO A FILTER, THATS A GOOD TRICK ${ALL_SANITIZER_COMMON_SUPPORTED_ARCH}")
-  message(STATUS "compilerrt suported arch: ${COMPILER_RT_SUPPORTED_ARCH}")
   filter_available_targets(SANITIZER_COMMON_SUPPORTED_ARCH
     ${ALL_SANITIZER_COMMON_SUPPORTED_ARCH})
   # LSan and UBSan common files should be available on all architectures
@@ -709,9 +712,6 @@ set(COMPILER_RT_SANITIZERS_TO_BUILD all CACHE STRING
     "sanitizers to build if supported on the target (all;${ALL_SANITIZERS})")
 list_replace(COMPILER_RT_SANITIZERS_TO_BUILD all "${ALL_SANITIZERS}")
 
-message(STATUS "Supported ARCH? ${SANITIZER_COMMON_SUPPORTED_ARCH}")
-message(STATUS "ALL Supported ARCH? ${ALL_SANITIZER_COMMON_SUPPORTED_ARCH}")
-message(STATUS "COMPILERRT Supported ARCH? ${COMPILER_RT_SUPPORTED_ARCH}")
 if (SANITIZER_COMMON_SUPPORTED_ARCH AND NOT LLVM_USE_SANITIZER AND
     (OS_NAME MATCHES "Android|Darwin|Linux|FreeBSD|NetBSD|Fuchsia|SunOS|Cheerp" OR
     (OS_NAME MATCHES "Windows" AND NOT CYGWIN AND
