@@ -641,8 +641,6 @@ if(APPLE)
 
 else()
   # Architectures supported by compiler-rt libraries.
-  message(STATUS "YOU KNOW WHAT? ILL DO A FILTER, THATS A GOOD TRICK ${ALL_SANITIZER_COMMON_SUPPORTED_ARCH}")
-  message(STATUS "compilerrt suported arch: ${COMPILER_RT_SUPPORTED_ARCH}")
   filter_available_targets(SANITIZER_COMMON_SUPPORTED_ARCH
     ${ALL_SANITIZER_COMMON_SUPPORTED_ARCH})
   # LSan and UBSan common files should be available on all architectures
@@ -709,9 +707,6 @@ set(COMPILER_RT_SANITIZERS_TO_BUILD all CACHE STRING
     "sanitizers to build if supported on the target (all;${ALL_SANITIZERS})")
 list_replace(COMPILER_RT_SANITIZERS_TO_BUILD all "${ALL_SANITIZERS}")
 
-message(STATUS "Supported ARCH? ${SANITIZER_COMMON_SUPPORTED_ARCH}")
-message(STATUS "ALL Supported ARCH? ${ALL_SANITIZER_COMMON_SUPPORTED_ARCH}")
-message(STATUS "COMPILERRT Supported ARCH? ${COMPILER_RT_SUPPORTED_ARCH}")
 if (SANITIZER_COMMON_SUPPORTED_ARCH AND NOT LLVM_USE_SANITIZER AND
     (OS_NAME MATCHES "Android|Darwin|Linux|FreeBSD|NetBSD|Fuchsia|SunOS|Cheerp" OR
     (OS_NAME MATCHES "Windows" AND NOT CYGWIN AND
