@@ -23,8 +23,6 @@
 #include "llvm/Support/VirtualFileSystem.h"
 #include "llvm/Option/ArgList.h"
 
-#include <iostream>
-
 using namespace clang::driver;
 using namespace clang::driver::tools;
 using namespace clang::driver::toolchains;
