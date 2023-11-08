@@ -155,11 +155,10 @@ jobs:
         uses: Hyxogen/cheerp-actions/install-compiler@master
       - name: Checkout cheerp-compiler
         uses: actions/checkout@v3
-      - name: Build runtime
-        working-directory: ./compiler-rt/lib
-        run: make install -j CHEERP_DEST="$CHEERP_DEST"
+      - name: Install asan runtime
+        uses: Hyxogen/cheerp-actions/install-libasan@master
       - name: Run tests
         working-directory: ./compiler-rt/lib
         run: |
           export PATH="$PATH:/usr/lib/llvm-14/bin"
-          ../../llvm/utils/lit/lit.py test
+          ../../llvm/utils/lit/lit.py -v test
