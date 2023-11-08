@@ -127,7 +127,6 @@ Function *llvm::createSanitizerCtor(Module &M, StringRef CtorName) {
       FunctionType::get(Type::getVoidTy(M.getContext()), false),
       GlobalValue::InternalLinkage, M.getDataLayout().getProgramAddressSpace(),
       CtorName, &M);
-  Ctor->setSection("asmjs");
   Ctor->addFnAttr(Attribute::NoUnwind);
   BasicBlock *CtorBB = BasicBlock::Create(M.getContext(), "", Ctor);
   ReturnInst::Create(M.getContext(), CtorBB);
