@@ -133,15 +133,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        config: [debug, release, distr]
         mode: [--asmjs, --wasm]
     steps:
       - name: Install cheerp-compiler
         uses: Hyxogen/cheerp-actions/install-compiler@master
       - name: Install asan runtime
         uses: Hyxogen/cheerp-actions/install-libasan@master
-        with:
-          config: ${{ matrix.config }}
       - name: Run tests
         uses: Hyxogen/cheerp-actions/cheerp-test@master
         with:
