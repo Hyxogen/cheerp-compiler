@@ -5,7 +5,7 @@
 // RUN: %clangxx_asan -O0 %s -o %t && %run %t 2>&1
 
 #include <assert.h>
-#include "Helpers/asan_interface.h"
+#include <sanitizer/asan_interface.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -4,7 +4,7 @@
 // RUN: %clangxx_asan -cheerp-linear-output=asmjs -O3 -mllvm -asan-instrument-dynamic-allocas %s -o %t && %run %t 2>&1
 //
 
-#include "Helpers/asan_interface.h"
+#include <sanitizer/asan_interface.h>
 #include <assert.h>
 
 __attribute__((noinline)) void foo(int index, int len) {

@@ -7,7 +7,7 @@
 #include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include "Helpers/asan_interface.h"
+#include <sanitizer/asan_interface.h>
 
 // MSVC provides _alloca instead of alloca.
 #if defined(_MSC_VER) && !defined(alloca)

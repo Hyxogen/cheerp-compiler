@@ -65,12 +65,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-//#include <sanitizer/asan_interface.h>
+#include <sanitizer/asan_interface.h>
 //#include "../../include/sanitizer/asan_interface.h"
-
-extern "C" {
-  void __asan_poison_memory_region(void const volatile *addr, size_t size);
-}
 
 typedef void *(*memcpy_t)(void *, const void *, size_t);
 

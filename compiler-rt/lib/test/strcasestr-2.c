@@ -5,7 +5,7 @@
 #define _GNU_SOURCE
 #include <assert.h>
 #include <string.h>
-#include "Helpers/asan_interface.h"
+#include <sanitizer/asan_interface.h>
 
 int main(int argc, char **argv) {
   char *r = 0;

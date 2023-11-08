@@ -3,7 +3,7 @@
 
 #include <assert.h>
 #include <stdio.h>
-#include "Helpers/asan_interface.h"
+#include <sanitizer/asan_interface.h>
 
 __attribute__((noinline))
 void Throw() {
