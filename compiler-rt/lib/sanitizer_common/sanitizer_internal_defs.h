@@ -386,9 +386,9 @@ void NORETURN CheckFailed(const char *file, int line, const char *cond,
 enum LinkerInitialized { LINKER_INITIALIZED = 0 };
 
 #if SANITIZER_CHEERPWASM
-#  define GET_CALLER_PC()                              \
-    ((__sanitizer::uptr) StackTrace::GetCurrentPc()) // CHEERPASAN: TODO this should actually return the pc of the caller, not this one
-#  define GET_CURRENT_FRAME() ((__sanitizer::uptr)0)
+uptr GetReturnAddress(uptr idx);
+#  define GET_CALLER_PC() ((__sanitizer::uptr)GetReturnAddress(1))
+#  define GET_CURRENT_FRAME() ((__sanitizer::uptr)0) // CHEERPASAN: TODO implement with somehting like __builtin_frame_address(0)
 extern "C" [[noreturn]] void abort(void);
 inline void Trap() {
   abort();
