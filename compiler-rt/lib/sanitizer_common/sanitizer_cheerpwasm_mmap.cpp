@@ -1,12 +1,15 @@
 #include "sanitizer_cheerpwasm_mmap.h"
 
 #if SANITIZER_CHEERPWASM
-#  include <cheerpintrin.h>
 #  include <errno.h>
 #  include <stdint.h>
 #  include <sys/mman.h>
 
 #  include "sanitizer_common.h"
+
+namespace [[cheerp::genericjs]] {
+int __builtin_cheerp_grow_memory(int bytes);
+}
 
 extern "C" {
 extern char* volatile _heapStart;
