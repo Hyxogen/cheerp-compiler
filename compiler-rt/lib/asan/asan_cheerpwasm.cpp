@@ -7,7 +7,6 @@
 
 #if SANITIZER_CHEERPWASM
 #include "lsan/lsan_common.h"
-#include <cheerpintrin.h>
 #include <stdlib.h>
 
 #define WASM_PAGE_SIZE (64*1024)
