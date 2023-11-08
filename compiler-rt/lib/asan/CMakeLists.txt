@@ -14,10 +14,12 @@ set(ASAN_SOURCES
   asan_interceptors.cpp
   asan_interceptors_memintrinsics.cpp
   asan_linux.cpp
+  asan_cheerpwasm.cpp
   asan_mac.cpp
   asan_malloc_linux.cpp
   asan_malloc_mac.cpp
   asan_malloc_win.cpp
+  asan_malloc_cheerpwasm.cpp
   asan_memory_profile.cpp
   asan_poisoning.cpp
   asan_posix.cpp
