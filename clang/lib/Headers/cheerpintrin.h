@@ -12,7 +12,7 @@
 #ifndef __CHEERPINTRIN_H
 #define __CHEERPINTRIN_H
 
-#include <cstddef>
+#include <stddef.h>
 
 namespace [[cheerp::genericjs]] {
 

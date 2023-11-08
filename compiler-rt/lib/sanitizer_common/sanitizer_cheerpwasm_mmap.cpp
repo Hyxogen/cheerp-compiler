@@ -4,12 +4,9 @@
 #  include <errno.h>
 #  include <stdint.h>
 #  include <sys/mman.h>
+#  include <cheerpintrin.h>
 
 #  include "sanitizer_common.h"
-
-namespace [[cheerp::genericjs]] {
-int __builtin_cheerp_grow_memory(int bytes);
-}
 
 extern "C" {
 extern char* volatile _heapStart;
