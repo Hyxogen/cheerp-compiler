@@ -27,6 +27,8 @@ extern char* volatile _stackTop;
 namespace __asan {
 
 static void ProtectGap(uptr addr, uptr size) {
+  // On cheerp, we can't protect pages, so we must poison the shadow to detect
+  // accesses there
   if (SANITIZER_CHEERPWASM || !flags()->protect_shadow_gap) {
     // The shadow gap is unprotected, so there is a chance that someone
     // is actually using this memory. Which means it needs a shadow...
