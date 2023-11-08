@@ -142,7 +142,7 @@ jobs:
       - name: Run tests
         uses: Hyxogen/cheerp-actions/cheerp-test@master
         with:
-          flags: "${{ matrix.mode }} --asan --determinism=3 --determinism-probability=0.2"
+          flags: "${{ matrix.mode }} --print-cmd --asan --determinism=3 --determinism-probability=0.2"
   asan-test:
     name: Run asan tests
     needs: test
