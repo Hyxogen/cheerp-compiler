@@ -42,10 +42,7 @@ namespace __sanitizer {
 // for mappings of the memory model to different processors.
 
 inline void atomic_signal_fence(memory_order) {
-#if SANITIZER_CHEERPWASM
-#else
   __asm__ __volatile__("" ::: "memory");
-#endif
 }
 
 inline void atomic_thread_fence(memory_order) {

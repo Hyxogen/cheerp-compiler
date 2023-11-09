@@ -9,9 +9,6 @@
 #include "lsan/lsan_common.h"
 #include <stdlib.h>
 
-#define WASM_PAGE_SIZE (64*1024)
-#define __ATTRP_C11_THREAD ((void*)(uptr)-1)
-
 namespace __asan {
 
 uptr FindDynamicShadowStart() {

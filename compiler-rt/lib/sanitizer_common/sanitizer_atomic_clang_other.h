@@ -18,10 +18,7 @@ namespace __sanitizer {
 
 
 inline void proc_yield(int cnt) {
-#if SANITIZER_CHEERPWASM
-#else
   __asm__ __volatile__("" ::: "memory");
-#endif
 }
 
 template<typename T>
