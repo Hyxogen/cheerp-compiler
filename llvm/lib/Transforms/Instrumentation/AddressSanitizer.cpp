@@ -2021,6 +2021,10 @@ Instruction *ModuleAddressSanitizer::CreateAsanModuleDtor(Module &M) {
   AsanDtorFunction = Function::createWithDefaultAttr(
       FunctionType::get(Type::getVoidTy(*C), false),
       GlobalValue::InternalLinkage, 0, kAsanModuleDtorName, &M);
+
+  if (TargetTriple.isCheerpWasm())
+    AsanDtorFunction->setSection("asmjs");
+
   AsanDtorFunction->addFnAttr(Attribute::NoUnwind);
   // Ensure Dtor cannot be discarded, even if in a comdat.
   appendToUsed(M, {AsanDtorFunction});
