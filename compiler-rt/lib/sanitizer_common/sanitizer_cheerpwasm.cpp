@@ -100,6 +100,8 @@ uptr MapDynamicShadow(uptr shadow_size_bytes, uptr shadow_scale,
 
 // Reserve memory range [beg, end].
 // We need to use inclusive range because end+1 may not be representable.
+// CHEERPASAN: TODO Does this still have to be here? Can't we just use the one
+// in sanitizer_common_libcdep.cpp?
 void ReserveShadowMemoryRange(uptr beg, uptr end, const char *name,
                               bool madvise_shadow) {
   CHECK_EQ((beg % GetMmapGranularity()), 0);
