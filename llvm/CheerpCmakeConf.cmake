@@ -13,6 +13,7 @@ set(LLVM_TOOLCHAIN_TOOLS
   llvm-dis
   llvm-ar
   llvm-link
+  llvm-nm
   opt
   llc
   CACHE STRING "")
