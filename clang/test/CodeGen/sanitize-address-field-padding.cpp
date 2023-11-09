@@ -24,7 +24,6 @@
 // FILE_IGNORELIST-NOT: __asan_poison_intra_object_redzone
 // NO_PADDING-NOT: __asan_poison_intra_object_redzone
 
-
 // XFAIL: cheerp-leaningtech-webbrowser-wasm
 
 
