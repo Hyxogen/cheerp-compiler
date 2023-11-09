@@ -1759,9 +1759,8 @@ bool ModuleAddressSanitizer::shouldInstrumentGlobal(GlobalVariable *G) const {
   LLVM_DEBUG(dbgs() << "GLOBAL: " << *G << "\n");
 
   if (TargetTriple.isCheerpWasm()) {
-    if (G->getSection() != StringRef("asmjs")) {
+    if (G->getSection() != StringRef("asmjs"))
       return false;
-    }
   }
 
   if (G->hasSanitizerMetadata() && G->getSanitizerMetadata().NoAddress)
@@ -2588,9 +2587,8 @@ void AddressSanitizer::initializeCallbacks(Module &M) {
   if (Mapping.InGlobal) {
     AsanShadowGlobal = M.getOrInsertGlobal("__asan_shadow",
                                            ArrayType::get(IRB.getInt8Ty(), 0));
-    if (TargetTriple.isCheerpWasm()) {
+    if (TargetTriple.isCheerpWasm())
       cast<GlobalVariable>(AsanShadowGlobal)->setSection("asmjs");
-    }
   }
 
   AMDGPUAddressShared = M.getOrInsertFunction(
@@ -2690,9 +2688,8 @@ bool AddressSanitizer::instrumentFunction(Function &F,
   if (F.getName().startswith("__asan_")) return false;
 
   if (TargetTriple.isCheerpWasm()) {
-    if (!F.hasSection() || F.getSection() != StringRef("asmjs")) {
+    if (!F.hasSection() || F.getSection() != StringRef("asmjs"))
       return false;
-    }
   }
 
   bool FunctionModified = false;
