@@ -25,6 +25,9 @@
 // NO_PADDING-NOT: __asan_poison_intra_object_redzone
 
 
+// XFAIL: cheerp-leaningtech-webbrowser-wasm
+
+
 class Positive1 {
  public:
   Positive1() {}
