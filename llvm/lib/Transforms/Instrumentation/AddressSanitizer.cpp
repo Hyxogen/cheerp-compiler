@@ -88,8 +88,6 @@
 #include <string>
 #include <tuple>
 
-#include <iostream>
-
 using namespace llvm;
 
 #define DEBUG_TYPE "asan"
