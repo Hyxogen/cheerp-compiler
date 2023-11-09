@@ -2308,7 +2308,6 @@ bool ModuleAddressSanitizer::InstrumentGlobals(IRBuilder<> &IRB, Module &M,
     const uint64_t RightRedzoneSize = getRedzoneSizeForGlobal(SizeInBytes);
     Type *RightRedZoneTy = ArrayType::get(IRB.getInt8Ty(), RightRedzoneSize);
 
-    //StructType *NewTy = StructType::get(Ty, RightRedZoneTy);
     StructType *NewTy = StructType::get(Ty->getContext(),
                                         ArrayRef<Type *>({Ty, RightRedZoneTy}),
                                         false, NULL, false, TargetTriple.isCheerpWasm());
