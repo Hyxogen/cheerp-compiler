@@ -666,7 +666,7 @@ void LinearMemoryHelper::setGlobalPtrIfPresent(llvm::StringRef name, uint32_t pt
 	}
 }
 
-void LinearMemoryHelper::setMemoryInfo()
+void LinearMemoryHelper::addMemoryInfo()
 {
 	setGlobalPtrIfPresent("_stackBottom", stackStart);
 	setGlobalPtrIfPresent("_stackTop", stackStart + 8 - stackSize);

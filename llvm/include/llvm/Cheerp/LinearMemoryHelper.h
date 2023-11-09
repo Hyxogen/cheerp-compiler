@@ -202,7 +202,7 @@ public:
 		addStack();
 		addGlobals();
 		checkMemorySize();
-		setMemoryInfo();
+		addMemoryInfo();
 		populateGlobalData();
 
 		return false;
@@ -394,7 +394,7 @@ private:
 	void addGlobals();
 	void addFunctions();
 	void addStack();
-	void setMemoryInfo();
+	void addMemoryInfo();
 	void checkMemorySize();
 	void populateGlobalData();
 
