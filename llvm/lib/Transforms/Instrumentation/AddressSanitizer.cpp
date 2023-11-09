@@ -2488,6 +2488,8 @@ bool ModuleAddressSanitizer::instrumentModule(Module &M) {
         createSanitizerCtorAndInitFunctions(M, kAsanModuleCtorName,
                                             kAsanInitName, /*InitArgTypes=*/{},
                                             /*InitArgs=*/{}, VersionCheckName);
+    if (TargetTriple.isCheerpWasm())
+      AsanCtorFunction->setSection("asmjs");
   }
 
   bool CtorComdat = true;
