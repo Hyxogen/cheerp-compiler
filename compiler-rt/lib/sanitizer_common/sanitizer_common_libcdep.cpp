@@ -151,7 +151,7 @@ uptr ReservedAddressRange::InitAligned(uptr size, uptr align,
   return start;
 }
 
-#if !SANITIZER_FUCHSIA && !SANITIZER_CHEERPWASM
+#if !SANITIZER_FUCHSIA
 
 // Reserve memory range [beg, end].
 // We need to use inclusive range because end+1 may not be representable.
