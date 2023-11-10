@@ -239,10 +239,6 @@ bool MmapFixedNoReserve(uptr fixed_addr, uptr size, const char *name) {
   return MmapFixed(fixed_addr, size, MAP_NORESERVE, name);
 }
 
-bool MmapFixedSuperNoReserve(uptr fixed_addr, uptr size, const char *name) {
-  return MmapFixedNoReserve(fixed_addr, size, name);
-}
-
 void *MmapOrDieOnFatalError(uptr size, const char *mem_type) {
   size = RoundUpTo(size, GetPageSizeCached());
   uptr res = InternalMmap(0, size, PROT_READ | PROT_WRITE,

@@ -42,7 +42,7 @@ static void ProtectGap(uptr addr, uptr size) {
           "|| `[%p, %p]` || ShadowGap's shadow ||\n",
           (void*)GapShadowBeg, (void*)GapShadowEnd);
     ReserveShadowMemoryRange(GapShadowBeg, GapShadowEnd,
-                             "unprotected gap shadow");
+                             "unprotected gap shadow", !SANITIZER_CHEERPWASM);
     return;
   }
   __sanitizer::ProtectGap(addr, size, kZeroBaseShadowStart,
@@ -95,9 +95,9 @@ void InitializeShadowMemory() {
   if (full_shadow_is_available) {
     // mmap the low shadow plus at least one page at the left.
     if (kLowShadowBeg)
-      ReserveShadowMemoryRange(shadow_start, kLowShadowEnd, "low shadow");
+      ReserveShadowMemoryRange(shadow_start, kLowShadowEnd, "low shadow", !SANITIZER_CHEERPWASM);
     // mmap the high shadow.
-    ReserveShadowMemoryRange(kHighShadowBeg, kHighShadowEnd, "high shadow");
+    ReserveShadowMemoryRange(kHighShadowBeg, kHighShadowEnd, "high shadow", !SANITIZER_CHEERPWASM);
     // protect the gap.
     ProtectGap(kShadowGapBeg, kShadowGapEnd - kShadowGapBeg + 1);
 #if SANITIZER_CHEERPWASM
