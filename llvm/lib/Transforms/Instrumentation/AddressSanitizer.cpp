@@ -2271,9 +2271,10 @@ bool ModuleAddressSanitizer::InstrumentGlobals(IRBuilder<> &IRB, Module &M,
   //   size_t odr_indicator;
   // We initialize an array of such structures and pass it to a run-time call.
   StructType *GlobalStructTy = StructType::get(
-      IntptrTy, IntptrTy, IntptrTy, IntptrTy, IntptrTy, IntptrTy, IntptrTy,
-      IntptrTy); // CHEERPASAN: TODO probably also need to give this type the
-                 // asmjs attribute
+      IntptrTy->getContext(),
+      ArrayRef<Type *>({IntptrTy, IntptrTy, IntptrTy, IntptrTy, IntptrTy,
+                        IntptrTy, IntptrTy, IntptrTy}),
+      false, NULL, false, TargetTriple.isCheerpWasm());
   SmallVector<GlobalVariable *, 16> NewGlobals(n);
   SmallVector<Constant *, 16> Initializers(n);
 
