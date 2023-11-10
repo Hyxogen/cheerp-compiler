@@ -5901,7 +5901,9 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
   // Forward cheerp-linear-output argument
   if (Arg *CheerpLinearOutput = Args.getLastArg(options::OPT_cheerp_linear_output_EQ)) {
     CheerpLinearOutput->render(Args, CmdArgs);
-    if (CheerpLinearOutput->containsValue("asmjs"))
+
+    Arg *Sanitizers = Args.getLastArg(options::OPT_fsanitize_EQ);
+    if (Sanitizers && Sanitizers->containsValue("address") && CheerpLinearOutput->containsValue("asmjs"))
       CmdArgs.push_back("-fsanitize-address-aligned-poisoning");
   }
   // Forward cheerp-no-pointer-scev argument
