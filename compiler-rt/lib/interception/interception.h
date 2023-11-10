@@ -226,6 +226,7 @@ const interpose_substitution substitution_##func_name[] \
   extern "C" INTERCEPTOR_ATTRIBUTE ret_type func(__VA_ARGS__)
 
 #elif !SANITIZER_APPLE
+
 #define INTERCEPTOR(ret_type, func, ...) \
   DEFINE_REAL(ret_type, func, __VA_ARGS__) \
   DECLARE_WRAPPER(ret_type, func, __VA_ARGS__) \
