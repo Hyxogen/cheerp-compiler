@@ -121,11 +121,9 @@ static void FreePages(uptr page, uptr len) {
 uptr InternalMmap(uptr addr, uptr len, int prot, int flags, int fildes) {
   CHECK_EQ(0, addr % MMAP_PAGESIZE);
   CHECK_EQ(true, _initialized);
+  CHECK_LT(addr, MAX_VIRTUAL_ADDRESS);
 
-  if (len % MMAP_PAGESIZE) {
-    len += MMAP_PAGESIZE - (len % MMAP_PAGESIZE);
-  }
-  CHECK_EQ(0, len % MMAP_PAGESIZE);
+  len = RoundUpTo(len, MMAP_PAGESIZE);
 
   uptr page_count = len / MMAP_PAGESIZE;
 
