@@ -594,7 +594,7 @@ void cheerp::Link::ConstructJob(Compilation &C, const JobAction &JA,
 	hasUnalignedMemory && (!Sanitizers || !Sanitizers->containsValue("address")))
     {
       // We omit libwasm when building with AddressSanitizer, since it defines
-      // it's own implementation.
+      // it's own implementation of functions like memcpy and memset.
       CmdArgs.push_back(Args.MakeArgString(getToolChain().GetFilePath("libwasm.bc")));
     }
   }
