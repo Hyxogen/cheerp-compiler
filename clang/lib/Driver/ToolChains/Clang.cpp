@@ -5903,6 +5903,7 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
     CheerpLinearOutput->render(Args, CmdArgs);
 
     Arg *Sanitizers = Args.getLastArg(options::OPT_fsanitize_EQ);
+    // asmjs requires natural alignment, which asan doesn't do by default.
     if (Sanitizers && Sanitizers->containsValue("address") && CheerpLinearOutput->containsValue("asmjs"))
       CmdArgs.push_back("-fsanitize-address-aligned-poisoning");
   }
