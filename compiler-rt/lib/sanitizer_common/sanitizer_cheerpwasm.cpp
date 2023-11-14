@@ -43,7 +43,7 @@ void ListOfModules::fallbackInit() { clear(); }
 
 uptr ReadBinaryName(/*out*/char *buf, uptr buf_len) {
   const char *default_binary_name = "default.binary.name";
-  const size_t len = strlen(default_binary_name);
+  const size_t len = internal_strlen(default_binary_name);
   size_t n = buf_len < len ? buf_len : len;
   internal_memcpy(buf, default_binary_name, n);
   return n;
