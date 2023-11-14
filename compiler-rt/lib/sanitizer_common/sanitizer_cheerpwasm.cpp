@@ -9,6 +9,9 @@
 #include <cstdio>
 #include <cstdlib>
 
+__attribute__((cheerp_asmjs)) char* volatile _stackBottom = (char*)0xdeadbeef;
+__attribute__((cheerp_asmjs)) char* volatile _stackTop = (char*)0xdeadbeef;
+
 namespace __sanitizer {
 
 void ListOfModules::init() {
@@ -125,7 +128,11 @@ void InitTlsSize() {}
 uptr internal_getpid() { return 1; }
 
 void GetThreadStackAndTls(bool main, uptr *stk_addr, uptr *stk_size,
-                          uptr *tls_addr, uptr *tls_size) {}
+                          uptr *tls_addr, uptr *tls_size) {
+	*stk_addr = (uptr) _stackTop;
+	*stk_size = _stackBottom - _stackTop;
+}
+
 void SetAlternateSignalStack() {}
 
 void internal__exit(int exitcode) {
