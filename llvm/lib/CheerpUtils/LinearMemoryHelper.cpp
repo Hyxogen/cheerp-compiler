@@ -670,7 +670,6 @@ void LinearMemoryHelper::setMemoryInfo()
 {
 	setGlobalPtrIfPresent("_stackBottom", stackStart);
 	setGlobalPtrIfPresent("_stackTop", stackStart + 8 - stackSize);
-	setGlobalPtrIfPresent("_maxAddress", memorySize);
 
 	//Align to 8 bytes
 	heapStart = (heapStart + 7) & ~7;
