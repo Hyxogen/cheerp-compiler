@@ -168,7 +168,7 @@ jobs:
           export PATH="$PATH:/usr/lib/llvm-14/bin"
           ../../llvm/utils/lit/lit.py -v test
   clang-test:
-    name: Run check-llvm
+    name: Run llvm check
     needs: test
     runs-on: ubuntu-latest
     steps:
@@ -180,5 +180,5 @@ jobs:
           name: compiler-source
       - name: Untar artifacts
         run: tar -xvf cheerp-compiler-source.tar.gz
-      - name: Run check-llvm
-        run: ninja -C ./cheerp-compiler/build check-llvm
+      - name: Run tests
+        run: ninja -C ./cheerp-compiler/build check
