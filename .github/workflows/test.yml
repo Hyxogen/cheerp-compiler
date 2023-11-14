@@ -89,7 +89,7 @@ jobs:
       - name: Tar artifacts
         run: |
           tar -zcvf cheerp-compiler.tar.gz /opt/cheerp
-          tar -zcvf cheerp-compiler-source.tar.gz "$GITHUB_WORKSPACE/cheerp-compiler"
+          tar -zcvf cheerp-compiler-source.tar.gz cheerp-compiler
       - name: Upload compiler
         uses: actions/upload-artifact@v3
         with:
