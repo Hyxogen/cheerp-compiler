@@ -11,7 +11,6 @@
 extern "C" {
 extern char* volatile _heapStart;
 extern char* volatile _heapEnd;
-__attribute__((cheerp_asmjs)) char* volatile _maxAddress = (char*)0xdeadbeef;
 }
 
 namespace __sanitizer {
@@ -161,7 +160,7 @@ void SetupMemoryMapping() {
     _pages[idx].MakeFree();
   }
 
-  _max_page_count = reinterpret_cast<uptr>(_maxAddress) / MMAP_PAGESIZE;
+  _max_page_count = reinterpret_cast<uptr>(_heapEnd) / MMAP_PAGESIZE;
 
   _mapped_pages = __builtin_cheerp_grow_memory(0);
   if (_mapped_pages == -1) {
