@@ -181,4 +181,4 @@ jobs:
       - name: Untar artifacts
         run: tar -xvf cheerp-compiler-source.tar.gz
       - name: Run check-llvm
-        run: ninja -C ./cheerp-compiler/build" check-llvm
+        run: ninja -C ./cheerp-compiler/build check-llvm
