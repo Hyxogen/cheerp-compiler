@@ -99,7 +99,7 @@ static uptr _name_len = 0;
   return 0;
 }
 
-[[cheerp::genericjs]] static uptr ClientStringToUtf16(client::String* str,
+[[cheerp::genericjs]] static uptr ClientStringToUtf16(const client::String* str,
                                                       char16_t* dest,
                                                       uptr len) {
   uptr i = 0;
