@@ -841,7 +841,6 @@ void cheerp::CheerpCompiler::ConstructJob(Compilation &C, const JobAction &JA,
     CmdArgs.push_back("-cheerp-preserve-free");
 
     if (Args.getLastArg(options::OPT_fsanitize_EQ)->containsValue("address")) {
-      CmdArgs.push_back("-cheerp-linear-heap-size=2000");
       // AddressSanitizer for Cheerp will poison the range [0x0, stack_top) to
       // find nullptr derefs. We offset the stack_top location here to find more
       // nullptr derefs.
@@ -975,6 +974,9 @@ void cheerp::CheerpCompiler::ConstructJob(Compilation &C, const JobAction &JA,
     cheerpGlobalPrefix->render(Args, CmdArgs);
   if(Arg *cheerpHeapSize = Args.getLastArg(options::OPT_cheerp_linear_heap_size))
     cheerpHeapSize->render(Args, CmdArgs);
+  else if (Args.hasArg(options::OPT_fsanitize_EQ) &&
+           Args.getLastArg(options::OPT_fsanitize_EQ)->containsValue("address"))
+    CmdArgs.push_back("-cheerp-linear-heap-size=2000"); // ASan requires quite a bit of memory to be effective
   if(Arg *cheerpStackSize = Args.getLastArg(options::OPT_cheerp_linear_stack_size))
     cheerpStackSize->render(Args, CmdArgs);
   if(Arg* cheerpNoICF = Args.getLastArg(options::OPT_cheerp_no_icf))
