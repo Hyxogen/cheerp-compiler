@@ -8,8 +8,8 @@ int main() {
   free(x);
   return x[5];
   // CHECK: heap-use-after-free
-  // DONTCHECK: free
-  // DONTCHECK: main{{.*}}sanity_check_pure_c.c:[[@LINE-4]]
-  // DONTCHECK: malloc
-  // DONTCHECK: main{{.*}}sanity_check_pure_c.c:[[@LINE-7]]
+  // CHECK: free
+  // CHECK: main
+  // CHECK: malloc
+  // CHECK: main
 }
