@@ -10,13 +10,16 @@ const char* GetFunctionNameAtPc(uptr pc);
 class CheerpSymbolizerTool : public SymbolizerTool {
  public:
   bool SymbolizePC(uptr addr, SymbolizedStack *frame) override {
+    const char *func_name = GetFunctionNameAtPc(addr);
+    if (!func_name)
+      func_name = "<unknown function>";
     if (0x80000000 & addr) {
-      frame->info.function = internal_strdup(GetFunctionNameAtPc(addr));
+      frame->info.function = internal_strdup(func_name);
       frame->info.file = internal_strdup("main");
       frame->info.line = 0x80000000 ^ addr;
       frame->info.column = 0;
     } else {
-      frame->info.function = internal_strdup(GetFunctionNameAtPc(addr));
+      frame->info.function = internal_strdup(func_name);
     }
     return true;
   }
@@ -24,6 +27,7 @@ class CheerpSymbolizerTool : public SymbolizerTool {
   bool SymbolizeData(uptr addr, DataInfo *info) override {
     return false;
   }
+
   const char *Demangle(const char *name) override {
     return name;
   }

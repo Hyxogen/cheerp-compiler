@@ -193,6 +193,9 @@ const char* GetFunctionNameAtPc(uptr pc) {
   char16_t buffer[256];
   uptr buffer_len =
       GetUtf16FunctionNameAtPc(pc, buffer, sizeof(buffer) / sizeof(buffer[0]));
+  if (buffer_len == 0)
+    return nullptr;
+
   _name_len = Utf16ToUtf8(_name_cache,
                           (sizeof(_name_cache) / sizeof(_name_cache[0])) - 1,
                           buffer, buffer_len);
