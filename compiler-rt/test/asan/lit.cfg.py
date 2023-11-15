@@ -97,6 +97,8 @@ clang_asan_static_cflags = (["-fsanitize=address",
                             config.debug_info_flags + target_cflags)
 if config.target_arch == 's390x':
   clang_asan_static_cflags.append("-mbackchain")
+if config.host_os == 'Cheerp':
+  clang_asan_static_cflags.append("-cheerp-pretty-code")
 clang_asan_static_cxxflags = config.cxx_mode_flags + clang_asan_static_cflags
 
 asan_dynamic_flags = []
@@ -247,3 +249,5 @@ if not config.parallelism_group:
 
 if config.host_os == 'NetBSD':
   config.substitutions.insert(0, ('%run', config.netbsd_noaslr_prefix))
+if config.host_os == 'Cheerp':
+  config.substitutions.insert(0, ('%run', 'node'))
