@@ -215,9 +215,7 @@ void BufferedStackTrace::UnwindFast(uptr pc, uptr bp, uptr stack_top,
   return 0;
 }
 
-uptr StackTrace::GetCurrentPc() {
-	return GetReturnAddress(0);
-}
+uptr StackTrace::GetCurrentPc() { return GetReturnAddress(0); }
 
 }  // namespace __sanitizer
 
