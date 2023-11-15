@@ -208,7 +208,7 @@ void BufferedStackTrace::UnwindFast(uptr pc, uptr bp, uptr stack_top,
 
 [[clang::always_inline]] uptr GetReturnAddress(uptr idx) {
   _prev_trace_len =
-      GetCallstack(_prev_trace, sizeof(_prev_trace) / sizeof(_prev_trace[0]), idx);
+      GetCallstack(_prev_trace, sizeof(_prev_trace) / sizeof(_prev_trace[0]), idx + 1);
 
   if (_prev_trace_len)
     return _prev_trace[0];
