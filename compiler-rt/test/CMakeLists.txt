@@ -63,6 +63,7 @@ if(COMPILER_RT_CAN_EXECUTE_TESTS)
   if(COMPILER_RT_BUILD_BUILTINS)
     add_subdirectory(builtins)
   endif()
+  message(STATUS "HI, I BUILD SANITIZRES? ${COMPILER_RT_BUILD_SANITIZERS}")
   if(COMPILER_RT_BUILD_SANITIZERS)
     compiler_rt_test_runtime(interception)
 
@@ -77,6 +78,7 @@ if(COMPILER_RT_CAN_EXECUTE_TESTS)
     endif()
 
     foreach(sanitizer ${COMPILER_RT_SANITIZERS_TO_BUILD})
+      message(STATUS "MUAHHAHAHAHA ITS ME?! ${sanitizer}")
       # cfi testing is gated on ubsan
       if(NOT ${sanitizer} STREQUAL cfi)
         compiler_rt_test_runtime(${sanitizer})

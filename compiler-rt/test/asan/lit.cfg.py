@@ -239,7 +239,7 @@ else:
   config.substitutions.append(('%pie', '-pie'))
 
 # Only run the tests on supported OSs.
-if config.host_os not in ['Linux', 'Darwin', 'FreeBSD', 'SunOS', 'Windows', 'NetBSD']:
+if config.host_os not in ['Linux', 'Darwin', 'FreeBSD', 'SunOS', 'Windows', 'NetBSD', "Cheerp"]:
   config.unsupported = True
 
 if not config.parallelism_group:
