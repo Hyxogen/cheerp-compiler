@@ -22,7 +22,7 @@ def build_cxx_invocation(compile_flags):
 extra_link_flags = []
 target_cflags = ["-target cheerp-wasm"] + extra_link_flags
 target_cxxflags = target_cflags + extra_link_flags
-clang_asan_static_cflags = (["-fsanitize=address"])
+clang_asan_static_cflags = (["-fsanitize=address", "-cheerp-pretty-code"])
 clang_asan_static_cxxflags = clang_asan_static_cflags
 
 clang_asan_cflags = clang_asan_static_cflags
