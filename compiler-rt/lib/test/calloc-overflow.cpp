@@ -5,14 +5,14 @@
 #include <stdlib.h>
 
 int main() {
-  void *volatile p = calloc(-1, 1000);
+  void *p = calloc(-1, 1000);
   // CHECK: {{ERROR: AddressSanitizer: calloc parameters overflow: count \* size \(.* \* 1000\) cannot be represented in type size_t}}
   // CHECK: {{#0 0x.* in .*calloc}}
   // CHECK: {{#1 0x.* in .*main}}
   // CHECK: SUMMARY: AddressSanitizer: calloc-overflow
 
-  //printf("calloc returned: %zu\n", (size_t)p);
-  // DONTCHECK-NULL: calloc returned: 0
+  printf("calloc returned: %zu\n", (size_t)p);
+  // CHECK-NULL: calloc returned: 0
 
   return 0;
 }
