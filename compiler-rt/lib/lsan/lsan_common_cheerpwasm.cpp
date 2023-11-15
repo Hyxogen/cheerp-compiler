@@ -49,7 +49,7 @@ void ProcessPlatformSpecificAllocations(Frontier *frontier) {}
 
 void LockStuffAndStopTheWorld(StopTheWorldCallback callback,
                               CheckForLeaksParam *argument) {
-  // Currently, on Emscripten this does nothing and just calls the callback.
+  // Currently, on Cheerp this does nothing and just calls the callback.
   // This works fine on a single-threaded environment.
   LockThreadRegistry();
   LockAllocator();
