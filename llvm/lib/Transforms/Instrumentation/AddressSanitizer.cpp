@@ -522,10 +522,9 @@ static ShadowMapping getShadowMapping(const Triple &TargetTriple, int LongSize,
       Mapping.Offset = kWindowsShadowOffset32;
     else if (IsEmscripten)
       Mapping.Offset = kEmscriptenShadowOffset;
-    else if (IsCheerpWasm) {
+    else if (IsCheerpWasm)
       Mapping.Offset = kDynamicShadowSentinel;
-      Mapping.InGlobal = true;
-    } else
+    else
       Mapping.Offset = kDefaultShadowOffset32;
   } else {  // LongSize == 64
     // Fuchsia is always PIE, which means that the beginning of the address
@@ -2585,12 +2584,9 @@ void AddressSanitizer::initializeCallbacks(Module &M) {
       M.getOrInsertFunction(kAsanPtrCmp, IRB.getVoidTy(), IntptrTy, IntptrTy);
   AsanPtrSubFunction =
       M.getOrInsertFunction(kAsanPtrSub, IRB.getVoidTy(), IntptrTy, IntptrTy);
-  if (Mapping.InGlobal) {
+  if (Mapping.InGlobal)
     AsanShadowGlobal = M.getOrInsertGlobal("__asan_shadow",
                                            ArrayType::get(IRB.getInt8Ty(), 0));
-    if (TargetTriple.isCheerpWasm())
-      cast<GlobalVariable>(AsanShadowGlobal)->setSection("asmjs");
-  }
 
   AMDGPUAddressShared = M.getOrInsertFunction(
       kAMDGPUAddressSharedName, IRB.getInt1Ty(), IRB.getInt8PtrTy());
