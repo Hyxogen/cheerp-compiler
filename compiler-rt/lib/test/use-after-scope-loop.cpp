@@ -10,5 +10,5 @@ int main() {
   }
   return **p;  // BOOM
   // CHECK: ERROR: AddressSanitizer: stack-use-after-scope
-  // DONTCHECK: #0 0x{{.*}} in main {{.*}}.cpp:[[@LINE-2]]
+  // CHECK: #0 0x{{.*}} in {{.*main}}
 }

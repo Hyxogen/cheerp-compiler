@@ -20,8 +20,8 @@ int main(int argc, char *argv[]) {
   return arr[argc - 1];  // BOOM
   // CHECK: ERROR: AddressSanitizer: stack-use-after-scope
   // CHECK: READ of size 4 at 0x{{.*}} thread T0
-  // DONTCHECK:   #0 0x{{.*}} in
-  // DONTCHECK:      {{.*}}use-after-scope-inlined.cpp:[[@LINE-4]]
+  // CHECK:   #0 0x{{.*}} in
+  // CHECK:      {{.*}}
   // CHECK: Address 0x{{.*}} is located in stack of thread T0 at offset [[OFFSET:[^ ]*]] in frame
   // CHECK:      {{.*}} in
   // CHECK:   This frame has

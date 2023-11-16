@@ -78,18 +78,18 @@ int main(int argc, char **argv) {
   memset(p, 0, 3000);
   assert(p[1] == 0);
   // CHECK-MEMSET: AddressSanitizer: use-after-poison on address
-  // DONTCHECK-MEMSET: in {{.*}}memset
+  // CHECK-MEMSET: in {{.*}}memset
 #else
   char * volatile q = (char *)malloc(3000);
 #if defined(TEST_MEMCPY)
   memcpy(q, p, 3000);
   // CHECK-MEMCPY: AddressSanitizer: use-after-poison on address
   // On Mac, memmove and memcpy are the same. Accept either one.
-  // DONTCHECK-MEMCPY: in {{.*(memmove|memcpy)}}
+  // CHECK-MEMCPY: in {{.*(memmove|memcpy)}}
 #elif defined(TEST_MEMMOVE)
   memmove(q, p, 3000);
   // CHECK-MEMMOVE: AddressSanitizer: use-after-poison on address
-  // DONTCHECK-MEMMOVE: in {{.*(memmove|memcpy)}}
+  // CHECK-MEMMOVE: in {{.*(memmove|memcpy)}}
 #elif defined(TEST_MEMCPY_SIZE_OVERFLOW)
   volatile memcpy_t my_memcpy = &memcpy;
   my_memcpy(p, q, -argc);

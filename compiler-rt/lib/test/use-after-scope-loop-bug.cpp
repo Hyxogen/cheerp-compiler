@@ -10,7 +10,7 @@ int main() {
   }
   return *p;  // BOOM
   // CHECK: ERROR: AddressSanitizer: stack-use-after-scope
-  // DONTCHECK:  #0 0x{{.*}} in
+  // CHECK:  #0 0x{{.*}} in
   // CHECK: Address 0x{{.*}} is located in stack of thread T{{.*}} at offset [[OFFSET:[^ ]+]] in frame
   // {{\[}}[[OFFSET]], {{[0-9]+}}) 'x'
 }

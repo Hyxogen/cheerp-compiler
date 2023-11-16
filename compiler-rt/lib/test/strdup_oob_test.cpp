@@ -16,11 +16,10 @@ int main(int argc, char **argv) {
   char *copy = strdup(kString);
   int x = copy[4 + argc];  // BOOM
   // CHECK: AddressSanitizer: heap-buffer-overflow
-  // DONTCHECK: #0 {{.*}}main {{.*}}strdup_oob_test.cpp:[[@LINE-2]]
+  // CHECK: #0 {{.*}}main
   // CHECK-LABEL: allocated by thread T{{.*}} here:
-  // DONTCHECK: #{{[01]}} {{.*}}strdup
-  // DONTCHECK: #{{.*}}main {{.*}}strdup_oob_test.cpp:[[@LINE-6]]
+  // CHECK: #{{[01]}} {{.*}}strdup
+  // CHECK: #{{.*}}main
   // CHECK-LABEL: SUMMARY
-  // DONTCHECK: strdup_oob_test.cpp:[[@LINE-7]]
   return x;
 }
