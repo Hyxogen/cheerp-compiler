@@ -99,6 +99,7 @@ if config.target_arch == 's390x':
   clang_asan_static_cflags.append("-mbackchain")
 if config.host_os == 'Cheerp':
   clang_asan_static_cflags.append("-cheerp-pretty-code")
+  clang_asan_static_cflags.append("-g0")
 clang_asan_static_cxxflags = config.cxx_mode_flags + clang_asan_static_cflags
 
 asan_dynamic_flags = []
