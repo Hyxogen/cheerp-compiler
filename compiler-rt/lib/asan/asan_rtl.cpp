@@ -33,6 +33,10 @@
 #include "ubsan/ubsan_init.h"
 #include "ubsan/ubsan_platform.h"
 
+#if SANITIZER_CHEERPWASM
+#include "sanitizer_common/sanitizer_cheerpwasm_mmap.h"
+#endif
+
 uptr __asan_shadow_memory_dynamic_address;  // Global interface symbol.
 int __asan_option_detect_stack_use_after_return;  // Global interface symbol.
 uptr *__asan_test_only_reported_buggy_pointer;  // Used only for testing asan.
@@ -386,6 +390,10 @@ static void AsanInitInternal() {
   SanitizerToolName = "AddressSanitizer";
   CHECK(!asan_init_is_running && "ASan init calls itself!");
   asan_init_is_running = true;
+
+#if SANITIZER_CHEERPWASM
+  SetupMemoryMapping();
+#endif
 
   CacheBinaryName();
 
