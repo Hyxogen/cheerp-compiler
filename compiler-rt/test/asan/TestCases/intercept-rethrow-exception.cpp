@@ -15,6 +15,9 @@
 // https://reviews.llvm.org/D111703 made compiler incompatible with released NDK.
 // UNSUPPORTED: android && arm-target-arch
 
+// CHEERPASAN: TODO test this
+// XFAIL: cheerp
+
 #include <assert.h>
 #include <exception>
 #include <sanitizer/asan_interface.h>

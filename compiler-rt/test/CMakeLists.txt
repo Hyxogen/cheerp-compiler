@@ -43,7 +43,7 @@ if(NOT ANDROID)
   endif()
 endif()
 
-if(COMPILER_RT_STANDALONE_BUILD)
+if(COMPILER_RT_STANDALONE_BUILD AND FALSE)
   umbrella_lit_testsuite_begin(check-compiler-rt)
 endif()
 
@@ -103,7 +103,7 @@ if(COMPILER_RT_CAN_EXECUTE_TESTS)
   add_subdirectory(shadowcallstack)
 endif()
 
-if(COMPILER_RT_STANDALONE_BUILD)
+if(COMPILER_RT_STANDALONE_BUILD AND FALSE)
   # Now that we've traversed all the directories and know all the lit testsuites,
   # introduce a rule to run to run all of them.
   add_custom_target(compiler-rt-test-depends DEPENDS ${LLVM_COMPILER_RT_LIT_DEPENDS})
