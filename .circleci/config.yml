@@ -178,12 +178,15 @@ jobs:
     parameters:
       target:
         type: string
+      preexecute:
+        type: boolean
     docker:
       - image: leaningtech/cheerp_ci_base:20.04
     resource_class: large
     steps:
       - run-cheerp-tests:
           target: << parameters.target >>
+          preexecute: << parameters.preexecute >>
   RPM-cheerp-compiler:
     docker:
       - image: leaningtech/cheerp_rpm_base:8
@@ -1014,6 +1017,8 @@ commands:
     parameters:
       target:
         type: string
+      preexecute:
+        type: boolean
     steps:
       - attach_workspace:
           at: packages
@@ -1038,11 +1043,22 @@ commands:
           package-name: libcxx-libcxxabi
       - install-deb:
           package-name: libs
-      - run:
-          name: test
+      - when:
           working_directory: ~/project/cheerp-utils/tests
-          command: ./run_tests.py --<< parameters.target >> --determinism=3 --determinism-probability=0.2 "/opt/cheerp/bin/clang++" "node --experimental-wasm-reftypes" -j4
-          no_output_timeout: 30m
+          condition:
+            equal: [ true, << parameters.preexecute >> ]
+          steps:
+            - run:
+                command: ./run_tests.py --<< parameters.target >> --preexecute --determinism=3 --determinism-probability=0.2 "/opt/cheerp/bin/clang++" "node --experimental-wasm-reftypes" -j4
+                no_output_timeout: 30m
+      - when:
+          working_directory: ~/project/cheerp-utils/tests
+          condition:
+            equal: [ false, << parameters.preexecute >> ]
+          steps:
+            - run:
+                command: ./run_tests.py --<< parameters.target >> --determinism=3 --determinism-probability=0.2 "/opt/cheerp/bin/clang++" "node --experimental-wasm-reftypes" -j4
+                no_output_timeout: 30m
       - run:
           name: Store test results
           command: |
@@ -1266,7 +1282,11 @@ workflows:
       - test:
           matrix:
             parameters:
-              target: ["genericjs", "asmjs", "wasm", "preexecute", "preexecute_asmjs"]
+              target: ["genericjs", "asmjs", "wasm"]
+              preexecute: [true, false]
+            exclude:
+              - target: "wasm"
+                preexecute: true
           requires:
             - build-cheerp-compiler
             - build-libraries
