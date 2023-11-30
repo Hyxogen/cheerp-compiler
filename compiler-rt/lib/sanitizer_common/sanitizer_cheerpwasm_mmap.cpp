@@ -1,6 +1,7 @@
 #include "sanitizer_cheerpwasm_mmap.h"
 
 #if SANITIZER_CHEERPWASM
+#  include <assert.h>
 #  include <cheerpintrin.h>
 #  include <errno.h>
 #  include <stdint.h>
@@ -89,8 +90,9 @@ static void ReservePages(uptr page, uptr page_count) {
     uptr wasm_pages =
         RoundUpTo(needed_pages * MMAP_PAGESIZE, WASM_PAGESIZE) / WASM_PAGESIZE;
     if (__builtin_cheerp_grow_memory(wasm_pages) == -1) {
-      abort();  // If this triggered, you probably did not give enough memory to
-                // your program
+      assert(0 &&
+             "If this triggered, you probably did not give enough memory to "
+             "your program");
     }
     _mapped_pages = last_page;
   }
