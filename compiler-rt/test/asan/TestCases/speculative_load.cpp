@@ -46,7 +46,7 @@ struct S {
 
 
 inline void side_effect(const void *arg) {
-  __asm__ __volatile__("" : : "r" (reinterpret_cast<unsigned>(arg)) : "memory");
+  __asm__ __volatile__("" : : "r"(reinterpret_cast<unsigned>(arg)) : "memory");
 }
 
 int main(int argc, char **argv) {

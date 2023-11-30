@@ -6,8 +6,9 @@
 #include "asan_thread.h"
 
 #if SANITIZER_CHEERPWASM
-#include "lsan/lsan_common.h"
-#include <stdlib.h>
+#  include <stdlib.h>
+
+#  include "lsan/lsan_common.h"
 
 namespace __asan {
 
@@ -21,7 +22,7 @@ void AsanCheckDynamicRTPrereqs() {}
 void AsanCheckIncompatibleRT() {}
 void InitializePlatformInterceptors() {}
 void InitializePlatformExceptionHandlers() {}
-bool IsSystemHeapAddress (uptr addr) { return false; }
+bool IsSystemHeapAddress(uptr addr) { return false; }
 void ReplaceSystemMalloc() {}
 bool PlatformUnpoisonStacks() { return false; }
 
@@ -87,8 +88,6 @@ void InstallAtExitCheckLeaks() {
   }
 }
 
-} // namespace __asan
+}  // namespace __asan
 
-#endif // SANITIZER_CHEERPWASM
-
-
+#endif  // SANITIZER_CHEERPWASM

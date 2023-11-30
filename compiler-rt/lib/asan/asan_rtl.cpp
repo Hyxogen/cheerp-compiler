@@ -34,7 +34,7 @@
 #include "ubsan/ubsan_platform.h"
 
 #if SANITIZER_CHEERPWASM
-#include "sanitizer_common/sanitizer_cheerpwasm_mmap.h"
+#  include "sanitizer_common/sanitizer_cheerpwasm_mmap.h"
 #endif
 
 uptr __asan_shadow_memory_dynamic_address;  // Global interface symbol.

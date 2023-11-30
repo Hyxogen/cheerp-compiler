@@ -1,11 +1,11 @@
 #include "sanitizer_platform.h"
 
 #if SANITIZER_CHEERPWASM
-#include "sanitizer_symbolizer_internal.h"
+#  include "sanitizer_symbolizer_internal.h"
 
 namespace __sanitizer {
 
-const char* GetFunctionNameAtPc(uptr pc);
+const char *GetFunctionNameAtPc(uptr pc);
 
 class CheerpSymbolizerTool : public SymbolizerTool {
  public:
@@ -24,13 +24,9 @@ class CheerpSymbolizerTool : public SymbolizerTool {
     return true;
   }
 
-  bool SymbolizeData(uptr addr, DataInfo *info) override {
-    return false;
-  }
+  bool SymbolizeData(uptr addr, DataInfo *info) override { return false; }
 
-  const char *Demangle(const char *name) override {
-    return name;
-  }
+  const char *Demangle(const char *name) override { return name; }
 };
 
 static void ChooseSymbolizerTools(IntrusiveList<SymbolizerTool> *list,
@@ -40,24 +36,20 @@ static void ChooseSymbolizerTools(IntrusiveList<SymbolizerTool> *list,
     return;
   }
 
-  list->push_back(new(*allocator) CheerpSymbolizerTool());
+  list->push_back(new (*allocator) CheerpSymbolizerTool());
 }
 
-const char *Symbolizer::PlatformDemangle(const char *name) {
-  return name;
-}
+const char *Symbolizer::PlatformDemangle(const char *name) { return name; }
 
 Symbolizer *Symbolizer::PlatformInit() {
   IntrusiveList<SymbolizerTool> list;
   list.clear();
   ChooseSymbolizerTools(&list, &symbolizer_allocator_);
 
-  return new(symbolizer_allocator_) Symbolizer(list);
+  return new (symbolizer_allocator_) Symbolizer(list);
 }
 
-void Symbolizer::LateInitialize() {
-  Symbolizer::GetOrInit();
-}
+void Symbolizer::LateInitialize() { Symbolizer::GetOrInit(); }
 
-} // namespace __sanitizer
-#endif // SANITIZER_CHEERPWASM
+}  // namespace __sanitizer
+#endif  // SANITIZER_CHEERPWASM

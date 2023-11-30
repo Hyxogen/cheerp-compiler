@@ -1,24 +1,25 @@
 #include "lsan_common.h"
 
 #if SANITIZER_CHEERPWASM && CAN_SANITIZE_LEAKS
-#include "lsan_thread.h"
-#include "sanitizer_common/sanitizer_common.h"
-#include "sanitizer_common/sanitizer_flags.h"
-#include "sanitizer_common/sanitizer_getauxval.h"
-#include "sanitizer_common/sanitizer_linux.h"
-#include "sanitizer_common/sanitizer_stackdepot.h"
-#include "sanitizer_common/sanitizer_thread_registry.h"
+#  include <stdlib.h>
 
-#include <stdlib.h>
+#  include "lsan_thread.h"
+#  include "sanitizer_common/sanitizer_common.h"
+#  include "sanitizer_common/sanitizer_flags.h"
+#  include "sanitizer_common/sanitizer_getauxval.h"
+#  include "sanitizer_common/sanitizer_linux.h"
+#  include "sanitizer_common/sanitizer_stackdepot.h"
+#  include "sanitizer_common/sanitizer_thread_registry.h"
 
-#define LOG_THREADS(...)                           \
-  do {                                             \
-    if (flags()->log_threads) Report(__VA_ARGS__); \
-  } while (0)
+#  define LOG_THREADS(...)      \
+    do {                        \
+      if (flags()->log_threads) \
+        Report(__VA_ARGS__);    \
+    } while (0)
 
 extern "C" {
-extern char* volatile _heapStart;
-extern char* volatile _stackTop;
+extern char *volatile _heapStart;
+extern char *volatile _stackTop;
 }
 
 namespace __lsan {
@@ -41,8 +42,9 @@ LoadedModule *GetLinker() { return linker; }
 
 // Scans global variables for heap pointers.
 void ProcessGlobalRegions(Frontier *frontier) {
-  if (!flags()->use_globals) return;
-  ScanGlobalRange((uptr) _stackTop, (uptr) _heapStart, frontier);
+  if (!flags()->use_globals)
+    return;
+  ScanGlobalRange((uptr)_stackTop, (uptr)_heapStart, frontier);
 }
 
 void ProcessPlatformSpecificAllocations(Frontier *frontier) {}
@@ -72,22 +74,24 @@ static void ProcessThreadsCallback(ThreadContextBase *tctx, void *arg) {
 
   uptr stack_begin, stack_end, tls_begin, tls_end, cache_begin, cache_end;
   DTLS *dtls;
-  bool thread_found = GetThreadRangesLocked(os_id, &stack_begin, &stack_end,
-                                            &tls_begin, &tls_end,
-                                            &cache_begin, &cache_end, &dtls);
+  bool thread_found =
+      GetThreadRangesLocked(os_id, &stack_begin, &stack_end, &tls_begin,
+                            &tls_end, &cache_begin, &cache_end, &dtls);
   if (!thread_found) {
     LOG_THREADS("Thread %llu not found in registry.\n", os_id);
     return;
   }
 
   if (flags()->use_stacks) {
-    LOG_THREADS("Stack at %p-%p.\n", (void*)stack_begin, (void*)stack_end);
+    LOG_THREADS("Stack at %p-%p.\n", (void *)stack_begin, (void *)stack_end);
 
     // We can't get the SP for other threads to narrow down the range, but we
     // we can for the current thread.
     if (tctx->tid == GetCurrentThread()) {
-      //uptr sp = (uptr) __builtin_frame_address(0);
-      uptr sp = (uptr) alloca(0); // CHEERPASAN: FIXME implement  __builtin_frame_address(0) (not currently supported by cheerp)
+      // uptr sp = (uptr) __builtin_frame_address(0);
+      uptr sp = (uptr)alloca(
+          0);  // CHEERPASAN: FIXME implement  __builtin_frame_address(0) (not
+               // currently supported by cheerp)
       if (sp < stack_begin || sp >= stack_end) {
         // SP is outside the recorded stack range (e.g. the thread is running a
         // signal handler on alternate stack, or swapcontext was used).
@@ -103,7 +107,7 @@ static void ProcessThreadsCallback(ThreadContextBase *tctx, void *arg) {
   }
 
   if (flags()->use_tls && tls_begin) {
-    LOG_THREADS("TLS at %p-%p.\n", (void*)tls_begin, (void*)tls_end);
+    LOG_THREADS("TLS at %p-%p.\n", (void *)tls_begin, (void *)tls_end);
     // If the tls and cache ranges don't overlap, scan full tls range,
     // otherwise, only scan the non-overlapping portions
     if (cache_begin == cache_end || tls_end < cache_begin ||
@@ -119,17 +123,16 @@ static void ProcessThreadsCallback(ThreadContextBase *tctx, void *arg) {
   }
 }
 
-void ProcessThreads(SuspendedThreadsList const& suspended_threads,
-                    Frontier* frontier,
-                    tid_t caller_tid,
-                    uptr caller_sp) {
+void ProcessThreads(SuspendedThreadsList const &suspended_threads,
+                    Frontier *frontier, tid_t caller_tid, uptr caller_sp) {
   GetThreadRegistryLocked()->RunCallbackForEachThreadLocked(
-    ProcessThreadsCallback, frontier);
+      ProcessThreadsCallback, frontier);
 }
 
 void HandleLeaks() {
-  if (common_flags()->exitcode) Die();
+  if (common_flags()->exitcode)
+    Die();
 }
-}
+}  // namespace __lsan
 
-#endif // SANITIZER_CHEERPWASM && CAN_SANITIZE_LEAKS
+#endif  // SANITIZER_CHEERPWASM && CAN_SANITIZE_LEAKS

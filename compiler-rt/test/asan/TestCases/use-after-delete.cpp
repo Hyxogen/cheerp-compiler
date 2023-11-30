@@ -37,7 +37,6 @@ int main() {
   // CHECK:        {{    #0 0x.* in .*malloc}}
   // CHECK-NEXT:   {{    #1 0x.* in .*main .*}}
 
-
   // CHECK: Shadow byte legend (one shadow byte represents {{[0-9]+}} application bytes):
   // CHECK: Global redzone:
   // CHECK: ASan internal:

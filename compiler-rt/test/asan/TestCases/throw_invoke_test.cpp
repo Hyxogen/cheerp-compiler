@@ -7,7 +7,7 @@
 #include <stdio.h>
 static volatile int zero = 0;
 inline void pretend_to_do_something(void *x) {
-  __asm__ __volatile__("" : : "r" (reinterpret_cast<unsigned>(x)) : "memory");
+  __asm__ __volatile__("" : : "r"(reinterpret_cast<unsigned>(x)) : "memory");
 }
 
 __attribute__((noinline))

@@ -147,7 +147,7 @@
 #endif
 
 #if SI_CHEERP
-#include "sanitizer_platform_limits_cheerpwasm.h"
+#  include "sanitizer_platform_limits_cheerpwasm.h"
 #endif
 
 #define SANITIZER_INTERCEPT_STRLEN SI_NOT_FUCHSIA

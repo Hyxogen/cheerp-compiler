@@ -18,22 +18,22 @@ INTERCEPTOR(void, free, void *ptr) {
   asan_free(ptr, &stack, FROM_MALLOC);
 }
 
-INTERCEPTOR(void*, malloc, uptr size) {
+INTERCEPTOR(void *, malloc, uptr size) {
   ENSURE_ASAN_INITED();
   GET_STACK_TRACE_MALLOC;
   return asan_malloc(size, &stack);
 }
 
-INTERCEPTOR(void*, calloc, uptr nmemb, uptr size) {
+INTERCEPTOR(void *, calloc, uptr nmemb, uptr size) {
   ENSURE_ASAN_INITED();
   GET_STACK_TRACE_MALLOC;
   return asan_calloc(nmemb, size, &stack);
 }
 
-INTERCEPTOR(void*, realloc, void *ptr, uptr size) {
+INTERCEPTOR(void *, realloc, void *ptr, uptr size) {
   ENSURE_ASAN_INITED();
   GET_STACK_TRACE_MALLOC;
   return asan_realloc(ptr, size, &stack);
 }
 
-#endif // SANITIZER_CHEERPWASM
+#endif  // SANITIZER_CHEERPWASM

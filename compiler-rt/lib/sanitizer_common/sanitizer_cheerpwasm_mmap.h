@@ -4,13 +4,13 @@
 #include "sanitizer_platform.h"
 
 #if SANITIZER_CHEERPWASM
-#include "sanitizer_internal_defs.h"
+#  include "sanitizer_internal_defs.h"
 
 namespace __sanitizer {
 
 void UnmapFromTo(uptr from, uptr to);
 void SetupMemoryMapping();
 
-}
-#endif // SANITIZER_CHEERPWASM
-#endif // SANITIZER_CHEERPWASM_MMAP_H
+}  // namespace __sanitizer
+#endif  // SANITIZER_CHEERPWASM
+#endif  // SANITIZER_CHEERPWASM_MMAP_H

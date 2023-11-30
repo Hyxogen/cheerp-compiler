@@ -5,9 +5,9 @@
 
 #if SANITIZER_CHEERPWASM
 
-#include "sanitizer_platform_limits_cheerpwasm.h"
-#include "sanitizer_internal_defs.h"
+#  include "sanitizer_internal_defs.h"
+#  include "sanitizer_platform_limits_cheerpwasm.h"
 
-#endif // SANITIZER_CHEERPWASM
+#endif  // SANITIZER_CHEERPWASM
 
-#endif // SANITIZER_CHEERPWASM_H
+#endif  // SANITIZER_CHEERPWASM_H

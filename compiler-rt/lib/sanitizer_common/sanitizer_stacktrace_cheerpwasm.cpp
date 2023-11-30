@@ -60,7 +60,8 @@ static uptr _name_len = 0;
   __asm__("%0[%1]=%2" : : "r"(_symbols), "r"(pc), "r"(frame));
 }
 
-[[cheerp::genericjs]] static uptr GetCallstack(uptr* dest, uptr dest_len, uptr skip) {
+[[cheerp::genericjs]] static uptr GetCallstack(uptr* dest, uptr dest_len,
+                                               uptr skip) {
   client::TArray<client::String>* callstack = nullptr;
   __asm__("(new Error()).stack.toString().split('\\n')" : "=r"(callstack));
 
@@ -210,8 +211,8 @@ void BufferedStackTrace::UnwindFast(uptr pc, uptr bp, uptr stack_top,
 }
 
 [[clang::always_inline]] uptr GetReturnAddress(uptr idx) {
-  _prev_trace_len =
-      GetCallstack(_prev_trace, sizeof(_prev_trace) / sizeof(_prev_trace[0]), idx + 1);
+  _prev_trace_len = GetCallstack(
+      _prev_trace, sizeof(_prev_trace) / sizeof(_prev_trace[0]), idx + 1);
 
   if (_prev_trace_len)
     return _prev_trace[0];

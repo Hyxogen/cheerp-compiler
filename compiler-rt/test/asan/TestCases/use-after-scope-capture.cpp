@@ -10,7 +10,7 @@ int main() {
     f = [&x]() __attribute__((noinline)) {
       return x;  // BOOM
       // CHECK: ERROR: AddressSanitizer: stack-use-after-scope
-      // CHECK: #0 0x{{.*}} in 
+      // CHECK: #0 0x{{.*}} in
     };
   }
   return f();  // BOOM
