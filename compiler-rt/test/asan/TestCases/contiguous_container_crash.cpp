@@ -54,13 +54,13 @@ int OddAlignmentEnd() {
 }
 
 int main(int argc, char **argv) {
-  if (TEST==0)
+  if (TEST == 0)
     return TestCrash();
-  else if (TEST==1)
+  else if (TEST == 1)
     BadBounds();
-  else if (TEST==2)
+  else if (TEST == 2)
     return OddAlignment();
-  else if (TEST==3)
+  else if (TEST == 3)
     return OddAlignmentEnd();
   return 0;
 }

@@ -967,7 +967,7 @@ static inline void SanitizerBreakOptimization(void *arg) {
 #if defined(_MSC_VER) && !defined(__clang__)
   _ReadWriteBarrier();
 #elif SANITIZER_CHEERPWASM
-  __asm__ __volatile__("" : : "r" (reinterpret_cast<uptr>(arg)) : "memory");
+  __asm__ __volatile__("" : : "r"(reinterpret_cast<uptr>(arg)) : "memory");
 #else
   __asm__ __volatile__("" : : "r" (arg) : "memory");
 #endif

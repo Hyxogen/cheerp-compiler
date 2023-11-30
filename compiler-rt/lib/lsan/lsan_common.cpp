@@ -13,6 +13,10 @@
 
 #include "lsan_common.h"
 
+#if SANITIZER_CHEERPWASM
+#include <alloca.h>
+#endif
+
 #include "sanitizer_common/sanitizer_common.h"
 #include "sanitizer_common/sanitizer_flag_parser.h"
 #include "sanitizer_common/sanitizer_flags.h"
@@ -24,8 +28,6 @@
 #include "sanitizer_common/sanitizer_suppressions.h"
 #include "sanitizer_common/sanitizer_thread_registry.h"
 #include "sanitizer_common/sanitizer_tls_get_addr.h"
-
-#include <alloca.h>
 
 #if CAN_SANITIZE_LEAKS
 
@@ -40,9 +42,9 @@
 #    define OBJC_FAST_IS_RW 0x8000000000000000UL
 #  endif
 
-# if SANITIZER_CHEERPWASM
-extern char* volatile _heapEnd;
-# endif
+#  if SANITIZER_CHEERPWASM
+extern char *volatile _heapEnd;
+#  endif
 
 namespace __lsan {
 
@@ -375,11 +377,11 @@ extern "C" SANITIZER_WEAK_ATTRIBUTE void __libc_iterate_dynamic_tls(
     pid_t, void (*cb)(void *, void *, uptr, void *), void *);
 #    endif
 
-#if SANITIZER_CHEERPWASM
+#    if SANITIZER_CHEERPWASM
 
 void ProcessThreads(SuspendedThreadsList const &suspended_threads,
                     Frontier *frontier, tid_t caller_tid, uptr caller_sp);
-#else
+#    else
 
 static void ProcessThreadRegistry(Frontier *frontier) {
   InternalMmapVector<uptr> ptrs;
@@ -487,7 +489,7 @@ static void ProcessThreads(SuspendedThreadsList const &suspended_threads,
                                  kReachable);
         }
       }
-#    if SANITIZER_ANDROID
+#      if SANITIZER_ANDROID
       auto *cb = +[](void *dtls_begin, void *dtls_end, uptr /*dso_idd*/,
                      void *arg) -> void {
         ScanRangeForPointers(reinterpret_cast<uptr>(dtls_begin),
@@ -500,7 +502,7 @@ static void ProcessThreads(SuspendedThreadsList const &suspended_threads,
       // thread is suspended in the middle of updating its DTLS. IOWs, we
       // could scan already freed memory. (probably fine for now)
       __libc_iterate_dynamic_tls(os_id, cb, frontier);
-#    else
+#      else
       if (dtls && !DTLSInDestruction(dtls)) {
         ForEachDVT(dtls, [&](const DTLS::DTV &dtv, int id) {
           uptr dtls_beg = dtv.beg;
@@ -517,7 +519,7 @@ static void ProcessThreads(SuspendedThreadsList const &suspended_threads,
         // this and continue.
         LOG_THREADS("Thread %llu has DTLS under destruction.\n", os_id);
       }
-#    endif
+#      endif
     }
   }
 
@@ -525,7 +527,7 @@ static void ProcessThreads(SuspendedThreadsList const &suspended_threads,
   ProcessThreadRegistry(frontier);
 }
 
-#endif // !SANITIZER_CHEERPWASM
+#    endif  // !SANITIZER_CHEERPWASM
 
 #  endif  // SANITIZER_FUCHSIA
 
@@ -548,7 +550,8 @@ void ScanRootRegion(Frontier *frontier, const RootRegion &root_region,
 static void ProcessRootRegion(Frontier *frontier,
                               const RootRegion &root_region) {
 #  if SANITIZER_CHEERPWASM
-  ScanRootRegion(frontier, root_region, 0, reinterpret_cast<uptr>(_heapEnd), true);
+  ScanRootRegion(frontier, root_region, 0, reinterpret_cast<uptr>(_heapEnd),
+                 true);
 #  else
   MemoryMappingLayout proc_maps(/*cache_enabled*/ true);
   MemoryMappedSegment segment;
@@ -776,11 +779,11 @@ static bool CheckForLeaks() {
     // threads are suspended and stack pointers captured.
     param.caller_tid = GetTid();
 
-#if SANITIZER_CHEERPWASM
+#  if SANITIZER_CHEERPWASM
     param.caller_sp = reinterpret_cast<uptr>(alloca(0));
-#else
+#  else
     param.caller_sp = reinterpret_cast<uptr>(__builtin_frame_address(0));
-#endif
+#  endif
 
     LockStuffAndStopTheWorld(CheckForLeaksCallback, &param);
     if (!param.success) {

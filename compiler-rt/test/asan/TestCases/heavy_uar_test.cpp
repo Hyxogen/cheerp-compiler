@@ -18,7 +18,7 @@
 
 __attribute__((noinline))
 char *pretend_to_do_something(char *x) {
-  __asm__ __volatile__("" : : "r" (reinterpret_cast<unsigned>(x)) : "memory");
+  __asm__ __volatile__("" : : "r"(reinterpret_cast<unsigned>(x)) : "memory");
   return x;
 }
 

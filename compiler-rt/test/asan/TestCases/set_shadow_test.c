@@ -1,4 +1,4 @@
-// RUN: %clang_asan -O0 %s -o %t -DSHADOW_BYTE=0x00 && %run %t 2>&1 | FileCheck %s -check-prefix=X00 
+// RUN: %clang_asan -O0 %s -o %t -DSHADOW_BYTE=0x00 && %run %t 2>&1 | FileCheck %s -check-prefix=X00
 // RUN: %clang_asan -O0 %s -o %t -DSHADOW_BYTE=0xf1 && not %run %t 2>&1 | FileCheck %s -check-prefix=XF1
 // RUN: %clang_asan -O0 %s -o %t -DSHADOW_BYTE=0xf2 && not %run %t 2>&1 | FileCheck %s -check-prefix=XF2
 // RUN: %clang_asan -O0 %s -o %t -DSHADOW_BYTE=0xf3 && not %run %t 2>&1 | FileCheck %s -check-prefix=XF3

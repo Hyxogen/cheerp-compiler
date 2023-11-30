@@ -5,11 +5,11 @@
 
 #if SANITIZER_CHEERPWASM
 
-#include <stdio.h>
+#  include <stdio.h>
 
 typedef FILE __sanitizer_FILE;
 extern unsigned mbstate_t_sz;
 
-#endif // SANITIZER_CHEERPWASM
+#endif  // SANITIZER_CHEERPWASM
 
-#endif // SANITIZER_PLATFORM_LIMITS_CHEERPWASM_H 
+#endif  // SANITIZER_PLATFORM_LIMITS_CHEERPWASM_H

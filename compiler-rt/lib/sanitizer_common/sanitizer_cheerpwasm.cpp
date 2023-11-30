@@ -2,13 +2,14 @@
 
 #if SANITIZER_CHEERPWASM
 
-#include "sanitizer_common.h"
-#include "sanitizer_file.h"
-#include "sanitizer_cheerpwasm_mmap.h"
-#include <stdlib.h>
+#  include <stdlib.h>
 
-__attribute__((cheerp_asmjs)) char* volatile _stackBottom = (char*)0xdeadbeef;
-__attribute__((cheerp_asmjs)) char* volatile _stackTop = (char*)0xdeadbeef;
+#  include "sanitizer_cheerpwasm_mmap.h"
+#  include "sanitizer_common.h"
+#  include "sanitizer_file.h"
+
+__attribute__((cheerp_asmjs)) char *volatile _stackBottom = (char *)0xdeadbeef;
+__attribute__((cheerp_asmjs)) char *volatile _stackTop = (char *)0xdeadbeef;
 
 namespace __sanitizer {
 
@@ -41,7 +42,7 @@ int Atexit(void (*function)(void)) { return atexit(function); }
 
 void ListOfModules::fallbackInit() { clear(); }
 
-uptr ReadBinaryName(/*out*/char *buf, uptr buf_len) {
+uptr ReadBinaryName(/*out*/ char *buf, uptr buf_len) {
   const char *default_binary_name = "default.binary.name";
   const size_t len = internal_strlen(default_binary_name);
   size_t n = buf_len < len ? buf_len : len;
@@ -53,21 +54,13 @@ uptr ReadLongProcessName(/*out*/ char *buf, uptr buf_len) {
   return ReadBinaryName(buf, buf_len);
 }
 
-const char *GetEnv(const char *name) {
-  return getenv(name);
-}
+const char *GetEnv(const char *name) { return getenv(name); }
 
-uptr GetPageSize() {
-  return GetMmapGranularity();
-}
+uptr GetPageSize() { return GetMmapGranularity(); }
 
-tid_t GetTid() {
-  return 0;
-}
+tid_t GetTid() { return 0; }
 
-uptr GetThreadSelf() {
-  return 0;
-}
+uptr GetThreadSelf() { return 0; }
 bool SupportsColoredOutput(fd_t fd) { return false; }
 
 void ReportFile::Write(const char *buffer, uptr length) {
@@ -102,23 +95,21 @@ void InitializePlatformCommonFlags(CommonFlags *cf) {}
 void InitializePlatformEarly() {}
 void CheckASLR() {}
 void DisableCoreDumperIfNecessary() {}
-void InstallDeadlySignalHandlers(void (*)(int, void*, void*)) {}
-void InitializeCoverage(bool, char const*) {}
+void InstallDeadlySignalHandlers(void (*)(int, void *, void *)) {}
+void InitializeCoverage(bool, char const *) {}
 void InitTlsSize() {}
 uptr internal_getpid() { return 1; }
 
 void GetThreadStackAndTls(bool main, uptr *stk_addr, uptr *stk_size,
                           uptr *tls_addr, uptr *tls_size) {
-	*stk_addr = (uptr) _stackTop;
-	*stk_size = _stackBottom - _stackTop;
+  *stk_addr = (uptr)_stackTop;
+  *stk_size = _stackBottom - _stackTop;
 }
 
 void SetAlternateSignalStack() {}
 
-void internal__exit(int exitcode) {
-  exit(exitcode);
-}
+void internal__exit(int exitcode) { exit(exitcode); }
 
-} // namespace __sanitizer
+}  // namespace __sanitizer
 
-#endif // SANITIZER_CHEERPWASM
+#endif  // SANITIZER_CHEERPWASM

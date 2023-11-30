@@ -5,7 +5,7 @@
 
 #define NOINLINE __attribute__((noinline))
 inline void break_optimization(void *arg) {
-  __asm__ __volatile__("" : : "r" (reinterpret_cast<unsigned>(arg)) : "memory");
+  __asm__ __volatile__("" : : "r"(reinterpret_cast<unsigned>(arg)) : "memory");
 }
 
 NOINLINE static void Frame0(int frame, char *a, char *b, char *c) {

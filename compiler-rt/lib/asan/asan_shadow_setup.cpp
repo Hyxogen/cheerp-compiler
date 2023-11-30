@@ -71,7 +71,8 @@ void InitializeShadowMemory() {
   bool full_shadow_is_available = false;
   if (shadow_start == kDefaultShadowSentinel) {
     shadow_start = FindDynamicShadowStart();
-    if (SANITIZER_LINUX || SANITIZER_CHEERPWASM) full_shadow_is_available = true;
+    if (SANITIZER_LINUX || SANITIZER_CHEERPWASM)
+      full_shadow_is_available = true;
   }
   // Update the shadow memory address (potentially) used by instrumentation.
   __asan_shadow_memory_dynamic_address = shadow_start;
@@ -95,15 +96,18 @@ void InitializeShadowMemory() {
   if (full_shadow_is_available) {
     // mmap the low shadow plus at least one page at the left.
     if (kLowShadowBeg)
-      ReserveShadowMemoryRange(shadow_start, kLowShadowEnd, "low shadow", !SANITIZER_CHEERPWASM);
+      ReserveShadowMemoryRange(shadow_start, kLowShadowEnd, "low shadow",
+                               !SANITIZER_CHEERPWASM);
     // mmap the high shadow.
-    ReserveShadowMemoryRange(kHighShadowBeg, kHighShadowEnd, "high shadow", !SANITIZER_CHEERPWASM);
+    ReserveShadowMemoryRange(kHighShadowBeg, kHighShadowEnd, "high shadow",
+                             !SANITIZER_CHEERPWASM);
     // protect the gap.
     ProtectGap(kShadowGapBeg, kShadowGapEnd - kShadowGapBeg + 1);
-#if SANITIZER_CHEERPWASM
-    // CHEERP: Poison everything from 0x0 up to stack top to detect null derefences
+#  if SANITIZER_CHEERPWASM
+    // CHEERP: Poison everything from 0x0 up to stack top to detect null
+    // derefences
     FastPoisonShadow(0, reinterpret_cast<uptr>(_stackTop), 0xfe);
-#endif
+#  endif
     CHECK_EQ(kShadowGapEnd, kHighShadowBeg - 1);
   } else if (kMidMemBeg &&
              MemoryRangeIsAvailable(shadow_start, kMidMemBeg - 1) &&

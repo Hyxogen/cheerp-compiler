@@ -15,8 +15,9 @@
 #define SANITIZER_ATOMIC_CLANG_H
 
 #if SANITIZER_CHEERPWASM
-# include "sanitizer_libc.h"
-# include <stdint.h>
+#  include <stdint.h>
+
+#  include "sanitizer_libc.h"
 
 #endif
 
@@ -102,7 +103,7 @@ inline bool atomic_compare_exchange_strong(volatile T *a, typename T::Type *cmp,
                                            typename T::Type xchg,
                                            memory_order mo) {
 #if SANITIZER_CHEERPWASM
-  typename T::Type* aptr = const_cast<typename T::Type*>(&a->val_dont_use);
+  typename T::Type *aptr = const_cast<typename T::Type *>(&a->val_dont_use);
   if (internal_memcmp(aptr, cmp, sizeof a->val_dont_use) == 0) {
     internal_memcpy(aptr, &xchg, sizeof a->val_dont_use);
     return true;
