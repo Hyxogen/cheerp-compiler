@@ -39,14 +39,13 @@ void FlushUnneededASanShadowMemory(uptr p, uptr size) {}
 static void (*tsd_destructor)(void *tsd) = nullptr;
 
 struct tsd_key {
-  // tsd_key() : key(nullptr) {} can't use this, since it will try to initialize
-  // itself in cxx_global_var_init after __asan_init exited
+  tsd_key() : key(nullptr) {}
   ~tsd_key() {
     CHECK(tsd_destructor);
     if (key)
       (*tsd_destructor)(key);
   }
-  void *key = nullptr;
+  void *key;
 };
 
 static /*thread_local*/ struct tsd_key key;
