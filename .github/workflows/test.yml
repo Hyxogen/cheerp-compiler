@@ -1,0 +1,221 @@
+name: Test
+
+on:
+  push:
+    branches: [ "master", "feat-libasan", "feat-libasan-next" ]
+
+env:
+  CHEERP_DEST: /opt/cheerp
+
+jobs:
+  build-compiler:
+    name: Build cheerp compiler
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependencies
+        run: sudo apt update && sudo apt install -y ninja-build mold
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          path: 'cheerp-compiler'
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          max-size: 500M
+          key: ccache-${{ github.ref_name }}
+          variant: ccache
+      - name: Build and install cheerp
+        run: |
+          cd "$GITHUB_WORKSPACE/cheerp-compiler"
+          cmake -DCMAKE_INSTALL_PREFIX="$CHEERP_DEST" -S llvm -B build -C llvm/CheerpCmakeConf.cmake -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS=clang -G Ninja -DLLVM_USE_LINKER=mold -DCMAKE_CXX_FLAGS_RELEASE=-O3 -DCMAKE_CXX_COMPILER=/usr/bin/g++ -DCMAKE_C_COMPILER=/usr/bin/gcc -DLLVM_ENABLE_ASSERTIONS=OFF -DLLVM_CCACHE_BUILD=On
+          ninja -C build install
+      - name: Tar artifacts
+        run: |
+          cd "$GITHUB_WORKSPACE/cheerp-compiler"
+          tar --zstd -cvf "$GITHUB_WORKSPACE/cheerp-compiler-source.tar.zst" build cmake third-party llvm clang compiler-rt .git/logs/HEAD
+      - name: Upload compiler
+        uses: actions/upload-artifact@v3
+        with:
+          name: compiler-source
+          path: ./cheerp-compiler-source.tar.zst
+          retention-days: 1
+  build-libraries:
+    name: Build libraries
+    needs: build-compiler
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependencies
+        run: sudo apt update && sudo apt install -y ninja-build mold ccache
+      - name: Download compiler source
+        uses: actions/download-artifact@v3
+        with:
+          name: compiler-source
+      - name: Untar artifacts
+        run: |
+          mkdir cheerp-compiler
+          tar -xvf cheerp-compiler-source.tar.zst -C cheerp-compiler
+      - name: Install cheerp compiler
+        working-directory: cheerp-compiler
+        run: ninja -C build install-distribution
+      - name: Checkout cheerp-utils
+        uses: actions/checkout@v3
+        with:
+          repository: 'leaningtech/cheerp-utils'
+          path: 'cheerp-utils'
+      - name: Install cheerp-utils
+        run: |
+          (cd "$GITHUB_WORKSPACE/cheerp-utils" && cmake -B build -DCMAKE_INSTALL_PREFIX="$CHEERP_DEST") 
+          make -C "$GITHUB_WORKSPACE/cheerp-utils/build" install -j
+      - name: Checkout cheerp-musl
+        uses: actions/checkout@v3
+        with:
+          repository: 'Hyxogen/cheerp-musl'
+          ref: 'feat-weak-functions'
+          path: 'cheerp-musl'
+      - name: Build and install musl
+        env:
+          GENERICJS_DIR: build_genericjs
+          ASMJS_DIR: build_asmjs
+          GENERICJS_CC: "/bin/clang -target cheerp"
+          ASMJS_CC: "/bin/clang -target cheerp-wasm"
+          CFLAGS: "-Wno-int-conversion"
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/cheerp-musl/$GENERICJS_DIR" "$GITHUB_WORKSPACE/cheerp-musl/$ASMJS_DIR"
+          (cd "$GITHUB_WORKSPACE/cheerp-musl/$GENERICJS_DIR" && CC="$CHEERP_DEST/$GENERICJS_CC" RANLIB="$CHEERP_DEST/bin/llvm-ar s" AR="$CHEERP_DEST/bin/llvm-ar" LD="$CHEERP_DEST/bin/llvm-link" ../configure --target=cheerp --disable-shared --prefix="$CHEERP_DEST" --with-malloc=dlmalloc)
+          (cd "$GITHUB_WORKSPACE/cheerp-musl/$ASMJS_DIR" && CC="$CHEERP_DEST/$ASMJS_CC" RANLIB="$CHEERP_DEST/bin/llvm-ar s" AR="$CHEERP_DEST/bin/llvm-ar" LD="$CHEERP_DEST/bin/llvm-link"  ../configure --target=cheerp-wasm --disable-shared --prefix="$CHEERP_DEST" --with-malloc=dlmalloc)
+          make -C "$GITHUB_WORKSPACE/cheerp-musl/$GENERICJS_DIR" -j
+          make -C "$GITHUB_WORKSPACE/cheerp-musl/$GENERICJS_DIR" install
+          make -C "$GITHUB_WORKSPACE/cheerp-musl/$ASMJS_DIR" -j
+          make -C "$GITHUB_WORKSPACE/cheerp-musl/$ASMJS_DIR" install
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          path: 'cheerp-compiler'
+      - name: Build and install runtimes
+        run: |
+          (cd "$GITHUB_WORKSPACE/cheerp-compiler" && cmake -DCMAKE_INSTALL_PREFIX="$CHEERP_DEST" -S runtimes -B build_runtimes_genericjs -GNinja -C runtimes/CheerpCmakeConf.cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="$CHEERP_DEST/share/cmake/Modules/CheerpToolchain.cmake")
+          ninja -C "$GITHUB_WORKSPACE/cheerp-compiler/build_runtimes_genericjs"
+          (cd "$GITHUB_WORKSPACE/cheerp-compiler" && cmake -DCMAKE_INSTALL_PREFIX="$CHEERP_DEST" -S runtimes -B build_runtimes_wasm -GNinja -C runtimes/CheerpCmakeConf.cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="$CHEERP_DEST/share/cmake/Modules/CheerpWasmToolchain.cmake")
+          ninja -C "$GITHUB_WORKSPACE/cheerp-compiler/build_runtimes_wasm"
+          ninja -C "$GITHUB_WORKSPACE/cheerp-compiler/build_runtimes_genericjs" install
+          ninja -C "$GITHUB_WORKSPACE/cheerp-compiler/build_runtimes_wasm" install
+      - name: Checkout cheerp-libs
+        uses: actions/checkout@v3
+        with:
+          repository: 'leaningtech/cheerp-libs'
+          path: 'cheerp-libs'
+      - name: Build and install libraries
+        env:
+          GENERICJS_DIR: build_genericjs
+          ASMJS_DIR: build_asmjs
+        run: |
+          make -C "$GITHUB_WORKSPACE/cheerp-libs/webgles" install INSTALL_PREFIX="$CHEERP_DEST" CHEERP_PREFIX="$CHEERP_DEST"
+          make -C "$GITHUB_WORKSPACE/cheerp-libs/wasm" install INSTALL_PREFIX="$CHEERP_DEST" CHEERP_PREFIX="$CHEERP_DEST"
+          make -C "$GITHUB_WORKSPACE/cheerp-libs/stdlibs" install INSTALL_PREFIX="$CHEERP_DEST" CHEERP_PREFIX="$CHEERP_DEST"
+          (cd "$GITHUB_WORKSPACE/cheerp-libs/system" && cmake -B "$GENERICJS_DIR" -DCMAKE_INSTALL_PREFIX="$CHEERP_DEST" -DCMAKE_TOOLCHAIN_FILE="$CHEERP_DEST/share/cmake/Modules/CheerpToolchain.cmake" .)
+          cmake --build "$GITHUB_WORKSPACE/cheerp-libs/system/$GENERICJS_DIR" 
+          cmake --install "$GITHUB_WORKSPACE/cheerp-libs/system/$GENERICJS_DIR" 
+          (cd "$GITHUB_WORKSPACE/cheerp-libs/system" && cmake -B "$ASMJS_DIR" -DCMAKE_INSTALL_PREFIX="$CHEERP_DEST" -DCMAKE_TOOLCHAIN_FILE="$CHEERP_DEST/share/cmake/Modules/CheerpWasmToolchain.cmake" .)
+          cmake --build "$GITHUB_WORKSPACE/cheerp-libs/system/$ASMJS_DIR" 
+          cmake --install "$GITHUB_WORKSPACE/cheerp-libs/system/$ASMJS_DIR" 
+      - name: Install compiler-rt
+        run: |
+          cd "$GITHUB_WORKSPACE/cheerp-compiler/compiler-rt"
+          cmake -B build -C CheerpCmakeConf.cmake . \
+            -DCOMPILER_RT_INCLUDE_TESTS=On -DCOMPILER_RT_CAN_EXECUTE_TESTS=On \
+            -DCOMPILER_RT_TEST_STANDALONE_BUILD_LIBS=Off -DCMAKE_INSTALL_PREFIX="$CHEERP_DEST" \
+            -DCMAKE_TOOLCHAIN_FILE="$CHEERP_DEST/share/cmake/Modules/CheerpWasmToolchain.cmake"
+          make -C build install
+      - name: Tar artifacts
+        run: tar --zstd -cvf cheerp-compiler.tar.zst /opt/cheerp
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: compiler
+          path: ./cheerp-compiler.tar.zst
+  cheerp-test:
+    name: Run cheerp-utils tests
+    needs: build-libraries
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        mode: [--asmjs, --wasm, --genericjs, --preexecute, --preexecute-asmjs]
+    steps:
+      - name: Install cheerp-compiler
+        uses: Hyxogen/cheerp-actions/install-compiler@master
+      - name: Run tests
+        uses: Hyxogen/cheerp-actions/cheerp-test@master
+        with:
+          flags: "${{ matrix.mode }} --determinism=3 --determinism-probability=0.2"
+  cheerp-test-asan-new:
+    name: Run cheerp-utils \w AddressSanitizer
+    needs: build-libraries
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        mode: [--asmjs, --wasm]
+    steps:
+      - name: Install cheerp-compiler
+        uses: Hyxogen/cheerp-actions/install-compiler@master
+      - name: Install asan runtime
+        uses: Hyxogen/cheerp-actions/install-libasan@master
+      - name: Run tests
+        uses: Hyxogen/cheerp-actions/cheerp-test@master
+        with:
+          flags: "${{ matrix.mode }} --asan --determinism=3 --determinism-probability=0.2"
+  asan-test-other-name:
+    name: Run asan tests
+    needs: build-libraries
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        executor: [spidermonkey, node]
+    steps:
+      - name: Install dependencies
+        run: sudo apt update && sudo apt install -y libmozjs-102-dev
+      - name: Setup spidermonkey
+        run: |
+          printf '#!/bin/bash\ncd "$(dirname $1)" && js102 "$(basename $1)"' > spidermonkey
+          chmod +x spidermonkey
+          sudo cp spidermonkey /usr/bin/
+      - name: Install cheerp-compiler
+        uses: Hyxogen/cheerp-actions/install-compiler@master
+      - name: Download compiler source
+        uses: actions/download-artifact@v3
+        with:
+          name: compiler-source
+      - name: Untar artifacts
+        run: |
+          mkdir cheerp-compiler
+          tar -xvf cheerp-compiler-source.tar.zst -C cheerp-compiler
+      - name: Setup libasan
+        working-directory: ./cheerp-compiler/compiler-rt
+        run: |
+          cmake -DCMAKE_INSTALL_PREFIX="$CHEERP_DEST" -B build -C CheerpCmakeConf.cmake \
+                  -DCOMPILER_RT_INCLUDE_TESTS=On -DCOMPILER_RT_CAN_EXECUTE_TESTS=On \
+                  -DCOMPILER_RT_STANDALONE_BUILD=OFF -DCOMPILER_RT_TEST_STANDALONE_BUILD_LIBS=OFF \
+                  -DASAN_TEST_EXECUTOR=${{ matrix.executor }} \
+                  -DCMAKE_TOOLCHAIN_FILE="$CHEERP_DEST/share/cmake/Modules/CheerpWasmToolchain.cmake" .
+          make -C build help
+          make -C build install
+          make -C build check-asan -j
+  llvm-check:
+    name: Run llvm check
+    needs: build-compiler
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rule: [check-clang, check-llvm]
+    steps:
+      - name: Install dependencies
+        run: sudo apt update && sudo apt install -y cmake python3 python3-distutils ninja-build mold ccache
+      - name: Download compiler source
+        uses: actions/download-artifact@v3
+        with:
+          name: compiler-source
+      - name: Untar artifacts
+        run: |
+          mkdir cheerp-compiler
+          tar -xvf cheerp-compiler-source.tar.zst -C cheerp-compiler
+      - name: Run tests
+        run: ninja -C ./cheerp-compiler/build ${{ matrix.rule }}
