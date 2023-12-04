@@ -3,8 +3,8 @@
 
 // REQUIRES: shared_cxxabi
 
-// RUN: %clangxx_asan -fexceptions -O0 %s -o %t
-// RUN: %env_asan_opts=detect_stack_use_after_return=0 %run %t
+// RUN: %clangxx_asan -fexceptions -O0 %s -o %t && %run %t
+// RUN: %clangxx_asan -cheerp-linear-output=asmjs -fexceptions -O0 %s -o %t && %run %t
 
 // The current implementation of this functionality requires special
 // combination of libraries that are not used by default on NetBSD
@@ -14,9 +14,6 @@
 
 // https://reviews.llvm.org/D111703 made compiler incompatible with released NDK.
 // UNSUPPORTED: android && arm-target-arch
-
-// CHEERPASAN: TODO test this
-// XFAIL: cheerp
 
 #include <assert.h>
 #include <exception>

@@ -340,9 +340,18 @@ INTERCEPTOR(void, __cxa_throw, void *a, void *b, void *c) {
 }
 #endif
 
+#if SANITIZER_CHEERPWASM
+extern "C" void __cxa_throw_wasm_adapter(size_t, void*, size_t);
+extern "C" void __cxa_throw_wasm(void *a, void *b, void *c) {
+  __asan_handle_no_return();
+  __cxa_throw_wasm_adapter(reinterpret_cast<size_t>(a), b, reinterpret_cast<size_t>(c));
+}
+#endif
+
+
 #if ASAN_INTERCEPT___CXA_RETHROW_PRIMARY_EXCEPTION
 INTERCEPTOR(void, __cxa_rethrow_primary_exception, void *a) {
-  CHECK(REAL(__cxa_rethrow_primary_exception));
+  //CHECK(REAL(__cxa_rethrow_primary_exception));
   __asan_handle_no_return();
   REAL(__cxa_rethrow_primary_exception)(a);
 }

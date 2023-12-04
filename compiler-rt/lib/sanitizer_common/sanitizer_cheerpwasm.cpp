@@ -99,6 +99,9 @@ void InstallDeadlySignalHandlers(void (*)(int, void *, void *)) {}
 void InitializeCoverage(bool, char const *) {}
 void InitTlsSize() {}
 uptr internal_getpid() { return 1; }
+const char *SignalContext::Describe() const { UNIMPLEMENTED(); }
+char **GetArgv() { UNIMPLEMENTED(); }
+void *internal_start_thread(void *(*func)(void *arg), void *arg) { UNIMPLEMENTED(); }
 
 void GetThreadStackAndTls(bool main, uptr *stk_addr, uptr *stk_size,
                           uptr *tls_addr, uptr *tls_size) {
