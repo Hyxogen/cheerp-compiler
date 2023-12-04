@@ -79,7 +79,7 @@ void InitializePlatformInterceptors();
 #endif
 
 #if ASAN_HAS_EXCEPTIONS && !SANITIZER_WINDOWS && !SANITIZER_SOLARIS && \
-    !SANITIZER_NETBSD && !SANITIZER_CHEERPWASM //CHEERPASAN: TODO probably should be implemented at some point
+    !SANITIZER_NETBSD && !SANITIZER_CHEERPWASM
 # define ASAN_INTERCEPT___CXA_THROW 1
 # define ASAN_INTERCEPT___CXA_RETHROW_PRIMARY_EXCEPTION 1
 # if defined(_GLIBCXX_SJLJ_EXCEPTIONS) || (SANITIZER_IOS && defined(__arm__))
@@ -87,6 +87,11 @@ void InitializePlatformInterceptors();
 # else
 #  define ASAN_INTERCEPT__UNWIND_RAISEEXCEPTION 1
 # endif
+#elif SANITIZER_CHEERPWASM
+# define ASAN_INTERCEPT___CXA_THROW 1
+# define ASAN_INTERCEPT___CXA_RETHROW_PRIMARY_EXCEPTION 1
+# define ASAN_INTERCEPT__UNWIND_RAISEEXCEPTION 0
+# define ASAN_INTERCEPT__UNWIND_SJLJ_RAISEEXCEPTION 0
 #else
 # define ASAN_INTERCEPT___CXA_THROW 0
 # define ASAN_INTERCEPT___CXA_RETHROW_PRIMARY_EXCEPTION 0
@@ -165,6 +170,9 @@ DECLARE_REAL(int, strncmp, const char *s1, const char *s2, size_t n)
 
 DECLARE_REAL(size_t, mbstowcs, wchar_t *dest, const char *src, size_t len);
 DECLARE_REAL(size_t, mbsrtowcs, wchar_t *dest, const char **src, size_t len, void *ps);
+
+extern "C" void __cheerp___cxa_throw(void *, void *, void *);
+extern "C" void __cheerp___cxa_rethrow_primary_exception(void*);
 #endif // SANITIZER_CHEERPWASM
 
 #  if !SANITIZER_APPLE
