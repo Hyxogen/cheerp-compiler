@@ -1,4 +1,5 @@
 #include "sanitizer_common.h"
+#include "sanitizer_flags.h"
 #include "sanitizer_placement_new.h"
 #include "sanitizer_stacktrace.h"
 #if SANITIZER_CHEERPWASM
@@ -191,6 +192,9 @@ static uptr Utf16ToUtf8(char* dest, uptr dlen, const char16_t* src, uptr slen) {
 }
 
 const char* GetFunctionNameAtPc(uptr pc) {
+  if (common_flags()->disable_traces) {
+    return "<stacktraces were disabled due to the 'disable_traces' flag>";
+  }
   char16_t buffer[256];
   uptr buffer_len =
       GetUtf16FunctionNameAtPc(pc, buffer, sizeof(buffer) / sizeof(buffer[0]));
@@ -211,6 +215,11 @@ void BufferedStackTrace::UnwindFast(uptr pc, uptr bp, uptr stack_top,
 }
 
 [[clang::always_inline]] uptr GetReturnAddress(uptr idx) {
+  if (common_flags()->disable_traces) {
+    _prev_trace[0] = 1;
+    _prev_trace_len = 1;
+    return 1;
+  }
   _prev_trace_len = GetCallstack(
       _prev_trace, sizeof(_prev_trace) / sizeof(_prev_trace[0]), idx + 1);
 
