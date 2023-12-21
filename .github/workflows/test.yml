@@ -153,7 +153,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        mode: [--asmjs, --wasm]
+        mode: [--asmjs, --wasm, --preexecute-asmjs]
     steps:
       - name: Install cheerp-compiler
         uses: Hyxogen/cheerp-actions/install-compiler@master
