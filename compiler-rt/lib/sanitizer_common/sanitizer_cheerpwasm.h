@@ -8,6 +8,10 @@
 #  include "sanitizer_internal_defs.h"
 #  include "sanitizer_platform_limits_cheerpwasm.h"
 
+namespace __sanitizer {
+void InitEnv();
+} // namespace __santizer
+
 #endif  // SANITIZER_CHEERPWASM
 
 #endif  // SANITIZER_CHEERPWASM_H
