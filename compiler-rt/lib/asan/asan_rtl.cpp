@@ -34,6 +34,7 @@
 #include "ubsan/ubsan_platform.h"
 
 #if SANITIZER_CHEERPWASM
+#  include "sanitizer_common/sanitizer_cheerpwasm.h"
 #  include "sanitizer_common/sanitizer_cheerpwasm_mmap.h"
 #endif
 
@@ -393,6 +394,7 @@ static void AsanInitInternal() {
 
 #if SANITIZER_CHEERPWASM
   SetupMemoryMapping();
+  InitEnv();
 #endif
 
   CacheBinaryName();
