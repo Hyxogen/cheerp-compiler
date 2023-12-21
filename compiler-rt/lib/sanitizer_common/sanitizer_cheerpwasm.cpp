@@ -7,7 +7,7 @@
 #  include "sanitizer_cheerpwasm_mmap.h"
 #  include "sanitizer_common.h"
 #  include "sanitizer_file.h"
-#  include "sanitizer_allocator.h"
+#  include "sanitizer_allocator_internal.h"
 
 #  define LEAN_CXX_LIB
 #  include <client/cheerp/types.h>
