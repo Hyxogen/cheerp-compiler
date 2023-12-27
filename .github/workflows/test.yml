@@ -102,7 +102,8 @@ jobs:
       - name: Checkout cheerp-libs
         uses: actions/checkout@v3
         with:
-          repository: 'leaningtech/cheerp-libs'
+          repository: 'Hyxogen/cheerp-libs'
+          ref: 'feat-asan'
           path: 'cheerp-libs'
       - name: Build and install libraries
         env:
