@@ -10,6 +10,7 @@
 
 namespace __sanitizer {
 void InitEnv();
+uptr Utf16ToUtf8(char *dest, uptr dlen, const char16_t *src, uptr slen);
 } // namespace __santizer
 
 #endif  // SANITIZER_CHEERPWASM

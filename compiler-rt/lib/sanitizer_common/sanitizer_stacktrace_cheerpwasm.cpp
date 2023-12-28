@@ -4,6 +4,7 @@
 #include "sanitizer_stacktrace.h"
 #if SANITIZER_CHEERPWASM
 
+#  include "sanitizer_cheerpwasm.h"
 #  include <uchar.h>
 
 // We have to define LEAN_CXX_LIB as client lib defines it own new operator
@@ -21,10 +22,6 @@
 // BP as a linked list. But on cheerp, BP does not exist. Therefore we must be
 // able to unwind from a PC value that may no longer be on the execution stack,
 // and thus are forced to cache the entire call stack.
-
-#  define REPLACEMENT_CHARACTER 0xFFFD
-#  define MAX_CODEPOINT 0x10FFFF
-#  define INVALID_CODEPOINT -1
 
 namespace __sanitizer {
 
@@ -128,73 +125,9 @@ static uptr _name_len = 0;
   return 0;
 }
 
-static uptr CodepointToUtf8(char* dest, char32_t codepoint) {
-  char buffer[4];
-
-  if (!dest)
-    dest = buffer;
-
-  if (codepoint > MAX_CODEPOINT)
-    codepoint = REPLACEMENT_CHARACTER;
-
-  if (codepoint <= 0x7F) {
-    *dest = static_cast<char>(codepoint);
-
-    return 1;
-  } else if (codepoint <= 0x7FF) {
-    dest[0] = 0xC0 | (codepoint >> 6);
-    dest[1] = 0x80 | (codepoint & 63);
-
-    return 2;
-  } else if (codepoint <= 0xFFFF) {
-    dest[0] = 0xE0 | (codepoint >> 12);
-    dest[1] = 0x80 | ((codepoint >> 6) & 63);
-    dest[2] = 0x80 | (codepoint & 63);
-
-    return 3;
-  }
-
-  dest[0] = 0xF0 | (codepoint >> 18);
-  dest[1] = 0x80 | ((codepoint >> 12) & 63);
-  dest[2] = 0x80 | ((codepoint >> 6) & 63);
-  dest[3] = 0x80 | (codepoint & 63);
-  return 4;
-}
-
-static uptr Utf16ToUtf8(char* dest, uptr dlen, const char16_t* src, uptr slen) {
-  if (dlen == 0)
-    return 0;
-
-  uptr j = 0;
-  for (uptr i = 0; i < slen; ++i) {
-    uint32_t codepoint = src[i];
-
-    if (codepoint >= 0xD800 && codepoint <= 0xDFFF) {
-      if (i + 1 < slen) {
-        uint32_t trail = src[++i];
-        codepoint = 0x10000 + ((codepoint & 0x3FF) | (trail & 0x3FF));
-      } else {
-        // Missing lower surrogate
-        codepoint = INVALID_CODEPOINT;
-      }
-    }
-
-    const uptr n = CodepointToUtf8(nullptr, codepoint);
-    if (i + n >= dlen)
-      break;
-
-    CodepointToUtf8(&dest[j], codepoint);
-    j += n;
-  }
-
-  dest[j] = 0;
-  return j ? j - 1 : 0;
-}
-
 const char* GetFunctionNameAtPc(uptr pc) {
-  if (common_flags()->disable_traces) {
+  if (common_flags()->disable_traces)
     return "<stacktraces were disabled due to the 'disable_traces' flag>";
-  }
   char16_t buffer[256];
   uptr buffer_len =
       GetUtf16FunctionNameAtPc(pc, buffer, sizeof(buffer) / sizeof(buffer[0]));
@@ -204,6 +137,11 @@ const char* GetFunctionNameAtPc(uptr pc) {
   _name_len = Utf16ToUtf8(_name_cache,
                           (sizeof(_name_cache) / sizeof(_name_cache[0])) - 1,
                           buffer, buffer_len);
+
+  if (_name_len >= sizeof(_name_cache))
+    _name_len = sizeof(_name_cache) - 1; // string was truncated
+  _name_cache[_name_len] = '\0';
+
   return _name_cache;
 }
 
