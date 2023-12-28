@@ -351,7 +351,6 @@ extern "C" void __cxa_throw_wasm(void *a, void *b, void *c) {
 
 #if ASAN_INTERCEPT___CXA_RETHROW_PRIMARY_EXCEPTION
 INTERCEPTOR(void, __cxa_rethrow_primary_exception, void *a) {
-  //CHECK(REAL(__cxa_rethrow_primary_exception));
   __asan_handle_no_return();
   REAL(__cxa_rethrow_primary_exception)(a);
 }
