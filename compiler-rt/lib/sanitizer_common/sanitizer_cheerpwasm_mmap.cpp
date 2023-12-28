@@ -10,8 +10,6 @@
 #  include "sanitizer_common.h"
 
 extern "C" {
-//extern char *volatile _heapStart;
-//extern char *volatile _heapEnd;
 __attribute__((cheerp_asmjs, __weak__)) char *volatile _heapStart = (char *)0xdeadbeef;
 __attribute__((cheerp_asmjs, __weak__)) char *volatile _heapEnd = (char *)0xdeadbeef;
 }
