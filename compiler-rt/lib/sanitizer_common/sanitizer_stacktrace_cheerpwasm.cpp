@@ -58,8 +58,9 @@ static uptr _name_len = 0;
   __asm__("%0[%1]=%2" : : "r"(_symbols), "r"(pc), "r"(frame));
 }
 
-[[cheerp::genericjs]] static uptr GetCallstack(uptr* dest, uptr dest_len,
-                                               uptr skip) {
+[[cheerp::genericjs]] __attribute__((weak)) uptr GetCallstack(uptr* dest,
+                                                              uptr dest_len,
+                                                              uptr skip) {
   client::TArray<client::String>* callstack = nullptr;
   __asm__("(new Error()).stack.toString().split('\\n')" : "=r"(callstack));
 
@@ -108,9 +109,8 @@ static uptr _name_len = 0;
   return i;
 }
 
-[[cheerp::genericjs]] static uptr GetUtf16FunctionNameAtPc(uptr pc,
-                                                           char16_t* dest,
-                                                           uptr len) {
+[[cheerp::genericjs]] __attribute__((weak)) uptr GetUtf16FunctionNameAtPc(
+    uptr pc, char16_t* dest, uptr len) {
   client::String* frame = GetFunctionAtPc(pc);
 
   if (frame) {

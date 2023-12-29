@@ -144,7 +144,7 @@ extern "C" char **environ;
   }
 }
 
-void InitEnv() {
+__attribute__ ((weak)) void InitEnv() {
   const uptr env_count = GetEnvCount();
   environ = reinterpret_cast<char **>(
       InternalAlloc(sizeof *environ * (env_count + 1)));
@@ -176,6 +176,10 @@ void InitEnv() {
 
   InternalFree(cb);
 }
+
+/* This function is overwritten in libwasi so to be able to detect if libasan is
+ * running in wasi or not */
+__attribute__((weak)) bool IsWasi() { return false; }
 
 const char *GetEnv(const char *name) { return getenv(name); }
 
