@@ -282,6 +282,7 @@ void *MmapNoReserveOrDie(uptr size, const char *mem_type) {
   IncreaseTotalMmap(size);
   return (void *)p;
 }
+bool MmapFixedSuperNoReserve(uptr, uptr, const char *) { UNIMPLEMENTED(); }
 
 }  // namespace __sanitizer
 

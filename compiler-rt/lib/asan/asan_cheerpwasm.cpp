@@ -25,6 +25,7 @@ void InitializePlatformExceptionHandlers() {}
 bool IsSystemHeapAddress(uptr addr) { return false; }
 void ReplaceSystemMalloc() {}
 bool PlatformUnpoisonStacks() { return false; }
+void AsanOnDeadlySignal(int, void *, void *) { UNIMPLEMENTED(); }
 
 void *AsanDoesNotSupportStaticLinkage() {
   // On Linux, this is some magic that fails linking with -static.

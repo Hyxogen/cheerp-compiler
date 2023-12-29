@@ -3,6 +3,7 @@
 #if SANITIZER_CHEERPWASM
 
 #  include <stdlib.h>
+#  include <errno.h>
 
 #  include "sanitizer_cheerpwasm_mmap.h"
 #  include "sanitizer_common.h"
@@ -226,8 +227,29 @@ void InstallDeadlySignalHandlers(void (*)(int, void *, void *)) {}
 void InitializeCoverage(bool, char const *) {}
 void InitTlsSize() {}
 uptr internal_getpid() { return 1; }
+bool ErrorIsOOM(error_t err) { return err == ENOMEM; }
 const char *SignalContext::Describe() const { UNIMPLEMENTED(); }
+bool SignalContext::IsStackOverflow() const { UNIMPLEMENTED(); }
 char **GetArgv() { UNIMPLEMENTED(); }
+void Abort() { UNIMPLEMENTED(); }
+void internal_usleep(u64) { UNIMPLEMENTED(); }
+void DumpProcessMap() { UNIMPLEMENTED(); }
+u64 MonotonicNanoTime() { UNIMPLEMENTED(); }
+bool MprotectReadOnly(uptr, uptr) { UNIMPLEMENTED(); }
+void FutexWake(atomic_uint32_t *, u32) { UNIMPLEMENTED(); }
+void FutexWait(atomic_uint32_t *, u32) { UNIMPLEMENTED(); }
+uptr internal_sched_yield() { UNIMPLEMENTED(); }
+void CloseFile(fd_t) { UNIMPLEMENTED(); }
+fd_t OpenFile(const char *, FileAccessMode, error_t *) { UNIMPLEMENTED(); }
+bool WriteToFile(fd_t, const void *, uptr, uptr *, error_t *) { UNIMPLEMENTED(); }
+bool FileExists(const char *) { UNIMPLEMENTED(); }
+bool IsAbsolutePath(const char *) { UNIMPLEMENTED(); }
+bool ReadFromFile(fd_t, void *, uptr, uptr *, error_t *) { UNIMPLEMENTED(); }
+void UnsetAlternateSignalStack() { UNIMPLEMENTED(); }
+bool DontDumpShadowMemory(uptr addr, uptr length) { UNIMPLEMENTED(); }
+bool IsPathSeparator(const char) { UNIMPLEMENTED(); }
+bool DirExists(const char *) { UNIMPLEMENTED(); }
+bool CreateDir(const char *) { UNIMPLEMENTED(); }
 void *internal_start_thread(void *(*func)(void *arg), void *arg) { UNIMPLEMENTED(); }
 
 void GetThreadStackAndTls(bool main, uptr *stk_addr, uptr *stk_size,
