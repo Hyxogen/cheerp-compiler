@@ -2,6 +2,16 @@
 
 #if SANITIZER_CHEERPWASM
 #  include "sanitizer_symbolizer_internal.h"
+#  include <stddef.h>
+#  include <stdlib.h>
+
+namespace llvm {
+__attribute__((weak)) char *itaniumDemangle(const char *mangled_name, char *buf,
+                                            size_t *n, int *status) {
+  *status = 1;
+  return nullptr;
+}
+}
 
 namespace __sanitizer {
 
@@ -11,16 +21,21 @@ class CheerpSymbolizerTool : public SymbolizerTool {
  public:
   bool SymbolizePC(uptr addr, SymbolizedStack *frame) override {
     const char *func_name = GetFunctionNameAtPc(addr);
+    char *demangled = nullptr;
+
     if (!func_name)
       func_name = "<unknown function>";
+    else
+      demangled = llvm::itaniumDemangle(func_name, nullptr, nullptr, nullptr);
 
-    frame->info.function = internal_strdup(func_name);
+    frame->info.function = internal_strdup(demangled ? demangled : func_name);
 
     if (0x80000000 & addr) {
       frame->info.file = internal_strdup("main");
       frame->info.line = 0x80000000 ^ addr;
       frame->info.column = 0;
     }
+    free(demangled);
     return true;
   }
 
