@@ -8,7 +8,6 @@
 namespace llvm {
 __attribute__((weak)) char *itaniumDemangle(const char *mangled_name, char *buf,
                                             size_t *n, int *status) {
-  *status = 1;
   return nullptr;
 }
 }
