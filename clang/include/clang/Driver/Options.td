@@ -1747,7 +1747,7 @@ defm sanitize_address_use_after_scope : BoolOption<"f", "sanitize-address-use-af
 defm sanitize_address_aligned_poisoning : BoolOption<"f", "sanitize-address-aligned-poisoning",
   CodeGenOpts<"SanitizeAddressAlignedPoisoning">, DefaultFalse,
   PosFlag<SetTrue, [], "Enable">, NegFlag<SetFalse, [CoreOption, NoXarchOption], "Disable">,
-  BothFlags<[], " require natural alignment for address poisoning">>,
+  BothFlags<[], " natural alignment for address poisoning">>,
   Group<f_clang_Group>;
 def sanitize_address_use_after_return_EQ
   : Joined<["-"], "fsanitize-address-use-after-return=">,
