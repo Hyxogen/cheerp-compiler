@@ -238,7 +238,7 @@ u64 MonotonicNanoTime() { UNIMPLEMENTED(); }
 bool MprotectReadOnly(uptr, uptr) { UNIMPLEMENTED(); }
 void FutexWake(atomic_uint32_t *, u32) { UNIMPLEMENTED(); }
 void FutexWait(atomic_uint32_t *, u32) { UNIMPLEMENTED(); }
-uptr internal_sched_yield() { UNIMPLEMENTED(); }
+uptr internal_sched_yield() { return 0; }
 void CloseFile(fd_t) { UNIMPLEMENTED(); }
 fd_t OpenFile(const char *, FileAccessMode, error_t *) { UNIMPLEMENTED(); }
 bool WriteToFile(fd_t, const void *, uptr, uptr *, error_t *) { UNIMPLEMENTED(); }
