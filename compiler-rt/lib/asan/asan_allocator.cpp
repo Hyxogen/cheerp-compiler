@@ -250,7 +250,7 @@ void AsanMapUnmapCallback::OnMap(uptr p, uptr size) const {
 }
 void AsanMapUnmapCallback::OnUnmap(uptr p, uptr size) const {
 #if SANITIZER_CHEERPWASM
-  // CHEERP: as wasm is a linear memory model, trying to access unmapped
+  // CHEERP: as wasm has no memory protection, trying to access unmapped
   // pages doesn't actually result in segfault or something like that, so we
   // should just poison unmapped pages so asan can detect their accesses
   PoisonShadow(p, size, 0xfe);
