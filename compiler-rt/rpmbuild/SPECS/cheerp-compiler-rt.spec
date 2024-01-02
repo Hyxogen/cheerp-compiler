@@ -1,7 +1,7 @@
 Name: cheerp-compiler-rt
 Version: 3.0
 Release:        1%{?dist}
-Summary: A C++ compiler for the Web, C++ library implementation
+Summary: Compiler runtime libraries for Cheerp
 
 License:  License: Apache-2.0 WITH LLVM-exception OR NCSA
 URL: https://leaningtech.com/cheerp
@@ -11,8 +11,7 @@ BuildRequires: cmake make ninja-build cheerp-llvm-clang = %{VERSION} cheerp-util
 Requires: cheerp-llvm-clang = %{VERSION} cheerp-utils = %{VERSION} cheerp-musl = %{VERSION}
 
 %description
-Cheerp is a tool to bring C++ programming to the Web. It can generate a seamless
-combination of JavaScript, WebAssembly and Asm.js from a single C++ codebase.
+Compiler runtime libraries for Cheerp
 
 %define debug_package %{nil}
 
@@ -37,7 +36,5 @@ rm -rf $RPM_BUILD_ROOT
 /opt/cheerp/
 
 %changelog
-* Fri Mar 03 2023 Yuri Iozzelli <yuri@leaningtech.com>
-- Update license
-* Tue Dec 10 2019 Yuri Iozzelli <yuri@leaningtech.com>
+* Tue Jan 02 2024 Daan Meijer <daan@leaningtech.com>
 - First RPM version

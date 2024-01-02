@@ -9,6 +9,4 @@ Package: cheerp-compiler-rt
 Architecture: any
 Conflicts: cheerp
 Depends: ${shlibs:Depends}, ${misc:Depends}, cheerp-llvm-clang (>=${binary:Version}), cheerp-utils (>=${binary:Version}), cheerp-musl (>=${binary:Version})
-Description: A C++ compiler for the Web, C++ library implementation
- Cheerp is a tool to bring C++ programming to the Web. It can generate a seamless
- combination of JavaScript, WebAssembly and Asm.js from a single C++ codebase.
+Description: Compiler runtime libraries for Cheerp
