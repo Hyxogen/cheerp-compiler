@@ -586,6 +586,9 @@ void cheerp::Link::ConstructJob(Compilation &C, const JobAction &JA,
     Arg *Sanitizers = Args.getLastArg(options::OPT_fsanitize_EQ);
     if (Sanitizers && Sanitizers->containsValue("address")) {
       CmdArgs.push_back(Args.MakeArgString(getToolChain().GetFilePath("cheerp/libclang_rt.asan-Cheerp.bc")));
+      if (D.CCCIsCXX())
+        CmdArgs.push_back(
+            Args.MakeArgString(getToolChain().GetFilePath("libdemangle.bc")));
     }
 
     llvm::Triple::EnvironmentType env = getToolChain().getTriple().getEnvironment();

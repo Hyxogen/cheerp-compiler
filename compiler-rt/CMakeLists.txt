@@ -767,3 +767,4 @@ if(COMPILER_RT_INCLUDE_TESTS)
 endif()
 
 add_subdirectory(tools)
+include(Demangle)
