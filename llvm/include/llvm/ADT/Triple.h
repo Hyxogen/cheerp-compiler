@@ -661,11 +661,6 @@ public:
   bool isOSEmscripten() const {
     return getOS() == Triple::Emscripten;
   }
-
-  bool isCheerpWasm() const {
-    return getArch() == Triple::cheerp && getObjectFormat() == Triple::Wasm;
-  }
-
   /// Tests whether the OS uses glibc.
   bool isOSGlibc() const {
     return (getOS() == Triple::Linux || getOS() == Triple::KFreeBSD ||
@@ -786,6 +781,11 @@ public:
   /// Tests whether the target is ARM (little and big endian).
   bool isARM() const {
     return getArch() == Triple::arm || getArch() == Triple::armeb;
+  }
+
+  /// Tests wheter the target is cheerp-wasm
+  bool isCheerpWasm() const {
+    return getArch() == Triple::cheerp && getObjectFormat() == Triple::Wasm;
   }
 
   /// Tests whether the target supports the EHABI exception
