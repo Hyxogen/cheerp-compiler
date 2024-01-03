@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.13.4)
 project (demangle)
 
-include_directories(include)
+include_directories(${LLVM_MAIN_SRC_DIR}/include)
 
 add_library(demangle STATIC
   ${LLVM_MAIN_SRC_DIR}/lib/Demangle/Demangle.cpp
