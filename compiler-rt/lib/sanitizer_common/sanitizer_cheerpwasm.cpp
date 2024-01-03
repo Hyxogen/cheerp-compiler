@@ -189,7 +189,7 @@ uptr GetPageSize() { return GetMmapGranularity(); }
 tid_t GetTid() { return 0; }
 
 uptr GetThreadSelf() { return 0; }
-bool SupportsColoredOutput(fd_t fd) { return false; }
+bool SupportsColoredOutput(fd_t fd) { return true; }
 
 void ReportFile::Write(const char *buffer, uptr length) {
   // CHEERPASAN: TODO do not hardcode output stream

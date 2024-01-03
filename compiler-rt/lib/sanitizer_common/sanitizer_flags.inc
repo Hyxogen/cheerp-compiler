@@ -119,7 +119,7 @@ COMMON_FLAG(
     uptr, clear_shadow_mmap_threshold, 64 * 1024,
     "Large shadow regions are zero-filled using mmap(NORESERVE) instead of "
     "memset(). This is the threshold size in bytes.")
-COMMON_FLAG(const char *, color, "auto",
+COMMON_FLAG(const char *, color, "never",
             "Colorize reports: (always|never|auto).")
 COMMON_FLAG(
     bool, legacy_pthread_cond, false,
