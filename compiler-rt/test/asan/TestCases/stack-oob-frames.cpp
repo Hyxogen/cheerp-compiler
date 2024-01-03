@@ -42,16 +42,12 @@ int main(int argc, char **argv) {
 // CHECK0: #2{{.*}}Frame2
 // CHECK0: #3{{.*}}Frame3
 // CHECK0: is located in stack of thread T0 at offset
-// DONTCHECK0-NEXT: #0{{.*}}Frame0 CHEERPASAN TODO stacktraces for things allocated on the stack seem to not work properly
 //
 // CHECK1: AddressSanitizer: stack-buffer-overflow
 // CHECK1: is located in stack of thread T0 at offset
-// DONTCHECK1-NEXT: #0{{.*}}Frame1
 //
 // CHECK2: AddressSanitizer: stack-buffer-overflow
 // CHECK2: is located in stack of thread T0 at offset
-// DONTCHECK2-NEXT: #0{{.*}}Frame2
 //
 // CHECK3: AddressSanitizer: stack-buffer-overflow
 // CHECK3: is located in stack of thread T0 at offset
-// DONTCHECK3-NEXT: #0{{.*}}Frame3
