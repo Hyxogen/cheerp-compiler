@@ -661,6 +661,7 @@ public:
   bool isOSEmscripten() const {
     return getOS() == Triple::Emscripten;
   }
+
   /// Tests whether the OS uses glibc.
   bool isOSGlibc() const {
     return (getOS() == Triple::Linux || getOS() == Triple::KFreeBSD ||
