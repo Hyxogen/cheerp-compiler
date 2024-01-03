@@ -108,7 +108,7 @@ void StackTrace::PrintTo(InternalScopedString *output) const {
     // addresses of the next instructions after the call.
     uptr pc = GetPreviousInstructionPc(trace[i]);
 #else
-    // In cheerp, the stacktraces come form javascript, and the addresses are
+    // In cheerp, the stacktraces come from javascript, and the addresses are
     // not the return addresses
     uptr pc = trace[i];
 #endif
